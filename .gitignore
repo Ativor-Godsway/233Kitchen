@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+.env.local
+.data
+.email-previews
+.DS_Store
+coverage
+.vercel
+test-results
+playwright-report
+*.log
