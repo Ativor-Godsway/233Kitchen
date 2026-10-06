@@ -264,3 +264,25 @@ export interface Paginated<T> {
   page: number;
   pageSize: number;
 }
+
+export interface PrepItemTotal {
+  slug: string;
+  name: string;
+  quantity: number;
+  options: Array<{ group: string; name: string; count: number }>;
+}
+
+export interface PrepSheet {
+  date: string;
+  label: string;
+  orderCount: number;
+  revenue: number;
+  items: PrepItemTotal[];
+  windows: Array<{ id: string; label: string; count: number }>;
+  fulfilment: { pickup: number; uber: number };
+  orders: OrderDTO[];
+}
+
+export interface OrdersListResponse extends Paginated<OrderDTO> {
+  statusCounts: Partial<Record<OrderStatus, number>>;
+}

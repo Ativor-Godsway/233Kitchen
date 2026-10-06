@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { mkdirSync } from 'node:fs';
 import { env } from './env.js';
 import { seedDatabase } from './services/seed.js';
+import { DEV_DB_URI, waitForDevDb } from './devDb.js';
 
 /**
  * Cached Mongoose connection. On Vercel each warm function instance reuses the
@@ -33,6 +34,18 @@ async function startMemoryServer(): Promise<string> {
   return server.getUri('k233');
 }
 
+/**
+ * Local database when MONGODB_URI is empty: the separate dev DB process started by
+ * `npm run dev` (K233_DEV_DB=1, waits for it), otherwise an in-process server.
+ */
+async function localDbUri(): Promise<string> {
+  if (env.isTest) return startMemoryServer();
+  const devDbExpected = process.env.K233_DEV_DB === '1';
+  if (await waitForDevDb(devDbExpected ? 90_000 : 1500)) return DEV_DB_URI;
+  if (devDbExpected) throw new Error('Local dev MongoDB (npm run dev:db) did not start');
+  return startMemoryServer();
+}
+
 export function connectDb(): Promise<typeof mongoose> {
   if (mongoose.connection.readyState === 1) return Promise.resolve(mongoose);
   if (cache.promise) return cache.promise;
@@ -42,7 +55,7 @@ export function connectDb(): Promise<typeof mongoose> {
     let autoSeed = false;
     if (!uri) {
       if (env.isProd) throw new Error('MONGODB_URI is required in production');
-      uri = await startMemoryServer();
+      uri = await localDbUri();
       autoSeed = true;
     }
     await mongoose.connect(uri, {
@@ -53,7 +66,7 @@ export function connectDb(): Promise<typeof mongoose> {
     if (autoSeed) {
       const result = await seedDatabase({ adminEmail: env.adminEmail, adminPassword: env.adminPassword });
       if (!env.isTest) {
-        console.log('\n  🗄️  Using in-memory MongoDB (no MONGODB_URI set). Data kept in ./.data/mongo');
+        console.log('\n  🗄️  Using local dev MongoDB (no MONGODB_URI set). Data kept in ./.data/mongo');
         if (result.adminCreated || result.menuCreated) console.log('  🌱 Seeded:', JSON.stringify(result));
         console.log(`  🔑 Dev admin login: ${env.adminEmail} / ${env.adminPassword}  (dev only)\n`);
       }

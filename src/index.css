@@ -49,3 +49,21 @@
     display: none !important;
   }
 }
+
+@media print {
+  @page {
+    margin: 12mm;
+  }
+  body {
+    background: #fff !important;
+  }
+  .admin,
+  .admin main {
+    background: #fff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .break-inside-avoid {
+    break-inside: avoid;
+  }
+}
