@@ -5,7 +5,8 @@ import { env } from '../env.js';
 export async function getSettings(): Promise<Settings> {
   const row = await SettingsModel.findById('global').lean();
   const s = mergeSettings(row?.data);
-  if (!s.notificationEmails.length && env.ownerEmail) s.notificationEmails = [env.ownerEmail];
+  // Never lose a new-order alert: fall back to OWNER_EMAIL, then the admin login email.
+  if (!s.notificationEmails.length) s.notificationEmails = [env.ownerEmail || env.adminEmail];
   return s;
 }
 

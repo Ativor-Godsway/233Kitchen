@@ -72,7 +72,10 @@ export default function Confirmation() {
         We’ve received your pre-order and will confirm it shortly.
       </p>
       <p className="mt-2 inline-flex items-center gap-2 text-sm text-cream/60">
-        <Mail size={16} aria-hidden /> We’ve emailed a copy to <span className="font-medium text-cream">{order.email}</span>.
+        <Mail size={16} aria-hidden />
+        <span>
+          We’ve emailed a copy to <span className="font-medium text-cream">{order.email}</span>.
+        </span>
       </p>
 
       <KenteBand height={6} className="my-8 rounded-full" />

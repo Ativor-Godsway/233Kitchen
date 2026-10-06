@@ -33,7 +33,7 @@ export async function seedDatabase(opts: SeedOptions) {
 
   const settings = await SettingsModel.findById('global');
   if (!settings) {
-    const notificationEmails = env.ownerEmail ? [env.ownerEmail] : [];
+    const notificationEmails = [env.ownerEmail || opts.adminEmail.toLowerCase()];
     await SettingsModel.create({
       _id: 'global',
       data: { ...DEFAULT_SETTINGS, timezone: env.tz, notificationEmails },

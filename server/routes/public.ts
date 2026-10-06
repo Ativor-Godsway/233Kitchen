@@ -4,6 +4,14 @@ import { getMenu } from '../services/menuService.js';
 import { getSettings, toPublicSettings } from '../services/settingsService.js';
 import { getPickupOptions } from '../services/availability.js';
 import type { PublicConfig } from '../../shared/types.js';
+import { z } from 'zod';
+import { HttpError, parse } from '../middleware/errors.js';
+import { orderLimiter, publicPostLimiter } from '../middleware/rateLimit.js';
+import { createOrder, toPublicOrder } from '../services/orderService.js';
+import { verifyOrderToken } from '../services/orderToken.js';
+import { OrderModel, toOrderDTO } from '../models/Order.js';
+import { CustomerModel } from '../models/Customer.js';
+import { orderIcs } from '../services/ics.js';
 
 export const publicRouter = Router();
 
@@ -24,5 +32,57 @@ publicRouter.get(
       now: new Date().toISOString(),
     };
     res.json(body);
+  }),
+);
+
+publicRouter.post(
+  '/orders',
+  orderLimiter,
+  ah(async (req, res) => {
+    const { publicOrder, token } = await createOrder(req.body);
+    res.status(201).json({ order: publicOrder, token });
+  }),
+);
+
+/** Loads an order for its customer; the HMAC token proves they own the link. */
+async function findOrderForCustomer(number: string, token: unknown) {
+  if (typeof token !== 'string' || !/^233-\d{4,}$/.test(number) || !verifyOrderToken(number, token)) {
+    throw new HttpError(404, 'Order not found', 'NOT_FOUND');
+  }
+  const row = await OrderModel.findOne({ number }).setOptions({ sanitizeFilter: true }).lean();
+  if (!row) throw new HttpError(404, 'Order not found', 'NOT_FOUND');
+  return toOrderDTO(row);
+}
+
+publicRouter.get(
+  '/orders/:number',
+  ah(async (req, res) => {
+    const order = await findOrderForCustomer(req.params.number, req.query.t);
+    res.json({ order: toPublicOrder(order, await getSettings()) });
+  }),
+);
+
+publicRouter.get(
+  '/orders/:number/ics',
+  ah(async (req, res) => {
+    const order = await findOrderForCustomer(req.params.number, req.query.t);
+    res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="233-kitchen-${order.number}.ics"`);
+    res.send(orderIcs(order, await getSettings()));
+  }),
+);
+
+publicRouter.post(
+  '/unsubscribe',
+  publicPostLimiter,
+  ah(async (req, res) => {
+    const { token } = parse(z.object({ token: z.string().min(10).max(100) }), req.body);
+    const customer = await CustomerModel.findOneAndUpdate(
+      { unsubscribeToken: token },
+      { $set: { marketingConsent: false, unsubscribedAt: new Date() } },
+      { new: true },
+    ).setOptions({ sanitizeFilter: true });
+    if (!customer) throw new HttpError(404, 'This unsubscribe link is invalid or has expired.', 'NOT_FOUND');
+    res.json({ ok: true });
   }),
 );
