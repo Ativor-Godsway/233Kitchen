@@ -1,3 +1,51 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply font-sans;
+    text-rendering: optimizeLegibility;
+  }
+  :focus-visible {
+    outline: 2px solid #e1a10c;
+    outline-offset: 2px;
+  }
+  .admin :focus-visible {
+    outline-color: #1e6131;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .field {
+    @apply w-full rounded-xl bg-white/[0.04] px-4 py-3 text-cream ring-1 ring-white/15 placeholder:text-cream/30 focus:outline-none focus:ring-2 focus:ring-ghana-gold;
+  }
+  .field-label {
+    @apply mb-1.5 block text-sm font-medium text-cream/80;
+  }
+  .field-error {
+    @apply mt-1.5 text-sm font-medium text-ghana-red-300;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

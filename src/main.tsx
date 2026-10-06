@@ -1,9 +1,25 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MotionConfig } from 'framer-motion';
+import { Toaster } from 'sonner';
+import App from './App';
 import './index.css';
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <main className="grid min-h-screen place-items-center font-display text-4xl">+233 Kitchen</main>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <MotionConfig reducedMotion="user">
+          <App />
+        </MotionConfig>
+        <Toaster position="top-center" richColors closeButton toastOptions={{ duration: 3000 }} />
+      </BrowserRouter>
+    </QueryClientProvider>
   </StrictMode>,
 );
