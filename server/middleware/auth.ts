@@ -27,9 +27,16 @@ export function cookieOptions(): CookieOptions {
   };
 }
 
-export function issueSession(res: Response, admin: { _id: unknown; email: string; tokenVersion?: number }) {
+export function issueSession(
+  res: Response,
+  admin: { _id: unknown; email: string; tokenVersion?: number },
+) {
   const token = jwt.sign(
-    { sub: String(admin._id), email: admin.email, v: admin.tokenVersion ?? 0 } satisfies TokenPayload,
+    {
+      sub: String(admin._id),
+      email: admin.email,
+      v: admin.tokenVersion ?? 0,
+    } satisfies TokenPayload,
     env.jwtSecret,
     { expiresIn: '7d' },
   );
@@ -52,7 +59,11 @@ export async function requireAdmin(req: AdminRequest, _res: Response, next: Next
     } catch {
       throw new HttpError(401, 'Session expired. Please log in again.', 'UNAUTHENTICATED');
     }
-    const admin = await AdminUserModel.findById(payload.sub).lean<{ _id: unknown; email: string; tokenVersion?: number }>();
+    const admin = await AdminUserModel.findById(payload.sub).lean<{
+      _id: unknown;
+      email: string;
+      tokenVersion?: number;
+    }>();
     if (!admin || (admin.tokenVersion ?? 0) !== payload.v) {
       throw new HttpError(401, 'Session expired. Please log in again.', 'UNAUTHENTICATED');
     }

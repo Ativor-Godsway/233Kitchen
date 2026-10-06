@@ -23,7 +23,10 @@ export function SiteLayout() {
 
   return (
     <div className="min-h-screen bg-ink text-cream">
-      <a href="#main" className="sr-only z-[70] rounded bg-cream px-4 py-2 text-ink focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
+      <a
+        href="#main"
+        className="sr-only z-[70] rounded bg-cream px-4 py-2 text-ink focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+      >
         Skip to content
       </a>
       <Navbar />

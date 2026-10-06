@@ -65,7 +65,13 @@ interface BrandIconProps {
   className?: string;
 }
 
-export function BrandIcon({ name, size = 24, tone = 'gold', badge = true, className }: BrandIconProps) {
+export function BrandIcon({
+  name,
+  size = 24,
+  tone = 'gold',
+  badge = true,
+  className,
+}: BrandIconProps) {
   const asset = THREE_D[name];
   const Icon = ICONS[name];
   const content = asset ? (
@@ -73,7 +79,8 @@ export function BrandIcon({ name, size = 24, tone = 'gold', badge = true, classN
   ) : (
     <Icon size={size} strokeWidth={1.75} aria-hidden />
   );
-  if (!badge) return <span className={cn('inline-grid place-items-center', className)}>{content}</span>;
+  if (!badge)
+    return <span className={cn('inline-grid place-items-center', className)}>{content}</span>;
   return (
     <span
       className={cn('inline-grid place-items-center rounded-2xl ring-1', TONES[tone], className)}

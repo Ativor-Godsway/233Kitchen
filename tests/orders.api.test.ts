@@ -45,7 +45,10 @@ describe('POST /api/orders — happy path', () => {
 
   it('increments order numbers and merges repeat customers', async () => {
     await request(app).post('/api/orders').send(orderBody()).expect(201);
-    const second = await request(app).post('/api/orders').send(orderBody({ marketingConsent: false })).expect(201);
+    const second = await request(app)
+      .post('/api/orders')
+      .send(orderBody({ marketingConsent: false }))
+      .expect(201);
     expect(second.body.order.number).toBe('233-0002');
     const customers = await CustomerModel.find().lean();
     expect(customers).toHaveLength(1);
@@ -63,7 +66,15 @@ describe('POST /api/orders — happy path', () => {
   it('ignores prices sent by the client', async () => {
     const body = orderBody({
       total: 1,
-      items: [{ slug: 'banku-grilled-tilapia', quantity: 1, price: 1, lineTotal: 1, selections: [{ groupKey: 'extras', optionKey: 'extra-tilapia', qty: 1, unitPrice: 0 }] }],
+      items: [
+        {
+          slug: 'banku-grilled-tilapia',
+          quantity: 1,
+          price: 1,
+          lineTotal: 1,
+          selections: [{ groupKey: 'extras', optionKey: 'extra-tilapia', qty: 1, unitPrice: 0 }],
+        },
+      ],
     });
     const res = await request(app).post('/api/orders').send(body).expect(201);
     expect(res.body.order.total).toBe(4000);
@@ -77,7 +88,9 @@ describe('POST /api/orders — happy path', () => {
     expect(view.body.order.paymentInstructions).toMatch(/Zelle/);
     await request(app).get(`/api/orders/${number}?t=wrong-token-wrong-token-wrong-tok`).expect(404);
     await request(app).get(`/api/orders/${number}`).expect(404);
-    const ics = await request(app).get(`/api/orders/${number}/ics?t=${orderToken(number)}`).expect(200);
+    const ics = await request(app)
+      .get(`/api/orders/${number}/ics?t=${orderToken(number)}`)
+      .expect(200);
     expect(ics.headers['content-type']).toMatch(/text\/calendar/);
     expect(ics.text).toContain('BEGIN:VEVENT');
     expect(ics.text).toContain(`${number}@233kitchen`);
@@ -95,7 +108,10 @@ describe('POST /api/orders — validation', () => {
   });
 
   it('rejects an empty bag', async () => {
-    const res = await request(app).post('/api/orders').send(orderBody({ items: [] })).expect(400);
+    const res = await request(app)
+      .post('/api/orders')
+      .send(orderBody({ items: [] }))
+      .expect(400);
     expect(res.body.fieldErrors.items).toBeTruthy();
   });
 
@@ -108,9 +124,15 @@ describe('POST /api/orders — validation', () => {
   });
 
   it('rejects unknown items and sold-out items', async () => {
-    await request(app).post('/api/orders').send(orderBody({ items: [{ slug: 'pizza', quantity: 1, selections: [] }] })).expect(422);
+    await request(app)
+      .post('/api/orders')
+      .send(orderBody({ items: [{ slug: 'pizza', quantity: 1, selections: [] }] }))
+      .expect(422);
     const { MenuItemModel } = await import('../server/models/MenuItem.js');
-    await MenuItemModel.updateOne({ slug: 'banku-grilled-tilapia' }, { $set: { isAvailable: false } });
+    await MenuItemModel.updateOne(
+      { slug: 'banku-grilled-tilapia' },
+      { $set: { isAvailable: false } },
+    );
     const res = await request(app)
       .post('/api/orders')
       .send(orderBody({ items: [{ slug: 'banku-grilled-tilapia', quantity: 1, selections: [] }] }))
@@ -119,12 +141,18 @@ describe('POST /api/orders — validation', () => {
   });
 
   it('rejects an invalid pickup window', async () => {
-    const res = await request(app).post('/api/orders').send(orderBody({ pickupWindowId: 'w99' })).expect(400);
+    const res = await request(app)
+      .post('/api/orders')
+      .send(orderBody({ pickupWindowId: 'w99' }))
+      .expect(400);
     expect(res.body.code).toBe('INVALID_WINDOW');
   });
 
   it('blocks honeypot submissions', async () => {
-    const res = await request(app).post('/api/orders').send(orderBody({ website: 'http://spam.example' })).expect(400);
+    const res = await request(app)
+      .post('/api/orders')
+      .send(orderBody({ website: 'http://spam.example' }))
+      .expect(400);
     expect(res.body.code).toBe('SPAM');
     expect(await OrderModel.countDocuments()).toBe(0);
   });
@@ -143,11 +171,16 @@ describe('cutoff, pause and capacity', () => {
     // Wed Oct 14 2026 closes Mon Oct 12 23:59:59 EDT (= Oct 13 03:59:59Z)
     const body = orderBody({ pickupDate: '2026-10-14' });
     await expect(createOrder(body, new Date('2026-10-13T03:59:30Z'))).resolves.toBeTruthy();
-    await expect(createOrder(body, new Date('2026-10-13T04:00:30Z'))).rejects.toMatchObject({ code: 'CUTOFF_PASSED', status: 409 });
+    await expect(createOrder(body, new Date('2026-10-13T04:00:30Z'))).rejects.toMatchObject({
+      code: 'CUTOFF_PASSED',
+      status: 409,
+    });
   });
 
   it('refuses non-pickup days', async () => {
-    await expect(createOrder(orderBody({ pickupDate: '2026-10-15' }), new Date('2026-10-06T12:00:00Z'))).rejects.toBeInstanceOf(HttpError);
+    await expect(
+      createOrder(orderBody({ pickupDate: '2026-10-15' }), new Date('2026-10-06T12:00:00Z')),
+    ).rejects.toBeInstanceOf(HttpError);
   });
 
   it('refuses orders while paused', async () => {
@@ -158,17 +191,25 @@ describe('cutoff, pause and capacity', () => {
 
   it('enforces window capacity and frees space when an order is cancelled', async () => {
     const { DEFAULT_SETTINGS } = await import('../shared/constants.js');
-    await patchSettings({ windows: DEFAULT_SETTINGS.windows.map((w) => (w.id === 'w14' ? { ...w, capacity: 2 } : w)) });
+    await patchSettings({
+      windows: DEFAULT_SETTINGS.windows.map((w) => (w.id === 'w14' ? { ...w, capacity: 2 } : w)),
+    });
     await request(app).post('/api/orders').send(orderBody()).expect(201);
     await request(app).post('/api/orders').send(orderBody()).expect(201);
     const full = await request(app).post('/api/orders').send(orderBody()).expect(409);
     expect(full.body.code).toBe('SLOT_FULL');
     // Other windows still open
-    await request(app).post('/api/orders').send(orderBody({ pickupWindowId: 'w16' })).expect(201);
+    await request(app)
+      .post('/api/orders')
+      .send(orderBody({ pickupWindowId: 'w16' }))
+      .expect(201);
 
     const config = await request(app).get('/api/config').expect(200);
     const date = config.body.pickupDates.find((d: { date: string }) => d.date === nextOpenDate());
-    expect(date.windows.find((w: { id: string }) => w.id === 'w14')).toMatchObject({ remaining: 0, isFull: true });
+    expect(date.windows.find((w: { id: string }) => w.id === 'w14')).toMatchObject({
+      remaining: 0,
+      isFull: true,
+    });
 
     await OrderModel.updateOne({ number: '233-0001' }, { $set: { status: 'cancelled' } });
     await request(app).post('/api/orders').send(orderBody()).expect(201);
@@ -189,7 +230,9 @@ describe('emails never block orders', () => {
       const res = await request(app).post('/api/orders').send(orderBody()).expect(201);
       const logs = await EmailLogModel.find({ orderNumber: res.body.order.number }).lean();
       expect(logs.length).toBe(2);
-      expect(logs.every((l) => l.status === 'failed' && /not configured/.test(l.error ?? ''))).toBe(true);
+      expect(logs.every((l) => l.status === 'failed' && /not configured/.test(l.error ?? ''))).toBe(
+        true,
+      );
     } finally {
       if (isProd) Object.defineProperty(env, 'isProd', isProd);
       process.env.MONGODB_URI = '';

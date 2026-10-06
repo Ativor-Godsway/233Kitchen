@@ -20,8 +20,14 @@ const listQuery = z.object({
   q: z.string().trim().max(80).optional(),
   status: z.enum(['all', 'active', ...ORDER_STATUSES] as [string, ...string[]]).optional(),
   paymentStatus: z.enum(['all', ...PAYMENT_STATUSES] as [string, ...string[]]).optional(),
-  pickupDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  customerId: z.string().regex(/^[a-f0-9]{24}$/).optional(),
+  pickupDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  customerId: z
+    .string()
+    .regex(/^[a-f0-9]{24}$/)
+    .optional(),
   page: z.coerce.number().int().min(1).max(10_000).default(1),
   pageSize: z.coerce.number().int().min(1).max(200).default(25),
   sort: z.enum(['newest', 'oldest', 'pickup']).default('newest'),
@@ -46,15 +52,27 @@ ordersRouter.get(
         { number: rx },
         { 'customer.name': rx },
         { 'customer.email': rx },
-        ...(digits.length >= 3 ? [{ 'customer.phone': new RegExp(digits.split('').join('\\D*')) }] : []),
+        ...(digits.length >= 3
+          ? [{ 'customer.phone': new RegExp(digits.split('').join('\\D*')) }]
+          : []),
       ];
     }
     const sort: Record<string, 1 | -1> =
-      q.sort === 'oldest' ? { createdAt: 1 } : q.sort === 'pickup' ? { pickupDate: 1, pickupWindowId: 1, seq: 1 } : { createdAt: -1 };
+      q.sort === 'oldest'
+        ? { createdAt: 1 }
+        : q.sort === 'pickup'
+          ? { pickupDate: 1, pickupWindowId: 1, seq: 1 }
+          : { createdAt: -1 };
     const [rows, total, counts] = await Promise.all([
-      OrderModel.find(filter).sort(sort).skip((q.page - 1) * q.pageSize).limit(q.pageSize).lean(),
+      OrderModel.find(filter)
+        .sort(sort)
+        .skip((q.page - 1) * q.pageSize)
+        .limit(q.pageSize)
+        .lean(),
       OrderModel.countDocuments(filter),
-      OrderModel.aggregate<{ _id: OrderStatus; n: number }>([{ $group: { _id: '$status', n: { $sum: 1 } } }]),
+      OrderModel.aggregate<{ _id: OrderStatus; n: number }>([
+        { $group: { _id: '$status', n: { $sum: 1 } } },
+      ]),
     ]);
     res.json({
       items: rows.map(toOrderDTO),
@@ -73,7 +91,10 @@ ordersRouter.get(
     const { since } = parse(z.object({ since: z.string().datetime().optional() }), req.query);
     const now = new Date();
     const rows = since
-      ? await OrderModel.find({ createdAt: { $gt: new Date(since) } }).sort({ createdAt: 1 }).limit(20).lean()
+      ? await OrderModel.find({ createdAt: { $gt: new Date(since) } })
+          .sort({ createdAt: 1 })
+          .limit(20)
+          .lean()
       : [];
     const newCount = await OrderModel.countDocuments({ status: 'new' });
     res.json({ orders: rows.map(toOrderDTO), newCount, now: now.toISOString() });
@@ -99,7 +120,12 @@ ordersRouter.get(
     const today = todayIn(s.timezone);
     res.json({
       today,
-      dates: rows.map((r) => ({ date: r._id, label: formatPickupDate(r._id, s.timezone), orders: r.active, isPast: r._id < today })),
+      dates: rows.map((r) => ({
+        date: r._id,
+        label: formatPickupDate(r._id, s.timezone),
+        orders: r.active,
+        isPast: r._id < today,
+      })),
     });
   }),
 );
@@ -147,18 +173,27 @@ ordersRouter.patch(
 
     const prevStatus = doc.status;
     const statusChanged = !!body.status && body.status !== prevStatus;
-    const notify = statusChanged && (body.notifyCustomer ?? settings.notifyOnStatus.includes(body.status as OrderStatus));
+    const notify =
+      statusChanged &&
+      (body.notifyCustomer ?? settings.notifyOnStatus.includes(body.status as OrderStatus));
 
     if (body.paymentStatus) doc.paymentStatus = body.paymentStatus as PaymentStatus;
     if (body.internalNotes !== undefined) doc.internalNotes = body.internalNotes;
     if (statusChanged) {
       doc.status = body.status as OrderStatus;
-      doc.statusHistory.push({ status: doc.status, at: new Date(), by: req.admin!.email, notified: notify, note: body.statusNote || undefined });
+      doc.statusHistory.push({
+        status: doc.status,
+        at: new Date(),
+        by: req.admin!.email,
+        notified: notify,
+        note: body.statusNote || undefined,
+      });
     }
     await doc.save();
 
     const order = toOrderDTO(doc.toObject() as OrderRow);
-    if (statusChanged && (prevStatus === 'cancelled' || order.status === 'cancelled')) await recomputeCustomerStats(order.customerId);
+    if (statusChanged && (prevStatus === 'cancelled' || order.status === 'cancelled'))
+      await recomputeCustomerStats(order.customerId);
 
     let email: { ok: boolean; error?: string } | null = null;
     if (notify) {

@@ -14,7 +14,8 @@ const settingsSchema = new Schema(
 type SettingsRow = { _id: string; data: Partial<Settings> };
 
 export const SettingsModel =
-  (mongoose.models.Settings as mongoose.Model<SettingsRow>) || mongoose.model<SettingsRow>('Settings', settingsSchema);
+  (mongoose.models.Settings as mongoose.Model<SettingsRow>) ||
+  mongoose.model<SettingsRow>('Settings', settingsSchema);
 
 export function mergeSettings(data: Partial<Settings> | undefined): Settings {
   const d = data ?? {};

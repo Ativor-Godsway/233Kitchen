@@ -38,11 +38,20 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     return res.status(422).json({ error: err.message, code: err.code, slug: err.slug });
   }
   if (err instanceof HttpError) {
-    return res.status(err.status).json({ error: err.message, code: err.code, details: err.details });
+    return res
+      .status(err.status)
+      .json({ error: err.message, code: err.code, details: err.details });
   }
-  if (err && typeof err === 'object' && 'type' in err && (err as { type: string }).type === 'entity.parse.failed') {
+  if (
+    err &&
+    typeof err === 'object' &&
+    'type' in err &&
+    (err as { type: string }).type === 'entity.parse.failed'
+  ) {
     return res.status(400).json({ error: 'Invalid JSON body', code: 'BAD_JSON' });
   }
   console.error('[api] unhandled error', err);
-  return res.status(500).json({ error: 'Something went wrong. Please try again.', code: 'INTERNAL' });
+  return res
+    .status(500)
+    .json({ error: 'Something went wrong. Please try again.', code: 'INTERNAL' });
 }

@@ -44,7 +44,11 @@ const MOBILE_MORE = NAV.slice(4);
 
 function Badge({ n }: { n: number }) {
   if (!n) return null;
-  return <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-ghana-red px-1.5 text-[11px] font-semibold text-white">{n}</span>;
+  return (
+    <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-ghana-red px-1.5 text-[11px] font-semibold text-white">
+      {n}
+    </span>
+  );
 }
 
 export function AdminLayout({ email }: { email: string }) {
@@ -92,7 +96,9 @@ export function AdminLayout({ email }: { email: string }) {
               className={({ isActive }) =>
                 cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
-                  isActive ? 'bg-neutral-100 text-neutral-900' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900',
+                  isActive
+                    ? 'bg-neutral-100 text-neutral-900'
+                    : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900',
                 )
               }
             >
@@ -103,7 +109,12 @@ export function AdminLayout({ email }: { email: string }) {
           ))}
         </nav>
         <div className="border-t border-neutral-200 p-3">
-          <a href="/" target="_blank" rel="noopener" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50">
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+          >
             <ExternalLink size={16} aria-hidden /> View site
           </a>
           <div className="mt-1 flex items-center gap-2 px-3 py-2">
@@ -111,7 +122,12 @@ export function AdminLayout({ email }: { email: string }) {
               {email}
             </p>
             {SoundBtn}
-            <button type="button" onClick={logout} className="grid h-9 w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900" aria-label="Log out">
+            <button
+              type="button"
+              onClick={logout}
+              className="grid h-9 w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+              aria-label="Log out"
+            >
               <LogOut size={18} aria-hidden />
             </button>
           </div>
@@ -134,7 +150,10 @@ export function AdminLayout({ email }: { email: string }) {
       </main>
 
       {/* Mobile bottom tabs */}
-      <nav className="no-print fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden" aria-label="Admin">
+      <nav
+        className="no-print fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
+        aria-label="Admin"
+      >
         <ul className="grid grid-cols-5">
           {MOBILE_TABS.map(({ to, label, icon: Icon, end }) => (
             <li key={to}>
@@ -142,19 +161,28 @@ export function AdminLayout({ email }: { email: string }) {
                 to={to}
                 end={end}
                 className={({ isActive }) =>
-                  cn('relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium', isActive ? 'text-neutral-900' : 'text-neutral-500')
+                  cn(
+                    'relative flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium',
+                    isActive ? 'text-neutral-900' : 'text-neutral-500',
+                  )
                 }
               >
                 <Icon size={20} aria-hidden />
                 {label.replace(' sheet', '')}
                 {to === '/admin/orders' && newCount > 0 && (
-                  <span className="absolute right-[22%] top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-ghana-red px-1 text-[10px] font-semibold text-white">{newCount}</span>
+                  <span className="absolute right-[22%] top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-ghana-red px-1 text-[10px] font-semibold text-white">
+                    {newCount}
+                  </span>
                 )}
               </NavLink>
             </li>
           ))}
           <li>
-            <button type="button" onClick={() => setMoreOpen(true)} className="flex w-full flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium text-neutral-500">
+            <button
+              type="button"
+              onClick={() => setMoreOpen(true)}
+              className="flex w-full flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium text-neutral-500"
+            >
               <MoreHorizontal size={20} aria-hidden />
               More
             </button>
@@ -162,10 +190,21 @@ export function AdminLayout({ email }: { email: string }) {
         </ul>
       </nav>
 
-      <Dialog open={moreOpen} onClose={() => setMoreOpen(false)} title="More" variant="sheet" className="!md:max-w-sm">
+      <Dialog
+        open={moreOpen}
+        onClose={() => setMoreOpen(false)}
+        title="More"
+        variant="sheet"
+        className="!md:max-w-sm"
+      >
         <MoreMenu onNavigate={() => setMoreOpen(false)} onLogout={logout}>
           {MOBILE_MORE.map(({ to, label, icon: Icon }) => (
-            <NavLink key={to} to={to} onClick={() => setMoreOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium hover:bg-neutral-50">
+            <NavLink
+              key={to}
+              to={to}
+              onClick={() => setMoreOpen(false)}
+              className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium hover:bg-neutral-50"
+            >
               <Icon size={18} aria-hidden /> {label}
             </NavLink>
           ))}
@@ -175,14 +214,32 @@ export function AdminLayout({ email }: { email: string }) {
   );
 }
 
-function MoreMenu({ children, onLogout, onNavigate }: { children: ReactNode; onLogout: () => void; onNavigate: () => void }) {
+function MoreMenu({
+  children,
+  onLogout,
+  onNavigate,
+}: {
+  children: ReactNode;
+  onLogout: () => void;
+  onNavigate: () => void;
+}) {
   return (
     <div className="space-y-1 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
       {children}
-      <a href="/" target="_blank" rel="noopener" onClick={onNavigate} className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium hover:bg-neutral-50">
+      <a
+        href="/"
+        target="_blank"
+        rel="noopener"
+        onClick={onNavigate}
+        className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium hover:bg-neutral-50"
+      >
         <ExternalLink size={18} aria-hidden /> View site
       </a>
-      <button type="button" onClick={onLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-ghana-red hover:bg-red-50">
+      <button
+        type="button"
+        onClick={onLogout}
+        className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-ghana-red hover:bg-red-50"
+      >
         <LogOut size={18} aria-hidden /> Log out
       </button>
     </div>

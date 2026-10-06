@@ -22,12 +22,18 @@ export async function resetDb() {
     CampaignModel.deleteMany({}),
     MenuItemModel.deleteMany({}),
   ]);
-  await seedDatabase({ adminEmail: process.env.ADMIN_EMAIL!, adminPassword: process.env.ADMIN_PASSWORD! });
+  await seedDatabase({
+    adminEmail: process.env.ADMIN_EMAIL!,
+    adminPassword: process.env.ADMIN_PASSWORD!,
+  });
 }
 
 export async function patchSettings(patch: Partial<Settings>) {
   const row = await SettingsModel.findById('global').lean();
-  await SettingsModel.updateOne({ _id: 'global' }, { $set: { data: { ...(row?.data ?? {}), ...patch } } });
+  await SettingsModel.updateOne(
+    { _id: 'global' },
+    { $set: { data: { ...(row?.data ?? {}), ...patch } } },
+  );
 }
 
 export const nextOpenDate = () => openPickupDates(new Date(), DEFAULT_SETTINGS)[0];
@@ -50,7 +56,14 @@ export function orderBody(overrides: Record<string, unknown> = {}) {
         selections: [{ groupKey: 'extras', optionKey: 'extra-plantain', qty: 1 }],
         notes: '',
       },
-      { slug: 'ice-kenkey', quantity: 1, selections: [{ groupKey: 'flavour', optionKey: 'oreo', qty: 1 }, { groupKey: 'nuts', optionKey: 'with-nuts', qty: 1 }] },
+      {
+        slug: 'ice-kenkey',
+        quantity: 1,
+        selections: [
+          { groupKey: 'flavour', optionKey: 'oreo', qty: 1 },
+          { groupKey: 'nuts', optionKey: 'with-nuts', qty: 1 },
+        ],
+      },
     ],
     ...overrides,
   };

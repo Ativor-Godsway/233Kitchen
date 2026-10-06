@@ -11,18 +11,28 @@ export class ApiError extends Error {
   }
 }
 
-export async function api<T>(path: string, init: RequestInit & { json?: unknown } = {}): Promise<T> {
+export async function api<T>(
+  path: string,
+  init: RequestInit & { json?: unknown } = {},
+): Promise<T> {
   const { json, headers, ...rest } = init;
   let res: Response;
   try {
     res = await fetch(`/api${path}`, {
       credentials: 'same-origin',
       ...rest,
-      headers: { ...(json !== undefined ? { 'Content-Type': 'application/json' } : {}), ...headers },
+      headers: {
+        ...(json !== undefined ? { 'Content-Type': 'application/json' } : {}),
+        ...headers,
+      },
       body: json !== undefined ? JSON.stringify(json) : rest.body,
     });
   } catch {
-    throw new ApiError(0, 'Can’t reach the server. Check your connection and try again.', 'NETWORK');
+    throw new ApiError(
+      0,
+      'Can’t reach the server. Check your connection and try again.',
+      'NETWORK',
+    );
   }
   const isJson = res.headers.get('content-type')?.includes('application/json');
   const body = isJson ? await res.json().catch(() => null) : null;

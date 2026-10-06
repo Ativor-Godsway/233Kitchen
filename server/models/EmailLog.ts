@@ -39,7 +39,8 @@ const emailLogSchema = new Schema<EmailLogRow>(
 emailLogSchema.index({ createdAt: -1 });
 
 export const EmailLogModel =
-  (mongoose.models.EmailLog as mongoose.Model<EmailLogRow>) || mongoose.model<EmailLogRow>('EmailLog', emailLogSchema);
+  (mongoose.models.EmailLog as mongoose.Model<EmailLogRow>) ||
+  mongoose.model<EmailLogRow>('EmailLog', emailLogSchema);
 
 export function toEmailLogDTO(e: EmailLogRow): EmailLogDTO {
   return {

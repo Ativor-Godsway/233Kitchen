@@ -42,7 +42,10 @@ export function MenuCard({ item, index }: { item: MenuItem; index: number }) {
         <MenuImage
           item={item}
           sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 92vw"
-          className={cn('h-full w-full transition duration-700 group-hover:scale-[1.04]', soldOut && 'grayscale')}
+          className={cn(
+            'h-full w-full transition duration-700 group-hover:scale-[1.04]',
+            soldOut && 'grayscale',
+          )}
         />
         {soldOut && (
           <span className="absolute left-4 top-4 rounded-full bg-ink px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cream">
@@ -53,7 +56,9 @@ export function MenuCard({ item, index }: { item: MenuItem; index: number }) {
       <div className="flex flex-1 flex-col p-6">
         <div className="flex items-start justify-between gap-4">
           <h3 className="font-display text-xl font-semibold leading-tight">{item.name}</h3>
-          <p className="shrink-0 font-display text-xl font-semibold text-ghana-red">{formatMoney(item.basePrice)}</p>
+          <p className="shrink-0 font-display text-xl font-semibold text-ghana-red">
+            {formatMoney(item.basePrice)}
+          </p>
         </div>
         <p className="mt-2 line-clamp-3 flex-1 text-sm text-ink/65">{item.description}</p>
         <div className="mt-5 flex gap-2">

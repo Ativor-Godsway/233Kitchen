@@ -19,11 +19,21 @@ emailsRouter.get(
     );
     const filter = q.status === 'all' ? {} : { status: q.status };
     const [rows, total, failed] = await Promise.all([
-      EmailLogModel.find(filter).sort({ createdAt: -1 }).skip((q.page - 1) * q.pageSize).limit(q.pageSize).lean(),
+      EmailLogModel.find(filter)
+        .sort({ createdAt: -1 })
+        .skip((q.page - 1) * q.pageSize)
+        .limit(q.pageSize)
+        .lean(),
       EmailLogModel.countDocuments(filter),
       EmailLogModel.countDocuments({ status: 'failed' }),
     ]);
-    res.json({ items: rows.map(toEmailLogDTO), total, page: q.page, pageSize: q.pageSize, failedCount: failed });
+    res.json({
+      items: rows.map(toEmailLogDTO),
+      total,
+      page: q.page,
+      pageSize: q.pageSize,
+      failedCount: failed,
+    });
   }),
 );
 
@@ -44,6 +54,8 @@ emailsRouter.post(
     const result = await resendLoggedEmail(id);
     if (!result) throw new HttpError(404, 'Email not found', 'NOT_FOUND');
     const row = await EmailLogModel.findById(id).lean();
-    res.status(result.ok ? 200 : 502).json({ ok: result.ok, error: result.error, email: row ? toEmailLogDTO(row) : null });
+    res
+      .status(result.ok ? 200 : 502)
+      .json({ ok: result.ok, error: result.error, email: row ? toEmailLogDTO(row) : null });
   }),
 );

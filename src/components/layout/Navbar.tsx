@@ -30,25 +30,42 @@ export function Navbar() {
     <header
       className={cn(
         'fixed inset-x-0 top-0 z-50 transition-colors duration-300',
-        scrolled || pathname !== '/' ? 'border-b border-white/10 bg-ink/70 backdrop-blur-xl' : 'bg-transparent',
+        scrolled || pathname !== '/'
+          ? 'border-b border-white/10 bg-ink/70 backdrop-blur-xl'
+          : 'bg-transparent',
       )}
     >
-      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6" aria-label="Main">
-        <Link to="/" className="flex items-center gap-3 rounded-full focus-visible:outline-offset-4" aria-label="+233 Kitchen home">
+      <nav
+        className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6"
+        aria-label="Main"
+      >
+        <Link
+          to="/"
+          className="flex items-center gap-3 rounded-full focus-visible:outline-offset-4"
+          aria-label="+233 Kitchen home"
+        >
           <Logo size={40} />
-          <span className="hidden font-display text-lg font-semibold tracking-wide sm:inline">+233 Kitchen</span>
+          <span className="hidden font-display text-lg font-semibold tracking-wide sm:inline">
+            +233 Kitchen
+          </span>
         </Link>
         <div className="flex items-center gap-1 sm:gap-2">
           <ul className="hidden items-center gap-1 md:flex">
             {LINKS.map((l) => (
               <li key={l.href}>
-                <a href={l.href} className="rounded-full px-4 py-2 text-sm font-medium text-cream/80 transition hover:bg-white/10 hover:text-cream">
+                <a
+                  href={l.href}
+                  className="rounded-full px-4 py-2 text-sm font-medium text-cream/80 transition hover:bg-white/10 hover:text-cream"
+                >
                   {l.label}
                 </a>
               </li>
             ))}
           </ul>
-          <a href="/#menu" className="rounded-full px-3 py-2 text-sm font-medium text-cream/80 hover:text-cream md:hidden">
+          <a
+            href="/#menu"
+            className="rounded-full px-3 py-2 text-sm font-medium text-cream/80 hover:text-cream md:hidden"
+          >
             Menu
           </a>
           <button

@@ -38,7 +38,13 @@ class MongoStore implements Store {
   }
 }
 
-function make(prefix: string, windowMs: number, limit: number, message: string, skipSuccessfulRequests = false) {
+function make(
+  prefix: string,
+  windowMs: number,
+  limit: number,
+  message: string,
+  skipSuccessfulRequests = false,
+) {
   return rateLimit({
     windowMs,
     limit,
@@ -53,7 +59,23 @@ function make(prefix: string, windowMs: number, limit: number, message: string, 
   });
 }
 
-export const orderLimiter = make('order', 15 * 60_000, 8, 'Too many orders from this device. Please call us instead.');
+export const orderLimiter = make(
+  'order',
+  15 * 60_000,
+  8,
+  'Too many orders from this device. Please call us instead.',
+);
 /** Only failed logins count, so the owner is never locked out by normal use. */
-export const loginLimiter = make('login', 15 * 60_000, 10, 'Too many login attempts. Try again in 15 minutes.', true);
-export const publicPostLimiter = make('public', 15 * 60_000, 30, 'Too many requests. Please slow down.');
+export const loginLimiter = make(
+  'login',
+  15 * 60_000,
+  10,
+  'Too many login attempts. Try again in 15 minutes.',
+  true,
+);
+export const publicPostLimiter = make(
+  'public',
+  15 * 60_000,
+  30,
+  'Too many requests. Please slow down.',
+);

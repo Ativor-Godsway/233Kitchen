@@ -31,12 +31,22 @@ export async function upsertCustomerForOrder(input: {
 }
 
 /** Recomputes order count / spend / first+last order from non-cancelled orders. */
-export async function recomputeCustomerStats(customerId: Types.ObjectId | string | null | undefined) {
+export async function recomputeCustomerStats(
+  customerId: Types.ObjectId | string | null | undefined,
+) {
   if (!customerId) return;
   const id = new Types.ObjectId(String(customerId));
   const [agg] = await OrderModel.aggregate<{ n: number; spent: number; first: Date; last: Date }>([
     { $match: { customerId: id, status: { $ne: 'cancelled' } } },
-    { $group: { _id: null, n: { $sum: 1 }, spent: { $sum: '$total' }, first: { $min: '$createdAt' }, last: { $max: '$createdAt' } } },
+    {
+      $group: {
+        _id: null,
+        n: { $sum: 1 },
+        spent: { $sum: '$total' },
+        first: { $min: '$createdAt' },
+        last: { $max: '$createdAt' },
+      },
+    },
   ]);
   await CustomerModel.updateOne(
     { _id: id },

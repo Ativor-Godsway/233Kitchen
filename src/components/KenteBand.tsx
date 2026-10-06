@@ -5,7 +5,15 @@ import { cn } from '../lib/cn';
  * Thin kente-inspired accent band (red · gold · green · black blocks with
  * fine weave lines). Only ever used as a divider, never as a background.
  */
-export function KenteBand({ className, animate = false, height = 8 }: { className?: string; animate?: boolean; height?: number }) {
+export function KenteBand({
+  className,
+  animate = false,
+  height = 8,
+}: {
+  className?: string;
+  animate?: boolean;
+  height?: number;
+}) {
   const reduce = useReducedMotion();
   const style = {
     height,
@@ -15,7 +23,8 @@ export function KenteBand({ className, animate = false, height = 8 }: { classNam
     ].join(','),
     backgroundSize: '96px 100%, 96px 100%',
   };
-  if (!animate || reduce) return <div aria-hidden className={cn('w-full', className)} style={style} />;
+  if (!animate || reduce)
+    return <div aria-hidden className={cn('w-full', className)} style={style} />;
   return (
     <motion.div
       aria-hidden

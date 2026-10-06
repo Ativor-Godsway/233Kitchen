@@ -25,7 +25,16 @@ interface DialogProps {
 }
 
 /** Accessible modal primitive: portal, focus trap, Escape to close, scroll lock. */
-export function Dialog({ open, onClose, title, hideTitle, variant = 'sheet', className, children, tone = 'light' }: DialogProps) {
+export function Dialog({
+  open,
+  onClose,
+  title,
+  hideTitle,
+  variant = 'sheet',
+  className,
+  children,
+  tone = 'light',
+}: DialogProps) {
   const titleId = useId();
   const reduce = useReducedMotion();
 
@@ -46,7 +55,11 @@ export function Dialog({ open, onClose, title, hideTitle, variant = 'sheet', cla
       ? { initial: { x: '100%' }, animate: { x: 0 }, exit: { x: '100%' } }
       : variant === 'sheet'
         ? { initial: { y: '100%' }, animate: { y: 0 }, exit: { y: '100%' } }
-        : { initial: { opacity: 0, scale: 0.96 }, animate: { opacity: 1, scale: 1 }, exit: { opacity: 0, scale: 0.96 } };
+        : {
+            initial: { opacity: 0, scale: 0.96 },
+            animate: { opacity: 1, scale: 1 },
+            exit: { opacity: 0, scale: 0.96 },
+          };
 
   return createPortal(
     <AnimatePresence>
@@ -79,7 +92,9 @@ export function Dialog({ open, onClose, title, hideTitle, variant = 'sheet', cla
               role="dialog"
               aria-modal="true"
               aria-labelledby={titleId}
-              {...(reduce ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } } : panelMotion)}
+              {...(reduce
+                ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
+                : panelMotion)}
               transition={{ type: 'spring', damping: 32, stiffness: 320 }}
               className={cn(
                 'relative flex flex-col overflow-hidden shadow-2xl outline-none',
@@ -91,7 +106,13 @@ export function Dialog({ open, onClose, title, hideTitle, variant = 'sheet', cla
                 className,
               )}
             >
-              <h2 id={titleId} tabIndex={-1} className={cn(hideTitle ? 'sr-only' : 'px-6 pb-3 pt-6 text-lg font-semibold outline-none')}>
+              <h2
+                id={titleId}
+                tabIndex={-1}
+                className={cn(
+                  hideTitle ? 'sr-only' : 'px-6 pb-3 pt-6 text-lg font-semibold outline-none',
+                )}
+              >
                 {title}
               </h2>
               {children}

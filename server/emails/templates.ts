@@ -75,7 +75,14 @@ ${itemsText(order)}
 Total: ${formatMoney(order.total)} (unpaid)
 ${order.notes ? `\nNotes: ${order.notes}\n` : ''}
 Open in admin: ${adminUrl}`;
-  return { subject, html: layout({ preheader: `${c.name} · ${formatMoney(order.total)} · ${pickupLine(order)}`, body }), text };
+  return {
+    subject,
+    html: layout({
+      preheader: `${c.name} · ${formatMoney(order.total)} · ${pickupLine(order)}`,
+      body,
+    }),
+    text,
+  };
 }
 
 // ------------------------------------------------------------ customer
@@ -84,7 +91,11 @@ function contactFooter(s: Settings) {
   return `Questions? Call or text <a href="${tel(s.businessPhone)}" style="color:${C.muted};">${esc(s.businessPhone)}</a>.<br>+233 Kitchen · Worcester, MA`;
 }
 
-export function customerOrderReceivedEmail(order: OrderDTO, s: Settings, token: string): EmailContent {
+export function customerOrderReceivedEmail(
+  order: OrderDTO,
+  s: Settings,
+  token: string,
+): EmailContent {
   const first = order.customer.name.split(' ')[0];
   const subject = `We got your order ${order.number} — pickup ${pickupLine(order)}`;
   const body = `${heading(`Thank you, ${first}!`)}
@@ -117,28 +128,58 @@ Payment: ${s.paymentInstructions}
 View your order: ${orderPageUrl(order, token)}
 
 Questions? Call or text ${s.businessPhone}.`;
-  return { subject, html: layout({ preheader: `Pickup ${pickupLine(order)} · ${formatMoney(order.total)}`, body, footer: contactFooter(s) }), text };
+  return {
+    subject,
+    html: layout({
+      preheader: `Pickup ${pickupLine(order)} · ${formatMoney(order.total)}`,
+      body,
+      footer: contactFooter(s),
+    }),
+    text,
+  };
 }
 
-const STATUS_COPY: Partial<Record<OrderStatus, { subject: string; title: string; line: string }>> = {
-  confirmed: {
-    subject: 'Your order is confirmed',
-    title: 'Your order is confirmed ✅',
-    line: 'great news! We’ve confirmed your order and it’s on our cooking list.',
-  },
-  preparing: { subject: 'We’re cooking your order', title: 'We’re cooking your order 🔥', line: 'your food is being prepared fresh right now.' },
-  ready: { subject: 'Your order is ready for pickup', title: 'Your order is ready for pickup 🎉', line: 'your box is packed and ready. See you soon!' },
-  completed: { subject: 'Thank you for ordering', title: 'Thank you for ordering!', line: 'we hope you enjoyed it. We’d love to cook for you again.' },
-  cancelled: {
-    subject: 'Your order has been cancelled',
-    title: 'Your order has been cancelled',
-    line: 'your order has been cancelled. If this is unexpected, please give us a call.',
-  },
-};
+const STATUS_COPY: Partial<Record<OrderStatus, { subject: string; title: string; line: string }>> =
+  {
+    confirmed: {
+      subject: 'Your order is confirmed',
+      title: 'Your order is confirmed ✅',
+      line: 'great news! We’ve confirmed your order and it’s on our cooking list.',
+    },
+    preparing: {
+      subject: 'We’re cooking your order',
+      title: 'We’re cooking your order 🔥',
+      line: 'your food is being prepared fresh right now.',
+    },
+    ready: {
+      subject: 'Your order is ready for pickup',
+      title: 'Your order is ready for pickup 🎉',
+      line: 'your box is packed and ready. See you soon!',
+    },
+    completed: {
+      subject: 'Thank you for ordering',
+      title: 'Thank you for ordering!',
+      line: 'we hope you enjoyed it. We’d love to cook for you again.',
+    },
+    cancelled: {
+      subject: 'Your order has been cancelled',
+      title: 'Your order has been cancelled',
+      line: 'your order has been cancelled. If this is unexpected, please give us a call.',
+    },
+  };
 
-export function customerStatusEmail(order: OrderDTO, s: Settings, token: string, note?: string): EmailContent {
+export function customerStatusEmail(
+  order: OrderDTO,
+  s: Settings,
+  token: string,
+  note?: string,
+): EmailContent {
   const label = STATUS_LABELS[order.status];
-  const copy = STATUS_COPY[order.status] ?? { subject: `Order update: ${label}`, title: `Order update: ${label}`, line: '' };
+  const copy = STATUS_COPY[order.status] ?? {
+    subject: `Order update: ${label}`,
+    title: `Order update: ${label}`,
+    line: '',
+  };
   const subject = `${copy.subject} — ${order.number}`;
   const showPickup = ['new', 'confirmed', 'preparing', 'ready'].includes(order.status);
   const showPayment = showPickup && order.paymentStatus === 'unpaid';
@@ -184,13 +225,17 @@ export function messageEmail(
   s: Settings,
   opts: { firstName?: string; unsubscribeToken?: string; marketing: boolean },
 ): EmailContent {
-  const greeting = opts.firstName ? `<p style="margin:0 0 16px;font-size:16px;">Hi ${esc(opts.firstName)},</p>` : '';
+  const greeting = opts.firstName
+    ? `<p style="margin:0 0 16px;font-size:16px;">Hi ${esc(opts.firstName)},</p>`
+    : '';
   const img = m.imageUrl
     ? `<img src="${esc(m.imageUrl)}" width="544" alt="" style="display:block;width:100%;max-width:544px;height:auto;border-radius:12px;margin:0 0 20px;">`
     : '';
   const cta = m.ctaLabel && m.ctaUrl ? button(m.ctaUrl, m.ctaLabel) : '';
   const body = `${m.heading ? heading(m.heading) : ''}${img}${greeting}${textToHtml(m.body)}${cta}`;
-  const unsub = opts.unsubscribeToken ? unsubscribeUrl(opts.unsubscribeToken) : `${env.siteUrl}/unsubscribe`;
+  const unsub = opts.unsubscribeToken
+    ? unsubscribeUrl(opts.unsubscribeToken)
+    : `${env.siteUrl}/unsubscribe`;
   const footer = opts.marketing
     ? `You’re receiving this because you opted in to +233 Kitchen emails when ordering.<br>
 <a href="${esc(unsub)}" style="color:${C.muted};">Unsubscribe</a> · ${esc(s.businessAddressLine)}`
@@ -199,5 +244,9 @@ export function messageEmail(
 ${m.ctaLabel && m.ctaUrl ? `\n${m.ctaLabel}: ${m.ctaUrl}\n` : ''}
 —
 ${opts.marketing ? `Unsubscribe: ${unsub}\n${s.businessAddressLine}` : `+233 Kitchen · ${s.businessPhone}`}`;
-  return { subject: m.subject, html: layout({ preheader: m.heading || m.subject, body, footer }), text };
+  return {
+    subject: m.subject,
+    html: layout({ preheader: m.heading || m.subject, body, footer }),
+    text,
+  };
 }

@@ -19,7 +19,10 @@ export async function windowCounts(dates: string[]): Promise<Map<string, number>
 }
 
 /** Open pickup dates with live per-window capacity. */
-export async function getPickupOptions(settings: Settings, now = new Date()): Promise<PickupDateOption[]> {
+export async function getPickupOptions(
+  settings: Settings,
+  now = new Date(),
+): Promise<PickupDateOption[]> {
   const dates = openPickupDates(now, settings);
   const counts = await windowCounts(dates);
   return dates.map((date) => ({

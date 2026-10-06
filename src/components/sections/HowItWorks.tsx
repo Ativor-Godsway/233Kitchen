@@ -35,7 +35,11 @@ export function HowItWorks() {
   return (
     <section id="how-it-works" className="scroll-mt-16 bg-ink-800 py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <SectionHeading eyebrow="How it works" title="Pre-order. We cook. You pick up." sub="A small kitchen that cooks once a week, so every box is fresh." />
+        <SectionHeading
+          eyebrow="How it works"
+          title="Pre-order. We cook. You pick up."
+          sub="A small kitchen that cooks once a week, so every box is fresh."
+        />
         <div className="mt-6">
           <CutoffNotice />
         </div>
@@ -50,8 +54,16 @@ export function HowItWorks() {
               className="relative rounded-3xl bg-white/[0.03] p-7 ring-1 ring-white/10"
             >
               <div className="flex items-center justify-between">
-                <BrandIcon name={step.icon as BrandIconName} tone={(['gold', 'red', 'green'] as const)[i]} />
-                <span className="font-display text-5xl font-semibold text-white/10">0{i + 1}</span>
+                <BrandIcon
+                  name={step.icon as BrandIconName}
+                  tone={(['gold', 'red', 'green'] as const)[i]}
+                />
+                {/* Decorative numeral (order is conveyed by the <ol>). */}
+                <span
+                  aria-hidden
+                  data-step={`0${i + 1}`}
+                  className="font-display text-5xl font-semibold text-white/10 before:content-[attr(data-step)]"
+                />
               </div>
               <h3 className="mt-6 font-display text-2xl font-semibold">{step.title}</h3>
               <p className="mt-2 text-cream/70">{step.body}</p>

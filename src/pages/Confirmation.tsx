@@ -18,9 +18,16 @@ export default function Confirmation() {
   const initial = (location.state as { order?: PublicOrderDTO } | null)?.order;
   const reduce = useReducedMotion();
 
-  const { data: order, isLoading, isError } = useQuery({
+  const {
+    data: order,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['public-order', number, token],
-    queryFn: () => api<{ order: PublicOrderDTO }>(`/orders/${encodeURIComponent(number)}?t=${encodeURIComponent(token)}`).then((r) => r.order),
+    queryFn: () =>
+      api<{ order: PublicOrderDTO }>(
+        `/orders/${encodeURIComponent(number)}?t=${encodeURIComponent(token)}`,
+      ).then((r) => r.order),
     initialData: initial?.number === number ? initial : undefined,
     enabled: !!token,
   });
@@ -34,8 +41,15 @@ export default function Confirmation() {
       <section className="grid min-h-[70vh] place-items-center px-4 pt-16 text-center">
         <div>
           <h1 className="font-display text-3xl font-semibold">We couldn’t find that order</h1>
-          <p className="mt-2 text-cream/60">Please use the link in your confirmation email, or call us.</p>
-          <Link to="/" className="mt-6 inline-block rounded-full bg-cream px-6 py-3 font-semibold text-ink">Home</Link>
+          <p className="mt-2 text-cream/60">
+            Please use the link in your confirmation email, or call us.
+          </p>
+          <Link
+            to="/"
+            className="mt-6 inline-block rounded-full bg-cream px-6 py-3 font-semibold text-ink"
+          >
+            Home
+          </Link>
         </div>
       </section>
     );
@@ -64,7 +78,9 @@ export default function Confirmation() {
       >
         <Check size={32} strokeWidth={3} aria-hidden />
       </motion.div>
-      <p className="mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-ghana-gold">Order {order.number}</p>
+      <p className="mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-ghana-gold">
+        Order {order.number}
+      </p>
       <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
         Thank you, {order.customerName.split(' ')[0]}!
       </h1>
@@ -82,13 +98,17 @@ export default function Confirmation() {
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl bg-white/[0.04] p-5 ring-1 ring-white/10">
-          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cream/50"><Clock size={14} aria-hidden /> Pickup</p>
+          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cream/50">
+            <Clock size={14} aria-hidden /> Pickup
+          </p>
           <p className="mt-2 font-display text-xl font-semibold">{order.pickupDateLabel}</p>
           <p className="text-cream/70">{order.pickupWindowLabel}</p>
           <p className="mt-1 text-sm text-cream/50">{FULFILMENT_LABELS[order.fulfilment]}</p>
         </div>
         <div className="rounded-2xl bg-white/[0.04] p-5 ring-1 ring-white/10">
-          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cream/50"><MapPin size={14} aria-hidden /> Where</p>
+          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cream/50">
+            <MapPin size={14} aria-hidden /> Where
+          </p>
           <p className="mt-2 font-semibold">{order.pickupAddressPublic}</p>
           <p className="text-sm text-cream/60">The exact address is in your confirmation email.</p>
         </div>
@@ -105,9 +125,13 @@ export default function Confirmation() {
           {order.items.map((l, i) => (
             <li key={i} className="flex justify-between gap-4 text-sm">
               <div>
-                <p className="font-medium">{l.quantity}× {l.name}</p>
-                {l.selections.length > 0 && <p className="text-xs text-cream/55">{describeSelections(l.selections)}</p>}
-                {l.notes && <p className="text-xs italic text-cream/45">“{l.notes}”</p>}
+                <p className="font-medium">
+                  {l.quantity}× {l.name}
+                </p>
+                {l.selections.length > 0 && (
+                  <p className="text-xs text-cream/55">{describeSelections(l.selections)}</p>
+                )}
+                {l.notes && <p className="text-xs italic text-cream/60">“{l.notes}”</p>}
               </div>
               <p className="tabular-nums">{formatMoney(l.lineTotal)}</p>
             </li>
@@ -115,19 +139,29 @@ export default function Confirmation() {
         </ul>
         <div className="mt-4 flex justify-between border-t border-white/10 pt-4">
           <p className="text-cream/70">Total (pay later)</p>
-          <p className="font-display text-2xl font-semibold tabular-nums">{formatMoney(order.total)}</p>
+          <p className="font-display text-2xl font-semibold tabular-nums">
+            {formatMoney(order.total)}
+          </p>
         </div>
       </div>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-        <a href={icsHref} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-cream px-6 py-3.5 font-semibold text-ink hover:bg-white">
+        <a
+          href={icsHref}
+          className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-cream px-6 py-3.5 font-semibold text-ink hover:bg-white"
+        >
           <CalendarPlus size={18} aria-hidden /> Add to calendar
         </a>
-        <a href={`tel:+1${tel}`} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full px-6 py-3.5 font-semibold ring-1 ring-white/25 hover:bg-white/10">
+        <a
+          href={`tel:+1${tel}`}
+          className="inline-flex flex-1 items-center justify-center gap-2 rounded-full px-6 py-3.5 font-semibold ring-1 ring-white/25 hover:bg-white/10"
+        >
           <Phone size={18} aria-hidden /> {order.businessPhone}
         </a>
       </div>
-      <Link to="/" className="mt-6 block text-center text-sm text-cream/50 hover:text-cream">Back to home</Link>
+      <Link to="/" className="mt-6 block text-center text-sm text-cream/50 hover:text-cream">
+        Back to home
+      </Link>
     </section>
   );
 }

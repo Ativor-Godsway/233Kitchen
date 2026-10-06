@@ -1,6 +1,13 @@
 import type { Fulfilment, OrderStatus, PaymentStatus, Settings } from './types.js';
 
-export const ORDER_STATUSES: OrderStatus[] = ['new', 'confirmed', 'preparing', 'ready', 'completed', 'cancelled'];
+export const ORDER_STATUSES: OrderStatus[] = [
+  'new',
+  'confirmed',
+  'preparing',
+  'ready',
+  'completed',
+  'cancelled',
+];
 
 export const STATUS_LABELS: Record<OrderStatus, string> = {
   new: 'New',
@@ -14,7 +21,12 @@ export const STATUS_LABELS: Record<OrderStatus, string> = {
 /** The normal forward flow. Cancelled can be reached from any non-completed state. */
 export const STATUS_FLOW: OrderStatus[] = ['new', 'confirmed', 'preparing', 'ready', 'completed'];
 
-export const PAYMENT_STATUSES: PaymentStatus[] = ['unpaid', 'paid_zelle', 'paid_applepay', 'paid_cash'];
+export const PAYMENT_STATUSES: PaymentStatus[] = [
+  'unpaid',
+  'paid_zelle',
+  'paid_applepay',
+  'paid_cash',
+];
 
 export const PAYMENT_LABELS: Record<PaymentStatus, string> = {
   unpaid: 'Unpaid',
@@ -42,7 +54,8 @@ export const DEFAULT_SETTINGS: Settings = {
   bookingWeeksAhead: 3,
   closedDates: [],
   orderingPaused: false,
-  pausedMessage: 'We’re taking a short break this week. Pre-orders reopen soon. Thank you for your patience!',
+  pausedMessage:
+    'We’re taking a short break this week. Pre-orders reopen soon. Thank you for your patience!',
   notificationEmails: [],
   paymentInstructions:
     'No payment now. Once we confirm your order, pay via Zelle (amankwaherica98@gmail.com) or Apple Pay (508-353-8191), or pay at pickup.',

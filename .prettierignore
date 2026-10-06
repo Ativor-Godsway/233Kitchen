@@ -4,3 +4,7 @@ public
 .data
 .email-previews
 package-lock.json
+.vercel
+.tmp-*
+reference
+coverage

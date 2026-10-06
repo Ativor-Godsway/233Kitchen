@@ -21,7 +21,10 @@ export function useMe() {
 export function useAdminSettings() {
   return useQuery({
     queryKey: ['admin', 'settings'],
-    queryFn: () => api<{ settings: Settings; emailProvider: 'resend' | 'smtp' | 'dev' | 'none' }>('/admin/settings'),
+    queryFn: () =>
+      api<{ settings: Settings; emailProvider: 'resend' | 'smtp' | 'dev' | 'none' }>(
+        '/admin/settings',
+      ),
     staleTime: 60_000,
   });
 }
@@ -37,10 +40,21 @@ export function downloadUrl(path: string) {
 }
 
 export const fmtDateTime = (iso: string) =>
-  new Date(iso).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  new Date(iso).toLocaleString('en-US', {
+    timeZone: 'America/New_York',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 
 export const fmtDate = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', year: 'numeric' });
+  new Date(iso).toLocaleDateString('en-US', {
+    timeZone: 'America/New_York',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 
 export const telHref = (phone: string) => `tel:+1${phone.replace(/\D/g, '').slice(-10)}`;
 export const smsHref = (phone: string) => `sms:+1${phone.replace(/\D/g, '').slice(-10)}`;
@@ -48,6 +62,10 @@ export const smsHref = (phone: string) => `sms:+1${phone.replace(/\D/g, '').slic
 export function usePickupDates() {
   return useQuery({
     queryKey: ['admin', 'orders', 'pickup-dates'],
-    queryFn: () => api<{ today: string; dates: Array<{ date: string; label: string; orders: number; isPast: boolean }> }>('/admin/orders/pickup-dates'),
+    queryFn: () =>
+      api<{
+        today: string;
+        dates: Array<{ date: string; label: string; orders: number; isPast: boolean }>;
+      }>('/admin/orders/pickup-dates'),
   });
 }

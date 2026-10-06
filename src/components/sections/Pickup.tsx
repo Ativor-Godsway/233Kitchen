@@ -4,13 +4,27 @@ import { usePublicConfig } from '../../lib/queries';
 import { BrandIcon } from '../BrandIcon';
 import { SectionHeading } from './SectionHeading';
 
-const WEEKDAYS = ['', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays', 'Sundays'];
+const WEEKDAYS = [
+  '',
+  'Mondays',
+  'Tuesdays',
+  'Wednesdays',
+  'Thursdays',
+  'Fridays',
+  'Saturdays',
+  'Sundays',
+];
 
 /** Lightweight stylised "map" (no third-party embed). */
 function MapCard({ address }: { address: string }) {
   return (
     <div className="relative overflow-hidden rounded-3xl bg-ink text-cream ring-1 ring-ink/10">
-      <svg viewBox="0 0 400 300" className="h-64 w-full sm:h-full" aria-hidden preserveAspectRatio="xMidYMid slice">
+      <svg
+        viewBox="0 0 400 300"
+        className="h-64 w-full sm:h-full"
+        aria-hidden
+        preserveAspectRatio="xMidYMid slice"
+      >
         <rect width="400" height="300" fill="#141414" />
         <g stroke="#2A2A2A" strokeWidth="10" strokeLinecap="round" fill="none">
           <path d="M-10 70 L410 40" />
@@ -52,13 +66,20 @@ export function Pickup() {
     <section id="pickup" className="scroll-mt-16 bg-cream-200 py-24 text-ink sm:py-32">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:items-center">
         <div>
-          <SectionHeading tone="light" eyebrow="Pickup & location" title={`Pick up ${days}.`} sub="Choose a time window at checkout. We’ll have your box ready." />
+          <SectionHeading
+            tone="light"
+            eyebrow="Pickup & location"
+            title={`Pick up ${days}.`}
+            sub="Choose a time window at checkout. We’ll have your box ready."
+          />
           <ul className="mt-8 space-y-5">
             <li className="flex gap-4">
               <BrandIcon name="location" tone="ink" size={20} />
               <div>
                 <p className="font-semibold">{s.pickupAddressPublic}</p>
-                <p className="text-sm text-ink/65">Street pickup in Worcester. Full address sent with your confirmation.</p>
+                <p className="text-sm text-ink/65">
+                  Street pickup in Worcester. Full address sent with your confirmation.
+                </p>
               </div>
             </li>
             <li className="flex gap-4">
@@ -67,7 +88,10 @@ export function Pickup() {
                 <p className="font-semibold">Pickup windows</p>
                 <ul className="mt-2 flex flex-wrap gap-2">
                   {s.windows.map((w) => (
-                    <li key={w.id} className="rounded-full bg-white px-3 py-1 text-sm font-medium ring-1 ring-ink/10">
+                    <li
+                      key={w.id}
+                      className="rounded-full bg-white px-3 py-1 text-sm font-medium ring-1 ring-ink/10"
+                    >
                       {w.label}
                     </li>
                   ))}
@@ -78,14 +102,19 @@ export function Pickup() {
               <BrandIcon name="courier" tone="ink" size={20} />
               <div>
                 <p className="font-semibold">Prefer delivery?</p>
-                <p className="text-sm text-ink/65">Send an Uber courier to collect your order. Just choose that option at checkout.</p>
+                <p className="text-sm text-ink/65">
+                  Send an Uber courier to collect your order. Just choose that option at checkout.
+                </p>
               </div>
             </li>
             <li className="flex gap-4">
               <BrandIcon name="phone" tone="ink" size={20} />
               <div>
                 <p className="font-semibold">Questions?</p>
-                <a href={`tel:+1${tel}`} className="inline-flex items-center gap-2 text-sm font-semibold text-ghana-red hover:underline">
+                <a
+                  href={`tel:+1${tel}`}
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-ghana-red hover:underline"
+                >
                   <Phone size={14} aria-hidden /> Call or text {s.businessPhone}
                 </a>
               </div>

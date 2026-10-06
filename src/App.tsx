@@ -12,8 +12,21 @@ const AdminApp = lazy(() => import('./admin/AdminApp'));
 
 function PageFallback({ light }: { light?: boolean }) {
   return (
-    <div className={light ? 'grid min-h-screen place-items-center bg-neutral-50' : 'grid min-h-[60vh] place-items-center'} role="status">
-      <span className={light ? 'h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-900' : 'h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-ghana-gold'} />
+    <div
+      className={
+        light
+          ? 'grid min-h-screen place-items-center bg-neutral-50'
+          : 'grid min-h-[60vh] place-items-center'
+      }
+      role="status"
+    >
+      <span
+        className={
+          light
+            ? 'h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-900'
+            : 'h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-ghana-gold'
+        }
+      />
       <span className="sr-only">Loading…</span>
     </div>
   );

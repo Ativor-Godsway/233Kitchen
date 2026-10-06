@@ -46,10 +46,17 @@ let resend: Resend | null = null;
 let smtp: Transporter | null = null;
 
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([p, new Promise<T>((_, rej) => setTimeout(() => rej(new Error(`Email provider timed out after ${ms}ms`)), ms))]);
+  return Promise.race([
+    p,
+    new Promise<T>((_, rej) =>
+      setTimeout(() => rej(new Error(`Email provider timed out after ${ms}ms`)), ms),
+    ),
+  ]);
 }
 
-async function deliver(input: SendInput): Promise<{ status: EmailLogRow['status']; providerId: string | null }> {
+async function deliver(
+  input: SendInput,
+): Promise<{ status: EmailLogRow['status']; providerId: string | null }> {
   const provider = activeProvider();
   const replyTo = input.replyTo || env.emailReplyTo || undefined;
 
@@ -79,7 +86,15 @@ async function deliver(input: SendInput): Promise<{ status: EmailLogRow['status'
       auth: { user: env.smtp.user, pass: env.smtp.pass },
     });
     const info = await withTimeout(
-      smtp.sendMail({ from: env.emailFrom, to: input.to, subject: input.subject, html: input.html, text: input.text, replyTo, headers: input.headers }),
+      smtp.sendMail({
+        from: env.emailFrom,
+        to: input.to,
+        subject: input.subject,
+        html: input.html,
+        text: input.text,
+        replyTo,
+        headers: input.headers,
+      }),
       15_000,
     );
     return { status: 'sent', providerId: info.messageId ?? null };
@@ -106,7 +121,8 @@ async function deliver(input: SendInput): Promise<{ status: EmailLogRow['status'
   throw new Error('Email is not configured (set RESEND_API_KEY or SMTP credentials).');
 }
 
-const oid = (v: string | Types.ObjectId | null | undefined) => (v ? new Types.ObjectId(String(v)) : null);
+const oid = (v: string | Types.ObjectId | null | undefined) =>
+  v ? new Types.ObjectId(String(v)) : null;
 
 /** Sends an email and records the attempt. Never throws. */
 export async function sendEmail(input: SendInput): Promise<SendResult> {
@@ -133,7 +149,12 @@ export async function sendEmail(input: SendInput): Promise<SendResult> {
       orderNumber: input.orderNumber ?? null,
       campaignId: oid(input.campaignId),
     });
-    return { ok: status !== 'failed', status, logId: log._id.toString(), ...(error ? { error } : {}) };
+    return {
+      ok: status !== 'failed',
+      status,
+      logId: log._id.toString(),
+      ...(error ? { error } : {}),
+    };
   } catch (e) {
     console.error('[email] could not write EmailLog', e);
     return { ok: status !== 'failed', status, logId: '', ...(error ? { error } : {}) };
@@ -145,7 +166,13 @@ export async function resendLoggedEmail(logId: string): Promise<SendResult | nul
   const log = await EmailLogModel.findById(logId);
   if (!log) return null;
   try {
-    const { status, providerId } = await deliver({ type: log.type, to: log.to, subject: log.subject, html: log.html, text: log.text });
+    const { status, providerId } = await deliver({
+      type: log.type,
+      to: log.to,
+      subject: log.subject,
+      html: log.html,
+      text: log.text,
+    });
     log.set({ status, providerId, error: null, attempts: (log.attempts ?? 1) + 1 });
     await log.save();
     return { ok: true, status, logId };

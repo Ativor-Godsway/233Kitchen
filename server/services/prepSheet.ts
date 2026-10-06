@@ -11,12 +11,26 @@ export async function buildPrepSheet(date: string, s: Settings): Promise<PrepShe
     .sort({ pickupWindowId: 1, seq: 1 })
     .lean();
   const orders = rows.map(toOrderDTO);
-  const menuOrder = new Map((await MenuItemModel.find().select('slug sortOrder').lean()).map((m) => [m.slug, m.sortOrder ?? 0]));
+  const menuOrder = new Map(
+    (await MenuItemModel.find().select('slug sortOrder').lean()).map((m) => [
+      m.slug,
+      m.sortOrder ?? 0,
+    ]),
+  );
 
-  const items = new Map<string, PrepItemTotal & { opt: Map<string, { group: string; name: string; count: number }> }>();
+  const items = new Map<
+    string,
+    PrepItemTotal & { opt: Map<string, { group: string; name: string; count: number }> }
+  >();
   for (const o of orders) {
     for (const l of o.items) {
-      const t = items.get(l.slug) ?? { slug: l.slug, name: l.name, quantity: 0, options: [], opt: new Map() };
+      const t = items.get(l.slug) ?? {
+        slug: l.slug,
+        name: l.name,
+        quantity: 0,
+        options: [],
+        opt: new Map(),
+      };
       t.quantity += l.quantity;
       for (const sel of l.selections) {
         const key = `${sel.groupKey}:${sel.optionKey}`;
@@ -30,7 +44,11 @@ export async function buildPrepSheet(date: string, s: Settings): Promise<PrepShe
   }
 
   const windowOrder = new Map(s.windows.map((w, i) => [w.id, i]));
-  orders.sort((a, b) => (windowOrder.get(a.pickupWindowId) ?? 99) - (windowOrder.get(b.pickupWindowId) ?? 99) || a.number.localeCompare(b.number));
+  orders.sort(
+    (a, b) =>
+      (windowOrder.get(a.pickupWindowId) ?? 99) - (windowOrder.get(b.pickupWindowId) ?? 99) ||
+      a.number.localeCompare(b.number),
+  );
 
   return {
     date,
@@ -39,8 +57,17 @@ export async function buildPrepSheet(date: string, s: Settings): Promise<PrepShe
     revenue: orders.reduce((n, o) => n + o.total, 0),
     items: [...items.values()]
       .sort((a, b) => (menuOrder.get(a.slug) ?? 99) - (menuOrder.get(b.slug) ?? 99))
-      .map(({ opt, ...t }) => ({ ...t, options: [...opt.values()].sort((a, b) => a.group.localeCompare(b.group) || b.count - a.count) })),
-    windows: s.windows.map((w) => ({ id: w.id, label: w.label, count: orders.filter((o) => o.pickupWindowId === w.id).length })),
+      .map(({ opt, ...t }) => ({
+        ...t,
+        options: [...opt.values()].sort(
+          (a, b) => a.group.localeCompare(b.group) || b.count - a.count,
+        ),
+      })),
+    windows: s.windows.map((w) => ({
+      id: w.id,
+      label: w.label,
+      count: orders.filter((o) => o.pickupWindowId === w.id).length,
+    })),
     fulfilment: {
       pickup: orders.filter((o) => o.fulfilment === 'pickup').length,
       uber: orders.filter((o) => o.fulfilment === 'uber').length,
@@ -62,7 +89,21 @@ export function toCsv(rows: Array<Array<string | number>>): string {
 
 export function prepSheetCsv(sheet: PrepSheet): string {
   const rows: Array<Array<string | number>> = [
-    ['Order', 'Window', 'Customer', 'Phone', 'Fulfilment', 'Item', 'Qty', 'Options', 'Item notes', 'Order notes', 'Order total', 'Status', 'Payment'],
+    [
+      'Order',
+      'Window',
+      'Customer',
+      'Phone',
+      'Fulfilment',
+      'Item',
+      'Qty',
+      'Options',
+      'Item notes',
+      'Order notes',
+      'Order total',
+      'Status',
+      'Payment',
+    ],
   ];
   for (const o of sheet.orders) {
     for (const l of o.items) {

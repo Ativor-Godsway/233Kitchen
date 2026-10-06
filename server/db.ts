@@ -64,10 +64,16 @@ export function connectDb(): Promise<typeof mongoose> {
       serverSelectionTimeoutMS: 8000,
     });
     if (autoSeed) {
-      const result = await seedDatabase({ adminEmail: env.adminEmail, adminPassword: env.adminPassword });
+      const result = await seedDatabase({
+        adminEmail: env.adminEmail,
+        adminPassword: env.adminPassword,
+      });
       if (!env.isTest) {
-        console.log('\n  🗄️  Using local dev MongoDB (no MONGODB_URI set). Data kept in ./.data/mongo');
-        if (result.adminCreated || result.menuCreated) console.log('  🌱 Seeded:', JSON.stringify(result));
+        console.log(
+          '\n  🗄️  Using local dev MongoDB (no MONGODB_URI set). Data kept in ./.data/mongo',
+        );
+        if (result.adminCreated || result.menuCreated)
+          console.log('  🌱 Seeded:', JSON.stringify(result));
         console.log(`  🔑 Dev admin login: ${env.adminEmail} / ${env.adminPassword}  (dev only)\n`);
       }
     }

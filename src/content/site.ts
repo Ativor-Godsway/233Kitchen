@@ -29,11 +29,31 @@ export const SITE = {
     },
   ],
   gallery: [
-    { src: '/images/fried-rice-chicken-960.webp', alt: 'Fried rice with grilled chicken, plantain, coleslaw and shito', caption: 'Loaded fried rice' },
-    { src: '/images/banku-tilapia-960.webp', alt: 'Grilled tilapia topped with peppers and red cabbage, with pepper sauce and shito', caption: 'Banku & grilled tilapia' },
-    { src: '/images/waakye-meat-960.webp', alt: 'Waakye with red stew, gari, boiled eggs, plantain and coleslaw', caption: 'Hajia waakye' },
-    { src: '/images/waakye-fish-960.webp', alt: 'Waakye with talia, stew, gari, egg, plantain and fried fish', caption: 'Waakye with fish' },
-    { src: '/images/rice-platter-960.webp', alt: 'Rice platter with omelette, sausages, plantain and pepper sauce', caption: 'From our kitchen' },
+    {
+      src: '/images/fried-rice-chicken-960.webp',
+      alt: 'Fried rice with grilled chicken, plantain, coleslaw and shito',
+      caption: 'Loaded fried rice',
+    },
+    {
+      src: '/images/banku-tilapia-960.webp',
+      alt: 'Grilled tilapia topped with peppers and red cabbage, with pepper sauce and shito',
+      caption: 'Banku & grilled tilapia',
+    },
+    {
+      src: '/images/waakye-meat-960.webp',
+      alt: 'Waakye with red stew, gari, boiled eggs, plantain and coleslaw',
+      caption: 'Hajia waakye',
+    },
+    {
+      src: '/images/waakye-fish-960.webp',
+      alt: 'Waakye with talia, stew, gari, egg, plantain and fried fish',
+      caption: 'Waakye with fish',
+    },
+    {
+      src: '/images/rice-platter-960.webp',
+      alt: 'Rice platter with omelette, sausages, plantain and pepper sauce',
+      caption: 'From our kitchen',
+    },
   ],
   faq: [
     {

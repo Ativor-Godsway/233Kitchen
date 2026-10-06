@@ -2,7 +2,12 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { ah, HttpError, parse } from '../../middleware/errors.js';
 import { loginLimiter } from '../../middleware/rateLimit.js';
-import { clearSession, issueSession, requireAdmin, type AdminRequest } from '../../middleware/auth.js';
+import {
+  clearSession,
+  issueSession,
+  requireAdmin,
+  type AdminRequest,
+} from '../../middleware/auth.js';
 import { AdminUserModel } from '../../models/AdminUser.js';
 import { changePasswordSchema, loginSchema } from '../../../shared/schemas.js';
 
@@ -52,7 +57,10 @@ authRouter.post(
     if (!admin || !(await bcrypt.compare(currentPassword, admin.passwordHash))) {
       throw new HttpError(400, 'Current password is incorrect', 'BAD_CREDENTIALS');
     }
-    admin.set({ passwordHash: await bcrypt.hash(newPassword, 12), tokenVersion: (admin.tokenVersion ?? 0) + 1 });
+    admin.set({
+      passwordHash: await bcrypt.hash(newPassword, 12),
+      tokenVersion: (admin.tokenVersion ?? 0) + 1,
+    });
     await admin.save();
     // Other sessions are revoked by the version bump; keep this one signed in.
     issueSession(res, admin);

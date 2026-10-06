@@ -20,7 +20,9 @@ function readSound(): boolean {
 /** Short two-tone chime via Web Audio (no asset to load). */
 function chime() {
   try {
-    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const Ctx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     const ctx = new Ctx();
     [880, 1320].forEach((freq, i) => {
       const osc = ctx.createOscillator();
@@ -68,7 +70,9 @@ export function useNewOrderAlerts(enabled: boolean) {
     const tick = async () => {
       try {
         const qs = since.current ? `?since=${encodeURIComponent(since.current)}` : '';
-        const res = await api<{ orders: OrderDTO[]; newCount: number; now: string }>(`/admin/orders/latest${qs}`);
+        const res = await api<{ orders: OrderDTO[]; newCount: number; now: string }>(
+          `/admin/orders/latest${qs}`,
+        );
         if (stopped) return;
         setNewCount(res.newCount);
         if (since.current && res.orders.length) {

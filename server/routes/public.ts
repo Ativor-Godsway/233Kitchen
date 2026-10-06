@@ -46,7 +46,11 @@ publicRouter.post(
 
 /** Loads an order for its customer; the HMAC token proves they own the link. */
 async function findOrderForCustomer(number: string, token: unknown) {
-  if (typeof token !== 'string' || !/^233-\d{4,}$/.test(number) || !verifyOrderToken(number, token)) {
+  if (
+    typeof token !== 'string' ||
+    !/^233-\d{4,}$/.test(number) ||
+    !verifyOrderToken(number, token)
+  ) {
     throw new HttpError(404, 'Order not found', 'NOT_FOUND');
   }
   const row = await OrderModel.findOne({ number }).setOptions({ sanitizeFilter: true }).lean();
@@ -82,7 +86,8 @@ publicRouter.post(
       { $set: { marketingConsent: false, unsubscribedAt: new Date() } },
       { new: true },
     ).setOptions({ sanitizeFilter: true });
-    if (!customer) throw new HttpError(404, 'This unsubscribe link is invalid or has expired.', 'NOT_FOUND');
+    if (!customer)
+      throw new HttpError(404, 'This unsubscribe link is invalid or has expired.', 'NOT_FOUND');
     res.json({ ok: true });
   }),
 );

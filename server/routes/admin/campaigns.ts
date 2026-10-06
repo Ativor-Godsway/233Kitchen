@@ -4,7 +4,12 @@ import type { AdminRequest } from '../../middleware/auth.js';
 import { campaignSchema } from '../../../shared/schemas.js';
 import { CampaignModel, toCampaignDTO } from '../../models/Campaign.js';
 import { getSettings } from '../../services/settingsService.js';
-import { renderFor, resolveAudience, sendCampaign, sendTest } from '../../services/campaignService.js';
+import {
+  renderFor,
+  resolveAudience,
+  sendCampaign,
+  sendTest,
+} from '../../services/campaignService.js';
 
 export const campaignsRouter = Router();
 
@@ -24,7 +29,12 @@ campaignsRouter.post(
     const s = await getSettings();
     const { transactional, customers } = await resolveAudience(input);
     const sample = customers[0] ?? null;
-    const content = renderFor(input, s, sample ?? { name: 'Ama Mensah', unsubscribeToken: 'preview' }, transactional);
+    const content = renderFor(
+      input,
+      s,
+      sample ?? { name: 'Ama Mensah', unsubscribeToken: 'preview' },
+      transactional,
+    );
     res.json({
       recipientCount: customers.length,
       transactional,
@@ -42,7 +52,8 @@ campaignsRouter.post(
     const s = await getSettings();
     const to = s.notificationEmails[0] || req.admin!.email;
     const r = await sendTest(input, s, to);
-    if (!r.ok) throw new HttpError(502, `Test email failed: ${r.error ?? 'unknown error'}`, 'EMAIL_FAILED');
+    if (!r.ok)
+      throw new HttpError(502, `Test email failed: ${r.error ?? 'unknown error'}`, 'EMAIL_FAILED');
     res.json({ ok: true, to, status: r.status });
   }),
 );

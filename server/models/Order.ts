@@ -34,7 +34,14 @@ export interface OrderRow {
 }
 
 const selectionSchema = new Schema(
-  { groupKey: String, groupName: String, optionKey: String, name: String, qty: Number, unitPrice: Number },
+  {
+    groupKey: String,
+    groupName: String,
+    optionKey: String,
+    name: String,
+    qty: Number,
+    unitPrice: Number,
+  },
   { _id: false },
 );
 
@@ -101,7 +108,8 @@ orderSchema.index({ pickupDate: 1, pickupWindowId: 1, status: 1 });
 orderSchema.index({ 'customer.email': 1 });
 
 export const OrderModel =
-  (mongoose.models.Order as mongoose.Model<OrderRow>) || mongoose.model<OrderRow>('Order', orderSchema);
+  (mongoose.models.Order as mongoose.Model<OrderRow>) ||
+  mongoose.model<OrderRow>('Order', orderSchema);
 
 export function toOrderDTO(o: OrderRow): OrderDTO {
   return {
@@ -152,4 +160,10 @@ export function toOrderDTO(o: OrderRow): OrderDTO {
 }
 
 /** Statuses that occupy capacity in a pickup window. */
-export const ACTIVE_STATUSES: OrderStatus[] = ['new', 'confirmed', 'preparing', 'ready', 'completed'];
+export const ACTIVE_STATUSES: OrderStatus[] = [
+  'new',
+  'confirmed',
+  'preparing',
+  'ready',
+  'completed',
+];

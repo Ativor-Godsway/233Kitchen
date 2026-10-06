@@ -237,7 +237,8 @@ export interface EmailLogDTO {
   createdAt: string;
 }
 
-export type SegmentType = 'all_opted_in' | 'ordered_last_30' | 'lapsed_60' | 'tag' | 'selected' | 'single';
+export type SegmentType =
+  'all_opted_in' | 'ordered_last_30' | 'lapsed_60' | 'tag' | 'selected' | 'single';
 
 export interface CampaignDTO {
   id: string;
@@ -306,4 +307,3 @@ export interface AnalyticsResult {
   byWindow: Array<{ label: string; orders: number }>;
   upcoming: { date: string; label: string; orders: number; revenue: number } | null;
 }
-

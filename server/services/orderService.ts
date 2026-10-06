@@ -10,7 +10,11 @@ import { getSettings } from './settingsService.js';
 import { recomputeCustomerStats, upsertCustomerForOrder } from './customerService.js';
 import { sendEmail } from './emailService.js';
 import { orderToken } from './orderToken.js';
-import { customerOrderReceivedEmail, customerStatusEmail, ownerNewOrderEmail } from '../emails/templates.js';
+import {
+  customerOrderReceivedEmail,
+  customerStatusEmail,
+  ownerNewOrderEmail,
+} from '../emails/templates.js';
 
 export function toPublicOrder(o: OrderDTO, s: Settings): PublicOrderDTO {
   return {
@@ -46,11 +50,21 @@ export async function sendNewOrderEmails(order: OrderDTO, s: Settings) {
 
 export async function sendStatusEmail(order: OrderDTO, s: Settings, note?: string) {
   const content = customerStatusEmail(order, s, orderToken(order.number), note);
-  return sendEmail({ type: 'customer_status_update', to: order.customer.email, ...content, orderId: order.id, orderNumber: order.number });
+  return sendEmail({
+    type: 'customer_status_update',
+    to: order.customer.email,
+    ...content,
+    orderId: order.id,
+    orderNumber: order.number,
+  });
 }
 
 export async function countActiveInWindow(date: string, windowId: string) {
-  return OrderModel.countDocuments({ pickupDate: date, pickupWindowId: windowId, status: { $in: ACTIVE_STATUSES } });
+  return OrderModel.countDocuments({
+    pickupDate: date,
+    pickupWindowId: windowId,
+    status: { $in: ACTIVE_STATUSES },
+  });
 }
 
 /**
@@ -59,7 +73,12 @@ export async function countActiveInWindow(date: string, windowId: string) {
  * customer, then sends emails (email failures never fail the order).
  */
 export async function createOrder(raw: unknown, now = new Date()) {
-  if (raw && typeof raw === 'object' && 'website' in raw && String((raw as { website: unknown }).website ?? '').length > 0) {
+  if (
+    raw &&
+    typeof raw === 'object' &&
+    'website' in raw &&
+    String((raw as { website: unknown }).website ?? '').length > 0
+  ) {
     throw new HttpError(400, 'Invalid submission', 'SPAM');
   }
   const input = createOrderSchema.parse(raw);
@@ -68,15 +87,26 @@ export async function createOrder(raw: unknown, now = new Date()) {
   const settings = await getSettings();
   if (settings.orderingPaused) throw new HttpError(409, settings.pausedMessage, 'ORDERING_PAUSED');
   if (!isDateOrderable(input.pickupDate, now, settings)) {
-    throw new HttpError(409, 'Orders for that pickup date have closed. Please choose another date.', 'CUTOFF_PASSED');
+    throw new HttpError(
+      409,
+      'Orders for that pickup date have closed. Please choose another date.',
+      'CUTOFF_PASSED',
+    );
   }
   const window = settings.windows.find((w) => w.id === input.pickupWindowId);
   if (!window) throw new HttpError(400, 'Please choose a valid pickup time.', 'INVALID_WINDOW');
 
   const priced = priceOrder(await getMenu(), input.items);
 
-  if (window.capacity !== null && (await countActiveInWindow(input.pickupDate, window.id)) >= window.capacity) {
-    throw new HttpError(409, `The ${window.label} pickup window is full. Please choose another time.`, 'SLOT_FULL');
+  if (
+    window.capacity !== null &&
+    (await countActiveInWindow(input.pickupDate, window.id)) >= window.capacity
+  ) {
+    throw new HttpError(
+      409,
+      `The ${window.label} pickup window is full. Please choose another time.`,
+      'SLOT_FULL',
+    );
   }
 
   const customer = await upsertCustomerForOrder({
@@ -110,5 +140,10 @@ export async function createOrder(raw: unknown, now = new Date()) {
   await recomputeCustomerStats(customer?._id);
   await sendNewOrderEmails(order, settings);
 
-  return { order, publicOrder: toPublicOrder(order, settings), token: orderToken(order.number), settings };
+  return {
+    order,
+    publicOrder: toPublicOrder(order, settings),
+    token: orderToken(order.number),
+    settings,
+  };
 }

@@ -61,7 +61,9 @@ describe('cutoff (America/New_York)', () => {
   });
 
   it('skips closed dates and returns nothing when paused', () => {
-    expect(openPickupDates(at('2026-10-06T15:00:00Z'), { ...s, closedDates: ['2026-10-14'] })[0]).toBe('2026-10-21');
+    expect(
+      openPickupDates(at('2026-10-06T15:00:00Z'), { ...s, closedDates: ['2026-10-14'] })[0],
+    ).toBe('2026-10-21');
     expect(openPickupDates(at('2026-10-06T15:00:00Z'), { ...s, orderingPaused: true })).toEqual([]);
   });
 

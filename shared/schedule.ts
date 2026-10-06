@@ -23,7 +23,10 @@ export function pickupDay(date: string, tz: string): DateTime {
  * Default: Monday 23:59 for a Wednesday pickup — the whole 23:59 minute counts,
  * so the cutoff instant is 23:59:59.999 local time.
  */
-export function cutoffFor(date: string, s: Pick<ScheduleSettings, 'timezone' | 'cutoffDaysBefore' | 'cutoffTime'>): DateTime {
+export function cutoffFor(
+  date: string,
+  s: Pick<ScheduleSettings, 'timezone' | 'cutoffDaysBefore' | 'cutoffTime'>,
+): DateTime {
   const { hour, minute } = parseHm(s.cutoffTime);
   return pickupDay(date, s.timezone)
     .minus({ days: s.cutoffDaysBefore })
@@ -89,7 +92,10 @@ export function windowRange(date: string, w: Pick<TimeWindow, 'start' | 'end'>, 
 }
 
 /** Remaining capacity for a window given the current number of active orders. */
-export function windowRemaining(w: Pick<TimeWindow, 'capacity'>, activeOrders: number): number | null {
+export function windowRemaining(
+  w: Pick<TimeWindow, 'capacity'>,
+  activeOrders: number,
+): number | null {
   if (w.capacity === null || w.capacity === undefined) return null;
   return Math.max(0, w.capacity - activeOrders);
 }

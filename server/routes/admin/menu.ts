@@ -20,7 +20,8 @@ menuRouter.post(
   '/',
   ah(async (req, res) => {
     const body = parse(menuItemSchema, req.body);
-    if (await MenuItemModel.exists({ slug: body.slug })) throw new HttpError(409, 'An item with that URL slug already exists', 'DUPLICATE');
+    if (await MenuItemModel.exists({ slug: body.slug }))
+      throw new HttpError(409, 'An item with that URL slug already exists', 'DUPLICATE');
     const doc = await MenuItemModel.create({ ...body, image: body.image || null });
     res.status(201).json({ item: toMenuItem(doc.toObject()) });
   }),
@@ -33,7 +34,11 @@ menuRouter.put(
     const body = parse(menuItemSchema, req.body);
     const clash = await MenuItemModel.findOne({ slug: body.slug, _id: { $ne: id } }).lean();
     if (clash) throw new HttpError(409, 'Another item already uses that URL slug', 'DUPLICATE');
-    const doc = await MenuItemModel.findByIdAndUpdate(id, { $set: { ...body, image: body.image || null } }, { new: true, runValidators: true }).lean();
+    const doc = await MenuItemModel.findByIdAndUpdate(
+      id,
+      { $set: { ...body, image: body.image || null } },
+      { new: true, runValidators: true },
+    ).lean();
     if (!doc) throw new HttpError(404, 'Menu item not found', 'NOT_FOUND');
     res.json({ item: toMenuItem(doc) });
   }),
@@ -48,7 +53,9 @@ menuRouter.patch(
     const doc = await MenuItemModel.findById(id);
     if (!doc) throw new HttpError(404, 'Menu item not found', 'NOT_FOUND');
     if (body.groupKey && body.optionKey) {
-      const option = doc.optionGroups.find((g) => g.key === body.groupKey)?.options.find((o) => o.key === body.optionKey);
+      const option = doc.optionGroups
+        .find((g) => g.key === body.groupKey)
+        ?.options.find((o) => o.key === body.optionKey);
       if (!option) throw new HttpError(404, 'Option not found', 'NOT_FOUND');
       option.isAvailable = body.isAvailable;
     } else {

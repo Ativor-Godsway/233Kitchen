@@ -42,7 +42,8 @@ const campaignSchema = new Schema<CampaignRow>(
 );
 
 export const CampaignModel =
-  (mongoose.models.Campaign as mongoose.Model<CampaignRow>) || mongoose.model<CampaignRow>('Campaign', campaignSchema);
+  (mongoose.models.Campaign as mongoose.Model<CampaignRow>) ||
+  mongoose.model<CampaignRow>('Campaign', campaignSchema);
 
 export function toCampaignDTO(c: CampaignRow): CampaignDTO {
   return {

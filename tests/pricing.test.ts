@@ -19,7 +19,11 @@ function expectPricingError(fn: () => unknown, code: string) {
 
 describe('priceLine', () => {
   it('prices a plain item at its base price', () => {
-    const l = priceLine(item('loaded-fried-rice-chicken'), { slug: 'loaded-fried-rice-chicken', quantity: 1, selections: [] });
+    const l = priceLine(item('loaded-fried-rice-chicken'), {
+      slug: 'loaded-fried-rice-chicken',
+      quantity: 1,
+      selections: [],
+    });
     expect(l.unitTotal).toBe(2000);
     expect(l.lineTotal).toBe(2000);
   });
@@ -108,7 +112,9 @@ describe('priceLine', () => {
       price: 1,
       unitTotal: 1,
       lineTotal: 1,
-      selections: [{ groupKey: 'extras', optionKey: 'extra-tilapia', qty: 1, unitPrice: 0, price: 0 }],
+      selections: [
+        { groupKey: 'extras', optionKey: 'extra-tilapia', qty: 1, unitPrice: 0, price: 0 },
+      ],
     } as unknown as LineInput;
     const order = priceOrder(menu, [tampered]);
     expect(order.total).toBe(4000);
@@ -126,24 +132,44 @@ describe('priceLine', () => {
     );
     const soldOut = { ...item('ice-kenkey'), isAvailable: false };
     expectPricingError(
-      () => priceLine(soldOut, { slug: 'ice-kenkey', quantity: 1, selections: [{ groupKey: 'flavour', optionKey: 'oreo', qty: 1 }] }),
+      () =>
+        priceLine(soldOut, {
+          slug: 'ice-kenkey',
+          quantity: 1,
+          selections: [{ groupKey: 'flavour', optionKey: 'oreo', qty: 1 }],
+        }),
       'ITEM_UNAVAILABLE',
     );
     const noOreo = structuredClone(item('ice-kenkey'));
     noOreo.optionGroups[0].options[0].isAvailable = false;
     expectPricingError(
-      () => priceLine(noOreo, { slug: 'ice-kenkey', quantity: 1, selections: [{ groupKey: 'flavour', optionKey: 'oreo', qty: 1 }] }),
+      () =>
+        priceLine(noOreo, {
+          slug: 'ice-kenkey',
+          quantity: 1,
+          selections: [{ groupKey: 'flavour', optionKey: 'oreo', qty: 1 }],
+        }),
       'OPTION_UNAVAILABLE',
     );
   });
 
   it('rejects invalid line quantities and duplicate options', () => {
     expectPricingError(
-      () => priceLine(item('loaded-hajia-waakye'), { slug: 'loaded-hajia-waakye', quantity: 0, selections: [] }),
+      () =>
+        priceLine(item('loaded-hajia-waakye'), {
+          slug: 'loaded-hajia-waakye',
+          quantity: 0,
+          selections: [],
+        }),
       'INVALID_QUANTITY',
     );
     expectPricingError(
-      () => priceLine(item('loaded-hajia-waakye'), { slug: 'loaded-hajia-waakye', quantity: 1.5, selections: [] }),
+      () =>
+        priceLine(item('loaded-hajia-waakye'), {
+          slug: 'loaded-hajia-waakye',
+          quantity: 1.5,
+          selections: [],
+        }),
       'INVALID_QUANTITY',
     );
     expectPricingError(
@@ -161,13 +187,20 @@ describe('priceLine', () => {
   });
 
   it('rejects items that are not on the menu', () => {
-    expectPricingError(() => priceOrder(menu, [{ slug: 'jollof', quantity: 1, selections: [] }]), 'ITEM_NOT_FOUND');
+    expectPricingError(
+      () => priceOrder(menu, [{ slug: 'jollof', quantity: 1, selections: [] }]),
+      'ITEM_NOT_FOUND',
+    );
   });
 
   it('sums multiple lines', () => {
     const o = priceOrder(menu, [
       { slug: 'loaded-fried-rice-chicken', quantity: 1, selections: [] },
-      { slug: 'ice-kenkey', quantity: 2, selections: [{ groupKey: 'flavour', optionKey: 'oreo', qty: 1 }] },
+      {
+        slug: 'ice-kenkey',
+        quantity: 2,
+        selections: [{ groupKey: 'flavour', optionKey: 'oreo', qty: 1 }],
+      },
     ]);
     expect(o.subtotal).toBe(3000);
     expect(o.total).toBe(3000);
@@ -192,7 +225,9 @@ describe('helpers', () => {
       ],
     });
     expect(a).toBe(b);
-    expect(lineKey({ slug: 'x', selections: [], notes: 'no pepper' })).not.toBe(lineKey({ slug: 'x', selections: [] }));
+    expect(lineKey({ slug: 'x', selections: [], notes: 'no pepper' })).not.toBe(
+      lineKey({ slug: 'x', selections: [] }),
+    );
   });
 
   it('formats money', () => {

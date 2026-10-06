@@ -36,19 +36,28 @@ function validateGroup(item: MenuItem, group: OptionGroup, chosen: SelectionInpu
   if (group.type === 'quantity') {
     for (const s of chosen) {
       if (!isInt(s.qty) || s.qty < 0 || s.qty > group.max) {
-        throw new PricingError('INVALID_QUANTITY', `${where}: quantity must be 0–${group.max}`, item.slug);
+        throw new PricingError(
+          'INVALID_QUANTITY',
+          `${where}: quantity must be 0–${group.max}`,
+          item.slug,
+        );
       }
     }
     const total = chosen.reduce((n, s) => n + s.qty, 0);
     if (group.required && total < Math.max(1, group.min)) {
-      throw new PricingError('REQUIRED_OPTION', `${where}: please choose at least ${Math.max(1, group.min)}`, item.slug);
+      throw new PricingError(
+        'REQUIRED_OPTION',
+        `${where}: please choose at least ${Math.max(1, group.min)}`,
+        item.slug,
+      );
     }
     return;
   }
 
   // single / multi: each chosen option counts once
   for (const s of chosen) {
-    if (s.qty !== 1) throw new PricingError('INVALID_QUANTITY', `${where}: invalid selection`, item.slug);
+    if (s.qty !== 1)
+      throw new PricingError('INVALID_QUANTITY', `${where}: invalid selection`, item.slug);
   }
   const max = group.type === 'single' ? 1 : group.max;
   const min = group.required ? Math.max(1, group.min) : group.min;
@@ -74,14 +83,19 @@ export function priceLine(item: MenuItem, input: LineInput): PricedLine {
     throw new PricingError('ITEM_UNAVAILABLE', `${item.name} is sold out`, item.slug);
   }
   if (!isInt(input.quantity) || input.quantity < 1 || input.quantity > MAX_LINE_QUANTITY) {
-    throw new PricingError('INVALID_QUANTITY', `Quantity must be 1–${MAX_LINE_QUANTITY}`, item.slug);
+    throw new PricingError(
+      'INVALID_QUANTITY',
+      `Quantity must be 1–${MAX_LINE_QUANTITY}`,
+      item.slug,
+    );
   }
 
   const seen = new Set<string>();
   const byGroup = new Map<string, SelectionInput[]>();
   for (const s of input.selections ?? []) {
     const id = `${s.groupKey}:${s.optionKey}`;
-    if (seen.has(id)) throw new PricingError('DUPLICATE_OPTION', `Duplicate option ${s.optionKey}`, item.slug);
+    if (seen.has(id))
+      throw new PricingError('DUPLICATE_OPTION', `Duplicate option ${s.optionKey}`, item.slug);
     seen.add(id);
     const group = item.optionGroups.find((g) => g.key === s.groupKey);
     const option = group?.options.find((o) => o.key === s.optionKey);
@@ -139,7 +153,12 @@ export function priceOrder(menu: MenuItem[], lines: LineInput[]): PricedOrder {
   const bySlug = new Map(menu.map((m) => [m.slug, m]));
   const priced = lines.map((line) => {
     const item = bySlug.get(line.slug);
-    if (!item) throw new PricingError('ITEM_NOT_FOUND', 'An item in your bag is no longer on the menu', line.slug);
+    if (!item)
+      throw new PricingError(
+        'ITEM_NOT_FOUND',
+        'An item in your bag is no longer on the menu',
+        line.slug,
+      );
     return priceLine(item, line);
   });
   const subtotal = priced.reduce((sum, l) => sum + l.lineTotal, 0);

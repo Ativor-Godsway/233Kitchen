@@ -33,25 +33,43 @@ export default function Unsubscribe() {
         {state === 'done' ? (
           <>
             <h1 className="mt-4 font-display text-3xl font-semibold">You’re unsubscribed</h1>
-            <p className="mt-2 text-cream/60">You won’t receive marketing emails from us. Order emails will still arrive when you order.</p>
+            <p className="mt-2 text-cream/60">
+              You won’t receive marketing emails from us. Order emails will still arrive when you
+              order.
+            </p>
           </>
         ) : (
           <>
-            <h1 className="mt-4 font-display text-3xl font-semibold">Unsubscribe from +233 Kitchen emails?</h1>
-            <p className="mt-2 text-cream/60">You’ll stop receiving news about new menu items and offers.</p>
-            {!token && <p className="mt-4 text-sm text-ghana-gold">This link is missing its token. Please use the link from your email.</p>}
-            {state === 'error' && <p className="mt-4 text-sm text-ghana-red-300" role="alert">{message}</p>}
+            <h1 className="mt-4 font-display text-3xl font-semibold">
+              Unsubscribe from +233 Kitchen emails?
+            </h1>
+            <p className="mt-2 text-cream/60">
+              You’ll stop receiving news about new menu items and offers.
+            </p>
+            {!token && (
+              <p className="mt-4 text-sm text-ghana-gold">
+                This link is missing its token. Please use the link from your email.
+              </p>
+            )}
+            {state === 'error' && (
+              <p className="mt-4 text-sm text-ghana-red-300" role="alert">
+                {message}
+              </p>
+            )}
             <button
               type="button"
               disabled={!token || state === 'working'}
               onClick={unsubscribe}
               className="mt-6 inline-flex items-center gap-2 rounded-full bg-cream px-6 py-3 font-semibold text-ink disabled:opacity-50"
             >
-              {state === 'working' && <Loader2 size={18} className="animate-spin" aria-hidden />} Unsubscribe
+              {state === 'working' && <Loader2 size={18} className="animate-spin" aria-hidden />}{' '}
+              Unsubscribe
             </button>
           </>
         )}
-        <Link to="/" className="mt-6 block text-sm text-cream/50 hover:text-cream">Back to home</Link>
+        <Link to="/" className="mt-6 block text-sm text-cream/50 hover:text-cream">
+          Back to home
+        </Link>
       </div>
     </section>
   );

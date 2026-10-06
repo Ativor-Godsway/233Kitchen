@@ -17,7 +17,13 @@ export interface SeedOptions {
 
 /** Idempotent: only creates what is missing unless asked to reset. */
 export async function seedDatabase(opts: SeedOptions) {
-  const result = { menuCreated: 0, menuUpdated: 0, settingsCreated: false, adminCreated: false, adminPasswordReset: false };
+  const result = {
+    menuCreated: 0,
+    menuUpdated: 0,
+    settingsCreated: false,
+    adminCreated: false,
+    adminPasswordReset: false,
+  };
 
   for (const item of MENU_SEED) {
     const existing = await MenuItemModel.findOne({ slug: item.slug });
@@ -47,7 +53,10 @@ export async function seedDatabase(opts: SeedOptions) {
     await AdminUserModel.create({ email, passwordHash: await bcrypt.hash(opts.adminPassword, 12) });
     result.adminCreated = true;
   } else if (opts.resetAdminPassword) {
-    admin.set({ passwordHash: await bcrypt.hash(opts.adminPassword, 12), tokenVersion: (admin.tokenVersion ?? 0) + 1 });
+    admin.set({
+      passwordHash: await bcrypt.hash(opts.adminPassword, 12),
+      tokenVersion: (admin.tokenVersion ?? 0) + 1,
+    });
     await admin.save();
     result.adminPasswordReset = true;
   }

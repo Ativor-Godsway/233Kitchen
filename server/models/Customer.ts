@@ -43,7 +43,8 @@ const customerSchema = new Schema<CustomerRow>(
 );
 
 export const CustomerModel =
-  (mongoose.models.Customer as mongoose.Model<CustomerRow>) || mongoose.model<CustomerRow>('Customer', customerSchema);
+  (mongoose.models.Customer as mongoose.Model<CustomerRow>) ||
+  mongoose.model<CustomerRow>('Customer', customerSchema);
 
 const iso = (d: Date | null | undefined) => (d ? new Date(d).toISOString() : null);
 

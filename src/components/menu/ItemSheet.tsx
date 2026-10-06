@@ -7,7 +7,13 @@ import { MenuImage } from './MenuImage';
 import { useUi } from '../../store/ui';
 import { useCart, type CartLine } from '../../store/cart';
 import { useMenu } from '../../lib/queries';
-import { formatMoney, priceLine, PricingError, MAX_LINE_QUANTITY, MAX_NOTES_LENGTH } from '../../../shared/pricing';
+import {
+  formatMoney,
+  priceLine,
+  PricingError,
+  MAX_LINE_QUANTITY,
+  MAX_NOTES_LENGTH,
+} from '../../../shared/pricing';
 import type { MenuItem, OptionGroup, SelectionInput } from '../../../shared/types';
 import { cn } from '../../lib/cn';
 
@@ -45,7 +51,11 @@ function GroupHeader({ group, error }: { group: OptionGroup; error?: string }) {
       <span
         className={cn(
           'shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold',
-          error ? 'bg-ghana-red text-white' : group.required ? 'bg-ghana-gold/20 text-ghana-gold' : 'bg-white/10 text-cream/60',
+          error
+            ? 'bg-ghana-red text-white'
+            : group.required
+              ? 'bg-ghana-gold/20 text-ghana-gold'
+              : 'bg-white/10 text-cream/60',
         )}
       >
         {group.required ? `Required · ${hint}` : hint}
@@ -54,7 +64,15 @@ function GroupHeader({ group, error }: { group: OptionGroup; error?: string }) {
   );
 }
 
-function SheetBody({ item, editing, onDone }: { item: MenuItem; editing?: CartLine; onDone: () => void }) {
+function SheetBody({
+  item,
+  editing,
+  onDone,
+}: {
+  item: MenuItem;
+  editing?: CartLine;
+  onDone: () => void;
+}) {
   const add = useCart((s) => s.add);
   const replace = useCart((s) => s.replace);
   const [sel, setSel] = useState<SelState>(() => fromLine(editing));
@@ -76,7 +94,8 @@ function SheetBody({ item, editing, onDone }: { item: MenuItem; editing?: CartLi
       const cur = { ...(s[group.key] ?? {}) };
       if (cur[o]) delete cur[o];
       else {
-        if (Object.keys(cur).length >= group.max && group.max === 1) for (const k of Object.keys(cur)) delete cur[k];
+        if (Object.keys(cur).length >= group.max && group.max === 1)
+          for (const k of Object.keys(cur)) delete cur[k];
         if (Object.keys(cur).length < group.max) cur[o] = 1;
       }
       return { ...s, [group.key]: cur };
@@ -97,11 +116,19 @@ function SheetBody({ item, editing, onDone }: { item: MenuItem; editing?: CartLi
       priceLine(item, line);
     } catch (e) {
       if (e instanceof PricingError) {
-        const group = item.optionGroups.find((g) => e.message.includes(g.name) && g.required) ?? item.optionGroups.find((g) => g.required);
+        const group =
+          item.optionGroups.find((g) => e.message.includes(g.name) && g.required) ??
+          item.optionGroups.find((g) => g.required);
         if (group) {
-          setErrorGroup({ key: group.key, message: group.type === 'single' ? `Please choose a ${group.name.toLowerCase()}` : e.message });
+          setErrorGroup({
+            key: group.key,
+            message:
+              group.type === 'single' ? `Please choose a ${group.name.toLowerCase()}` : e.message,
+          });
           groupRefs.current[group.key]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          groupRefs.current[group.key]?.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true });
+          groupRefs.current[group.key]
+            ?.querySelector<HTMLInputElement>('input')
+            ?.focus({ preventScroll: true });
         } else {
           toast.error(e.message);
         }
@@ -122,7 +149,12 @@ function SheetBody({ item, editing, onDone }: { item: MenuItem; editing?: CartLi
   return (
     <div className="flex min-h-0 flex-1 flex-col md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
       <div className="relative h-52 shrink-0 sm:h-64 md:h-auto">
-        <MenuImage item={item} sizes="(min-width: 768px) 460px, 100vw" className="h-full w-full" eager />
+        <MenuImage
+          item={item}
+          sizes="(min-width: 768px) 460px, 100vw"
+          className="h-full w-full"
+          eager
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-ink-800 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-ink-800/30" />
         <button
           type="button"
@@ -137,7 +169,9 @@ function SheetBody({ item, editing, onDone }: { item: MenuItem; editing?: CartLi
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-6 pt-2 sm:px-7 md:pt-7">
           <div aria-hidden className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/20 md:hidden" />
-          <p className="font-display text-2xl font-semibold leading-tight sm:text-3xl">{item.name}</p>
+          <p className="font-display text-2xl font-semibold leading-tight sm:text-3xl">
+            {item.name}
+          </p>
           <p className="mt-1 font-display text-lg text-ghana-gold">{formatMoney(item.basePrice)}</p>
           <p className="mt-3 text-sm text-cream/70">{item.description}</p>
 
@@ -149,13 +183,20 @@ function SheetBody({ item, editing, onDone }: { item: MenuItem; editing?: CartLi
                 ref={(el) => {
                   groupRefs.current[group.key] = el;
                 }}
-                className={cn('mt-7 rounded-2xl', err && 'ring-2 ring-ghana-red ring-offset-8 ring-offset-ink-800')}
+                className={cn(
+                  'mt-7 rounded-2xl',
+                  err && 'ring-2 ring-ghana-red ring-offset-8 ring-offset-ink-800',
+                )}
                 aria-describedby={err ? `${group.key}-err` : undefined}
               >
                 <legend className="sr-only">{group.name}</legend>
                 <GroupHeader group={group} error={err} />
                 {err && (
-                  <p id={`${group.key}-err`} role="alert" className="mb-3 text-sm font-semibold text-ghana-red-300">
+                  <p
+                    id={`${group.key}-err`}
+                    role="alert"
+                    className="mb-3 text-sm font-semibold text-ghana-red-300"
+                  >
                     {err}
                   </p>
                 )}
@@ -163,10 +204,18 @@ function SheetBody({ item, editing, onDone }: { item: MenuItem; editing?: CartLi
                 {group.type === 'quantity' && (
                   <ul className="divide-y divide-white/10 rounded-2xl bg-white/[0.04] ring-1 ring-white/10">
                     {group.options.map((o) => (
-                      <li key={o.key} className={cn('flex items-center justify-between gap-3 px-4 py-3', !o.isAvailable && 'opacity-40')}>
+                      <li
+                        key={o.key}
+                        className={cn(
+                          'flex items-center justify-between gap-3 px-4 py-3',
+                          !o.isAvailable && 'opacity-40',
+                        )}
+                      >
                         <div>
                           <p className="text-sm font-medium">{o.name}</p>
-                          <p className="text-xs text-cream/60">{o.isAvailable ? priceTag(o.price) : 'Sold out'}</p>
+                          <p className="text-xs text-cream/60">
+                            {o.isAvailable ? priceTag(o.price) : 'Sold out'}
+                          </p>
                         </div>
                         <Stepper
                           size="sm"
@@ -190,7 +239,9 @@ function SheetBody({ item, editing, onDone }: { item: MenuItem; editing?: CartLi
                           key={o.key}
                           className={cn(
                             'relative flex cursor-pointer items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium ring-1 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ghana-gold',
-                            checked ? 'bg-ghana-gold/15 ring-ghana-gold' : 'bg-white/[0.04] ring-white/10 hover:ring-white/30',
+                            checked
+                              ? 'bg-ghana-gold/15 ring-ghana-gold'
+                              : 'bg-white/[0.04] ring-white/10 hover:ring-white/30',
                             !o.isAvailable && 'cursor-not-allowed opacity-40',
                           )}
                         >
@@ -202,13 +253,22 @@ function SheetBody({ item, editing, onDone }: { item: MenuItem; editing?: CartLi
                             disabled={!o.isAvailable}
                             onChange={() => pickSingle(group.key, o.key)}
                           />
-                          <span className={cn('grid h-5 w-5 shrink-0 place-items-center rounded-full ring-2', checked ? 'bg-ghana-gold ring-ghana-gold' : 'ring-white/30')}>
-                            {checked && <Check size={12} strokeWidth={3} className="text-ink" aria-hidden />}
+                          <span
+                            className={cn(
+                              'grid h-5 w-5 shrink-0 place-items-center rounded-full ring-2',
+                              checked ? 'bg-ghana-gold ring-ghana-gold' : 'ring-white/30',
+                            )}
+                          >
+                            {checked && (
+                              <Check size={12} strokeWidth={3} className="text-ink" aria-hidden />
+                            )}
                           </span>
                           <span className="flex-1">
                             {o.name}
                             {(o.price > 0 || !o.isAvailable) && (
-                              <span className="block text-xs text-cream/60">{o.isAvailable ? priceTag(o.price) : 'Sold out'}</span>
+                              <span className="block text-xs text-cream/60">
+                                {o.isAvailable ? priceTag(o.price) : 'Sold out'}
+                              </span>
                             )}
                           </span>
                         </label>
@@ -223,10 +283,17 @@ function SheetBody({ item, editing, onDone }: { item: MenuItem; editing?: CartLi
                       const on = !!sel[group.key]?.[o.key];
                       return (
                         <li key={o.key}>
-                          <label className={cn('flex cursor-pointer items-center justify-between gap-3 rounded-2xl bg-white/[0.04] px-4 py-3 ring-1 ring-white/10', !o.isAvailable && 'cursor-not-allowed opacity-40')}>
+                          <label
+                            className={cn(
+                              'flex cursor-pointer items-center justify-between gap-3 rounded-2xl bg-white/[0.04] px-4 py-3 ring-1 ring-white/10',
+                              !o.isAvailable && 'cursor-not-allowed opacity-40',
+                            )}
+                          >
                             <span>
                               <span className="block text-sm font-medium">{o.name}</span>
-                              <span className="block text-xs text-cream/60">{o.isAvailable ? priceTag(o.price) : 'Sold out'}</span>
+                              <span className="block text-xs text-cream/60">
+                                {o.isAvailable ? priceTag(o.price) : 'Sold out'}
+                              </span>
                             </span>
                             <input
                               type="checkbox"
@@ -244,7 +311,12 @@ function SheetBody({ item, editing, onDone }: { item: MenuItem; editing?: CartLi
                                 on ? 'bg-ghana-green-400' : 'bg-white/20',
                               )}
                             >
-                              <span className={cn('absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all', on ? 'left-6' : 'left-1')} />
+                              <span
+                                className={cn(
+                                  'absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all',
+                                  on ? 'left-6' : 'left-1',
+                                )}
+                              />
                             </span>
                           </label>
                         </li>
@@ -258,7 +330,8 @@ function SheetBody({ item, editing, onDone }: { item: MenuItem; editing?: CartLi
 
           <div className="mt-7">
             <label htmlFor="item-notes" className="font-display text-lg font-semibold">
-              Special instructions <span className="text-sm font-normal text-cream/50">(optional)</span>
+              Special instructions{' '}
+              <span className="text-sm font-normal text-cream/50">(optional)</span>
             </label>
             <textarea
               id="item-notes"
@@ -273,7 +346,13 @@ function SheetBody({ item, editing, onDone }: { item: MenuItem; editing?: CartLi
         </div>
 
         <div className="flex items-center gap-3 border-t border-white/10 bg-ink-800 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-7">
-          <Stepper label="Quantity" value={quantity} min={1} max={MAX_LINE_QUANTITY} onChange={setQuantity} />
+          <Stepper
+            label="Quantity"
+            value={quantity}
+            min={1}
+            max={MAX_LINE_QUANTITY}
+            onChange={setQuantity}
+          />
           <button
             type="button"
             onClick={submit}
@@ -298,8 +377,22 @@ export function ItemSheet() {
   const item = sheet ? menu?.find((m) => m.slug === sheet.slug) : undefined;
 
   return (
-    <Dialog open={!!sheet && !!item} onClose={closeItem} title={item ? `Customise ${item.name}` : 'Customise'} hideTitle variant="sheet" tone="dark">
-      {item && <SheetBody key={`${item.slug}-${sheet?.editing?.key ?? 'new'}`} item={item} editing={sheet?.editing} onDone={closeItem} />}
+    <Dialog
+      open={!!sheet && !!item}
+      onClose={closeItem}
+      title={item ? `Customise ${item.name}` : 'Customise'}
+      hideTitle
+      variant="sheet"
+      tone="dark"
+    >
+      {item && (
+        <SheetBody
+          key={`${item.slug}-${sheet?.editing?.key ?? 'new'}`}
+          item={item}
+          editing={sheet?.editing}
+          onDone={closeItem}
+        />
+      )}
     </Dialog>
   );
 }

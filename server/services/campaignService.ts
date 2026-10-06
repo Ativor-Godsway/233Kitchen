@@ -18,13 +18,19 @@ const eligible = { marketingConsent: true, unsubscribedAt: null };
  * ignores marketing consent; every other segment is marketing and is filtered
  * to opted-in customers.
  */
-export async function resolveAudience(input: Pick<CampaignInput, 'segment' | 'tag' | 'customerIds'>, now = new Date()) {
+export async function resolveAudience(
+  input: Pick<CampaignInput, 'segment' | 'tag' | 'customerIds'>,
+  now = new Date(),
+) {
   const ids = input.customerIds.map((id) => new Types.ObjectId(id));
   let filter: Record<string, unknown>;
   switch (input.segment) {
     case 'single':
       if (ids.length !== 1) throw new HttpError(400, 'Choose exactly one customer', 'VALIDATION');
-      return { transactional: true, customers: await CustomerModel.find({ _id: ids[0] }).lean<CustomerRow[]>() };
+      return {
+        transactional: true,
+        customers: await CustomerModel.find({ _id: ids[0] }).lean<CustomerRow[]>(),
+      };
     case 'selected':
       filter = { ...eligible, _id: { $in: ids } };
       break;
@@ -41,10 +47,18 @@ export async function resolveAudience(input: Pick<CampaignInput, 'segment' | 'ta
     default:
       filter = { ...eligible };
   }
-  return { transactional: false, customers: await CustomerModel.find(filter).sort({ lastOrderAt: -1 }).lean<CustomerRow[]>() };
+  return {
+    transactional: false,
+    customers: await CustomerModel.find(filter).sort({ lastOrderAt: -1 }).lean<CustomerRow[]>(),
+  };
 }
 
-export function renderFor(input: CampaignInput, s: Settings, c: Pick<CustomerRow, 'name' | 'unsubscribeToken'> | null, transactional: boolean) {
+export function renderFor(
+  input: CampaignInput,
+  s: Settings,
+  c: Pick<CustomerRow, 'name' | 'unsubscribeToken'> | null,
+  transactional: boolean,
+) {
   return messageEmail(input, s, {
     firstName: c?.name.split(' ')[0],
     unsubscribeToken: c?.unsubscribeToken,
@@ -53,14 +67,20 @@ export function renderFor(input: CampaignInput, s: Settings, c: Pick<CustomerRow
 }
 
 export async function sendTest(input: CampaignInput, s: Settings, to: string) {
-  const content = renderFor(input, s, { name: 'Ama Mensah', unsubscribeToken: 'test-preview-token' }, input.segment === 'single');
+  const content = renderFor(
+    input,
+    s,
+    { name: 'Ama Mensah', unsubscribeToken: 'test-preview-token' },
+    input.segment === 'single',
+  );
   return sendEmail({ type: 'test', to, ...content, subject: `[TEST] ${content.subject}` });
 }
 
 /** Sends a campaign with limited concurrency and records the outcome. */
 export async function sendCampaign(input: CampaignInput, s: Settings) {
   const { transactional, customers } = await resolveAudience(input);
-  if (!customers.length) throw new HttpError(400, 'No eligible recipients for this audience', 'EMPTY_AUDIENCE');
+  if (!customers.length)
+    throw new HttpError(400, 'No eligible recipients for this audience', 'EMPTY_AUDIENCE');
 
   const campaign = await CampaignModel.create({
     subject: input.subject,
@@ -88,14 +108,25 @@ export async function sendCampaign(input: CampaignInput, s: Settings) {
             'List-Unsubscribe': `<${env.siteUrl}/api/unsubscribe/one-click?token=${encodeURIComponent(c.unsubscribeToken)}>, <${unsubscribeUrl(c.unsubscribeToken)}>`,
             'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
           };
-      const r = await sendEmail({ type: transactional ? 'direct' : 'marketing', to: c.email, ...content, headers, campaignId: campaign._id });
+      const r = await sendEmail({
+        type: transactional ? 'direct' : 'marketing',
+        to: c.email,
+        ...content,
+        headers,
+        campaignId: campaign._id,
+      });
       if (r.ok) sent++;
       else failed++;
     }
   };
   await Promise.all(Array.from({ length: Math.min(5, customers.length) }, worker));
 
-  campaign.set({ sentCount: sent, failedCount: failed, sentAt: new Date(), status: failed === 0 ? 'sent' : sent === 0 ? 'failed' : 'partial' });
+  campaign.set({
+    sentCount: sent,
+    failedCount: failed,
+    sentAt: new Date(),
+    status: failed === 0 ? 'sent' : sent === 0 ? 'failed' : 'partial',
+  });
   await campaign.save();
   return toCampaignDTO(campaign.toObject());
 }

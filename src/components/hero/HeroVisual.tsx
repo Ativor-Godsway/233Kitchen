@@ -6,7 +6,10 @@ import { srcSetFor } from '../../lib/images';
  * Isolated hero visual. It only receives scroll progress (0 → 1), so it can be
  * swapped for a 3D/Spline scene later without touching the rest of the hero.
  */
-const MAIN = { src: '/images/fried-rice-chicken-960.webp', alt: 'Loaded fried rice with grilled chicken, plantain and coleslaw' };
+const MAIN = {
+  src: '/images/fried-rice-chicken-960.webp',
+  alt: 'Loaded fried rice with grilled chicken, plantain and coleslaw',
+};
 const FAN = [
   { src: '/images/banku-tilapia-960.webp', alt: 'Banku with grilled tilapia' },
   { src: '/images/waakye-meat-960.webp', alt: 'Loaded Hajia waakye' },
@@ -14,7 +17,9 @@ const FAN = [
 ];
 
 function useIsWide() {
-  const [wide, setWide] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches);
+  const [wide, setWide] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches,
+  );
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)');
     const on = () => setWide(mq.matches);
@@ -24,9 +29,21 @@ function useIsWide() {
   return wide;
 }
 
-function Card({ src, alt, eager, className }: { src: string; alt: string; eager?: boolean; className?: string }) {
+function Card({
+  src,
+  alt,
+  eager,
+  className,
+}: {
+  src: string;
+  alt: string;
+  eager?: boolean;
+  className?: string;
+}) {
   return (
-    <div className={`h-full w-full overflow-hidden rounded-[28px] bg-ink-700 shadow-lift ring-1 ring-white/10 ${className ?? ''}`}>
+    <div
+      className={`h-full w-full overflow-hidden rounded-[28px] bg-ink-700 shadow-lift ring-1 ring-white/10 ${className ?? ''}`}
+    >
       <img
         src={src}
         srcSet={srcSetFor(src)}
@@ -68,26 +85,42 @@ export function HeroVisual({ progress }: { progress: MotionValue<number> }) {
   const glow = useTransform(progress, [0.1, 0.5], [0.25, 1]);
 
   return (
-    <div className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden={false}>
+    <div
+      className="pointer-events-none absolute inset-0 flex items-center justify-center"
+      aria-hidden={false}
+    >
       <motion.div
         aria-hidden
         className="absolute h-[70vmin] w-[70vmin] rounded-full"
         style={{
           opacity: glow,
-          background: 'radial-gradient(closest-side, rgba(225,161,12,.28), rgba(200,16,16,.10) 55%, transparent)',
+          background:
+            'radial-gradient(closest-side, rgba(225,161,12,.28), rgba(200,16,16,.10) 55%, transparent)',
         }}
       />
       <div className="relative aspect-[3/4] w-[min(48vw,300px)] md:w-[min(26vw,300px)]">
-        <motion.div className="absolute inset-0" style={{ y: backY, scale: backScale, opacity: fanOpacity }}>
+        <motion.div
+          className="absolute inset-0"
+          style={{ y: backY, scale: backScale, opacity: fanOpacity }}
+        >
           <Card {...FAN[2]} />
         </motion.div>
-        <motion.div className="absolute inset-0" style={{ x: leftX, y: sideY, rotate: sideRotL, scale: sideScale, opacity: fanOpacity }}>
+        <motion.div
+          className="absolute inset-0"
+          style={{ x: leftX, y: sideY, rotate: sideRotL, scale: sideScale, opacity: fanOpacity }}
+        >
           <Card {...FAN[0]} />
         </motion.div>
-        <motion.div className="absolute inset-0" style={{ x: rightX, y: sideY, rotate: sideRotR, scale: sideScale, opacity: fanOpacity }}>
+        <motion.div
+          className="absolute inset-0"
+          style={{ x: rightX, y: sideY, rotate: sideRotR, scale: sideScale, opacity: fanOpacity }}
+        >
           <Card {...FAN[1]} />
         </motion.div>
-        <motion.div className="absolute inset-0" style={{ y: mainY, scale: mainScale, rotate: mainRotate }}>
+        <motion.div
+          className="absolute inset-0"
+          style={{ y: mainY, scale: mainScale, rotate: mainRotate }}
+        >
           <Card {...MAIN} eager />
         </motion.div>
       </div>

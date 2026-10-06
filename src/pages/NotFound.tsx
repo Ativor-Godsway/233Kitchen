@@ -13,7 +13,10 @@ export default function NotFound() {
         <KenteBand height={6} className="mx-auto mt-4 max-w-[200px] rounded-full" />
         <h1 className="mt-6 font-display text-3xl font-semibold">This page isn’t on the menu.</h1>
         <p className="mt-2 text-cream/60">The link may be old, or the page has moved.</p>
-        <Link to="/" className="mt-8 inline-block rounded-full bg-cream px-6 py-3 font-semibold text-ink hover:bg-white">
+        <Link
+          to="/"
+          className="mt-8 inline-block rounded-full bg-cream px-6 py-3 font-semibold text-ink hover:bg-white"
+        >
           Back to the kitchen
         </Link>
       </div>

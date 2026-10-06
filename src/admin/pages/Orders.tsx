@@ -6,7 +6,17 @@ import { api } from '../../lib/api';
 import { formatMoney } from '../../../shared/pricing';
 import { PAYMENT_LABELS, PAYMENT_STATUSES, STATUS_LABELS } from '../../../shared/constants';
 import type { OrderStatus, OrdersListResponse } from '../../../shared/types';
-import { Card, EmptyState, ErrorState, Input, PageHeader, PaymentPill, Select, SkeletonRows, StatusPill } from '../ui';
+import {
+  Card,
+  EmptyState,
+  ErrorState,
+  Input,
+  PageHeader,
+  PaymentPill,
+  Select,
+  SkeletonRows,
+  StatusPill,
+} from '../ui';
 import { fmtDateTime, usePickupDates } from '../api';
 import { OrderDrawer } from './OrderDrawer';
 import { cn } from '../../lib/cn';
@@ -54,7 +64,13 @@ export default function Orders() {
     document.title = 'Orders · +233 Kitchen Admin';
   }, []);
 
-  const qs = new URLSearchParams({ status, paymentStatus, page: String(page), pageSize: '25', sort: 'newest' });
+  const qs = new URLSearchParams({
+    status,
+    paymentStatus,
+    page: String(page),
+    pageSize: '25',
+    sort: 'newest',
+  });
   if (pickupDate) qs.set('pickupDate', pickupDate);
   if (params.get('q')) qs.set('q', params.get('q')!);
 
@@ -70,16 +86,26 @@ export default function Orders() {
     id === 'all'
       ? Object.values(counts).reduce((a, b) => a + (b ?? 0), 0)
       : id === 'active'
-        ? (['new', 'confirmed', 'preparing', 'ready'] as OrderStatus[]).reduce((a, s) => a + (counts[s] ?? 0), 0)
+        ? (['new', 'confirmed', 'preparing', 'ready'] as OrderStatus[]).reduce(
+            (a, s) => a + (counts[s] ?? 0),
+            0,
+          )
         : (counts[id as OrderStatus] ?? 0);
   const pages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
 
   return (
     <>
-      <PageHeader title="Orders" sub="Search, filter and update pre-orders. New orders appear automatically." />
+      <PageHeader
+        title="Orders"
+        sub="Search, filter and update pre-orders. New orders appear automatically."
+      />
 
       <div className="-mx-4 mb-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-        <div className="inline-flex gap-1 rounded-lg border border-neutral-200 bg-white p-1" role="tablist" aria-label="Order status">
+        <div
+          className="inline-flex gap-1 rounded-lg border border-neutral-200 bg-white p-1"
+          role="tablist"
+          aria-label="Order status"
+        >
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -89,11 +115,22 @@ export default function Orders() {
               onClick={() => update({ status: t.id })}
               className={cn(
                 'flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition',
-                status === t.id ? 'bg-neutral-900 text-white' : 'text-neutral-600 hover:bg-neutral-100',
+                status === t.id
+                  ? 'bg-neutral-900 text-white'
+                  : 'text-neutral-600 hover:bg-neutral-100',
               )}
             >
               {t.label}
-              <span className={cn('rounded px-1 text-xs tabular-nums', status === t.id ? 'bg-white/20' : t.id === 'new' && countFor('new') ? 'bg-ghana-red text-white' : 'bg-neutral-100 text-neutral-500')}>
+              <span
+                className={cn(
+                  'rounded px-1 text-xs tabular-nums',
+                  status === t.id
+                    ? 'bg-white/20'
+                    : t.id === 'new' && countFor('new')
+                      ? 'bg-ghana-red text-white'
+                      : 'bg-neutral-100 text-neutral-500',
+                )}
+              >
                 {countFor(t.id)}
               </span>
             </button>
@@ -103,10 +140,24 @@ export default function Orders() {
 
       <div className="mb-4 grid gap-2 sm:grid-cols-[1fr_200px_180px]">
         <div className="relative">
-          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" aria-hidden />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search name, phone or order #" className="pl-9" aria-label="Search orders" />
+          <Search
+            size={16}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+            aria-hidden
+          />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search name, phone or order #"
+            className="pl-9"
+            aria-label="Search orders"
+          />
         </div>
-        <Select value={pickupDate} onChange={(e) => update({ date: e.target.value })} aria-label="Pickup date">
+        <Select
+          value={pickupDate}
+          onChange={(e) => update({ date: e.target.value })}
+          aria-label="Pickup date"
+        >
           <option value="">All pickup dates</option>
           {dates.data?.dates.map((d) => (
             <option key={d.date} value={d.date}>
@@ -114,7 +165,11 @@ export default function Orders() {
             </option>
           ))}
         </Select>
-        <Select value={paymentStatus} onChange={(e) => update({ payment: e.target.value })} aria-label="Payment status">
+        <Select
+          value={paymentStatus}
+          onChange={(e) => update({ payment: e.target.value })}
+          aria-label="Payment status"
+        >
           <option value="all">Any payment</option>
           {PAYMENT_STATUSES.map((p) => (
             <option key={p} value={p}>
@@ -126,11 +181,24 @@ export default function Orders() {
 
       {isError && <ErrorState message="Could not load orders." onRetry={refetch} />}
 
-      <Card className={cn('overflow-hidden transition-opacity', isFetching && !isLoading && 'opacity-70')}>
+      <Card
+        className={cn(
+          'overflow-hidden transition-opacity',
+          isFetching && !isLoading && 'opacity-70',
+        )}
+      >
         {isLoading ? (
           <SkeletonRows rows={6} />
         ) : !data || data.items.length === 0 ? (
-          <EmptyState icon={<ShoppingBag size={20} />} title="No orders here" body={params.get('q') ? 'Try a different search.' : 'Orders matching these filters will show up here.'} />
+          <EmptyState
+            icon={<ShoppingBag size={20} />}
+            title="No orders here"
+            body={
+              params.get('q')
+                ? 'Try a different search.'
+                : 'Orders matching these filters will show up here.'
+            }
+          />
         ) : (
           <>
             {/* Desktop table */}
@@ -151,8 +219,13 @@ export default function Orders() {
                     key={o.id}
                     tabIndex={0}
                     onClick={() => update({ order: o.id, page: String(page) })}
-                    onKeyDown={(e) => e.key === 'Enter' && update({ order: o.id, page: String(page) })}
-                    className={cn('cursor-pointer hover:bg-neutral-50 focus:bg-neutral-50 focus:outline-none', o.status === 'new' && 'bg-ghana-red-50/40')}
+                    onKeyDown={(e) =>
+                      e.key === 'Enter' && update({ order: o.id, page: String(page) })
+                    }
+                    className={cn(
+                      'cursor-pointer hover:bg-neutral-50 focus:bg-neutral-50 focus:outline-none',
+                      o.status === 'new' && 'bg-ghana-red-50/40',
+                    )}
                   >
                     <td className="px-4 py-3">
                       <p className="font-semibold">{o.number}</p>
@@ -169,7 +242,9 @@ export default function Orders() {
                         {o.fulfilment === 'uber' && <Car size={12} aria-label="Uber courier" />}
                       </p>
                     </td>
-                    <td className="px-4 py-3 text-right font-medium tabular-nums">{formatMoney(o.total)}</td>
+                    <td className="px-4 py-3 text-right font-medium tabular-nums">
+                      {formatMoney(o.total)}
+                    </td>
                     <td className="px-4 py-3">
                       <StatusPill status={o.status} />
                     </td>
@@ -185,10 +260,18 @@ export default function Orders() {
             <ul className="divide-y divide-neutral-100 md:hidden">
               {data.items.map((o) => (
                 <li key={o.id}>
-                  <button type="button" onClick={() => update({ order: o.id, page: String(page) })} className={cn('w-full px-4 py-3.5 text-left', o.status === 'new' && 'bg-ghana-red-50/40')}>
+                  <button
+                    type="button"
+                    onClick={() => update({ order: o.id, page: String(page) })}
+                    className={cn(
+                      'w-full px-4 py-3.5 text-left',
+                      o.status === 'new' && 'bg-ghana-red-50/40',
+                    )}
+                  >
                     <div className="flex items-center justify-between gap-2">
                       <p className="font-semibold">
-                        {o.number} <span className="font-normal text-neutral-500">· {o.customer.name}</span>
+                        {o.number}{' '}
+                        <span className="font-normal text-neutral-600">· {o.customer.name}</span>
                       </p>
                       <p className="font-semibold tabular-nums">{formatMoney(o.total)}</p>
                     </div>
@@ -211,13 +294,26 @@ export default function Orders() {
       {data && data.total > data.pageSize && (
         <div className="mt-4 flex items-center justify-between text-sm text-neutral-600">
           <p>
-            {(page - 1) * data.pageSize + 1}–{Math.min(page * data.pageSize, data.total)} of {data.total}
+            {(page - 1) * data.pageSize + 1}–{Math.min(page * data.pageSize, data.total)} of{' '}
+            {data.total}
           </p>
           <div className="flex gap-1">
-            <button type="button" disabled={page <= 1} onClick={() => update({ page: String(page - 1) })} className="grid h-9 w-9 place-items-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40" aria-label="Previous page">
+            <button
+              type="button"
+              disabled={page <= 1}
+              onClick={() => update({ page: String(page - 1) })}
+              className="grid h-9 w-9 place-items-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40"
+              aria-label="Previous page"
+            >
               <ChevronLeft size={16} aria-hidden />
             </button>
-            <button type="button" disabled={page >= pages} onClick={() => update({ page: String(page + 1) })} className="grid h-9 w-9 place-items-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40" aria-label="Next page">
+            <button
+              type="button"
+              disabled={page >= pages}
+              onClick={() => update({ page: String(page + 1) })}
+              className="grid h-9 w-9 place-items-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40"
+              aria-label="Next page"
+            >
               <ChevronRight size={16} aria-hidden />
             </button>
           </div>

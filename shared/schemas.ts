@@ -92,7 +92,10 @@ const optionGroupSchema = z
     options: z.array(optionSchema).min(1).max(30),
   })
   .refine((g) => g.min <= g.max || g.type === 'quantity', 'min must be ≤ max')
-  .refine((g) => new Set(g.options.map((o) => o.key)).size === g.options.length, 'Option keys must be unique');
+  .refine(
+    (g) => new Set(g.options.map((o) => o.key)).size === g.options.length,
+    'Option keys must be unique',
+  );
 
 export const menuItemSchema = z.object({
   name: z.string().trim().min(2).max(80),
@@ -104,7 +107,10 @@ export const menuItemSchema = z.object({
     .string()
     .trim()
     .max(500)
-    .refine((v) => v === '' || v.startsWith('/') || /^https:\/\//.test(v), 'Use an https:// URL or /images/… path')
+    .refine(
+      (v) => v === '' || v.startsWith('/') || /^https:\/\//.test(v),
+      'Use an https:// URL or /images/… path',
+    )
     .nullable(),
   isAvailable: z.boolean(),
   sortOrder: z.number().int().min(0).max(1000),
@@ -157,7 +163,12 @@ export const settingsSchema = z.object({
   pickupAddressFull: z.string().trim().min(1).max(300),
   businessAddressLine: z.string().trim().min(1).max(200),
   businessPhone: z.string().trim().min(7).max(30),
-  social: z.object({ instagram: optionalUrl, whatsapp: optionalUrl, tiktok: optionalUrl, facebook: optionalUrl }),
+  social: z.object({
+    instagram: optionalUrl,
+    whatsapp: optionalUrl,
+    tiktok: optionalUrl,
+    facebook: optionalUrl,
+  }),
   notifyOnStatus: z.array(z.enum(ORDER_STATUSES as [string, ...string[]])),
 });
 
@@ -190,6 +201,9 @@ export const campaignSchema = z.object({
     .default(''),
   segment: z.enum(['all_opted_in', 'ordered_last_30', 'lapsed_60', 'tag', 'selected', 'single']),
   tag: z.string().trim().max(30).default(''),
-  customerIds: z.array(z.string().regex(/^[a-f0-9]{24}$/)).max(5000).default([]),
+  customerIds: z
+    .array(z.string().regex(/^[a-f0-9]{24}$/))
+    .max(5000)
+    .default([]),
 });
 export type CampaignInput = z.infer<typeof campaignSchema>;

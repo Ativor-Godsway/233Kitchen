@@ -45,7 +45,9 @@ export const MenuItemModel =
   (mongoose.models.MenuItem as mongoose.Model<InferSchemaType<typeof menuItemSchema>>) ||
   mongoose.model('MenuItem', menuItemSchema);
 
-export function toMenuItem(doc: MenuItemDoc | (InferSchemaType<typeof menuItemSchema> & { _id: unknown })): MenuItem {
+export function toMenuItem(
+  doc: MenuItemDoc | (InferSchemaType<typeof menuItemSchema> & { _id: unknown }),
+): MenuItem {
   const d = doc as InferSchemaType<typeof menuItemSchema> & { _id: { toString(): string } };
   return {
     id: d._id.toString(),

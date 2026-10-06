@@ -2,8 +2,13 @@ import { windowRange } from '../../shared/schedule.js';
 import type { OrderDTO, Settings } from '../../shared/types.js';
 import { env } from '../env.js';
 
-const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-const escIcs = (s: string) => s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+const fmt = (d: Date) =>
+  d
+    .toISOString()
+    .replace(/[-:]/g, '')
+    .replace(/\.\d{3}/, '');
+const escIcs = (s: string) =>
+  s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
 
 /** Folds lines at 75 octets as required by RFC 5545. */
 function fold(line: string): string {

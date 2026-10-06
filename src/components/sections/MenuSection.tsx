@@ -15,24 +15,42 @@ export function MenuSection() {
 
   const groups = useMemo(() => {
     const items = menu ?? [];
-    const cats = (Object.keys(CATEGORY_LABELS) as MenuItem['category'][]).filter((c) => filter === 'all' || c === filter);
-    return cats.map((c) => ({ category: c, label: CATEGORY_LABELS[c], items: items.filter((i) => i.category === c) })).filter((g) => g.items.length);
+    const cats = (Object.keys(CATEGORY_LABELS) as MenuItem['category'][]).filter(
+      (c) => filter === 'all' || c === filter,
+    );
+    return cats
+      .map((c) => ({
+        category: c,
+        label: CATEGORY_LABELS[c],
+        items: items.filter((i) => i.category === c),
+      }))
+      .filter((g) => g.items.length);
   }, [menu, filter]);
 
   const chips: Array<{ id: Filter; label: string }> = [
     { id: 'all', label: 'All' },
-    ...(Object.entries(CATEGORY_LABELS) as Array<[MenuItem['category'], string]>).map(([id, label]) => ({ id, label })),
+    ...(Object.entries(CATEGORY_LABELS) as Array<[MenuItem['category'], string]>).map(
+      ([id, label]) => ({ id, label }),
+    ),
   ];
 
   return (
     <section id="menu" className="scroll-mt-16 bg-cream py-24 text-ink sm:py-32">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <SectionHeading tone="light" eyebrow="This week’s menu" title="Made to order, boxed with care." />
+          <SectionHeading
+            tone="light"
+            eyebrow="This week’s menu"
+            title="Made to order, boxed with care."
+          />
           <CutoffNotice tone="light" />
         </div>
 
-        <div className="sticky top-16 z-20 -mx-4 mt-10 bg-cream/90 px-4 py-3 backdrop-blur sm:mx-0 sm:px-0" role="tablist" aria-label="Menu categories">
+        <div
+          className="sticky top-16 z-20 -mx-4 mt-10 bg-cream/90 px-4 py-3 backdrop-blur sm:mx-0 sm:px-0"
+          role="tablist"
+          aria-label="Menu categories"
+        >
           <div className="flex gap-2 overflow-x-auto">
             {chips.map((c) => (
               <button
@@ -43,7 +61,9 @@ export function MenuSection() {
                 onClick={() => setFilter(c.id)}
                 className={cn(
                   'shrink-0 rounded-full px-5 py-2 text-sm font-semibold transition',
-                  filter === c.id ? 'bg-ink text-cream' : 'bg-white text-ink ring-1 ring-ink/10 hover:ring-ink/30',
+                  filter === c.id
+                    ? 'bg-ink text-cream'
+                    : 'bg-white text-ink ring-1 ring-ink/10 hover:ring-ink/30',
                 )}
               >
                 {c.label}
@@ -55,7 +75,11 @@ export function MenuSection() {
         {isError && (
           <div className="mt-10 rounded-2xl bg-white p-6 text-center ring-1 ring-ink/10">
             <p className="font-semibold">We couldn’t load the menu.</p>
-            <button type="button" onClick={() => refetch()} className="mt-3 rounded-full bg-ink px-5 py-2 text-sm font-semibold text-cream">
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="mt-3 rounded-full bg-ink px-5 py-2 text-sm font-semibold text-cream"
+            >
               Try again
             </button>
           </div>

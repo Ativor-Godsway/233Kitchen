@@ -3,7 +3,10 @@ import { env } from '../env.js';
 
 /** Signed, unguessable token that lets a customer view their own order page. */
 export function orderToken(number: string): string {
-  return createHmac('sha256', env.jwtSecret).update(`order:${number}`).digest('base64url').slice(0, 32);
+  return createHmac('sha256', env.jwtSecret)
+    .update(`order:${number}`)
+    .digest('base64url')
+    .slice(0, 32);
 }
 
 export function verifyOrderToken(number: string, token: string): boolean {

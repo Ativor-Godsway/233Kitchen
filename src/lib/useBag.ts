@@ -23,7 +23,12 @@ export function useBag() {
       try {
         return { line, item, priced: priceLine(item, line), problem: null };
       } catch (e) {
-        return { line, item, priced: null, problem: e instanceof PricingError ? e.message : 'Unavailable' };
+        return {
+          line,
+          item,
+          priced: null,
+          problem: e instanceof PricingError ? e.message : 'Unavailable',
+        };
       }
     });
     const subtotal = items.reduce((n, b) => n + (b.priced?.lineTotal ?? 0), 0);

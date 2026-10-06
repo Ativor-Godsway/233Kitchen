@@ -24,16 +24,31 @@ const RANGES: Array<{ id: RangeKey; label: string }> = [
   { id: 'custom', label: 'Custom' },
 ];
 
-function Kpi({ label, value, sub, href }: { label: string; value: ReactNode; sub?: ReactNode; href?: string }) {
+function Kpi({
+  label,
+  value,
+  sub,
+  href,
+}: {
+  label: string;
+  value: ReactNode;
+  sub?: ReactNode;
+  href?: string;
+}) {
   const body = (
     <>
       <p className="text-xs font-medium text-neutral-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-neutral-900">{value}</p>
+      <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-neutral-900">
+        {value}
+      </p>
       {sub && <p className="mt-0.5 text-xs text-neutral-500">{sub}</p>}
     </>
   );
   return href ? (
-    <Link to={href} className="rounded-xl border border-neutral-200 bg-white p-4 shadow-card transition hover:border-neutral-300">
+    <Link
+      to={href}
+      className="rounded-xl border border-neutral-200 bg-white p-4 shadow-card transition hover:border-neutral-300"
+    >
       {body}
     </Link>
   ) : (
@@ -46,7 +61,19 @@ interface Row {
   value: number;
 }
 
-function ChartTooltip({ active, payload, label, money, unit }: { active?: boolean; payload?: Array<{ value: number }>; label?: string; money?: boolean; unit: string }) {
+function ChartTooltip({
+  active,
+  payload,
+  label,
+  money,
+  unit,
+}: {
+  active?: boolean;
+  payload?: Array<{ value: number }>;
+  label?: string;
+  money?: boolean;
+  unit: string;
+}) {
   if (!active || !payload?.length) return null;
   const v = payload[0].value;
   return (
@@ -61,7 +88,23 @@ function ChartTooltip({ active, payload, label, money, unit }: { active?: boolea
 }
 
 /** Card with a bar chart and an accessible table view toggle. */
-function ChartCard({ title, sub, rows, money, unit, horizontal, empty }: { title: string; sub?: string; rows: Row[]; money?: boolean; unit: string; horizontal?: boolean; empty: string }) {
+function ChartCard({
+  title,
+  sub,
+  rows,
+  money,
+  unit,
+  horizontal,
+  empty,
+}: {
+  title: string;
+  sub?: string;
+  rows: Row[];
+  money?: boolean;
+  unit: string;
+  horizontal?: boolean;
+  empty: string;
+}) {
   const [asTable, setAsTable] = useState(false);
   const hasData = rows.some((r) => r.value > 0);
   const height = horizontal ? Math.max(160, rows.length * 34 + 24) : 240;
@@ -106,23 +149,82 @@ function ChartCard({ title, sub, rows, money, unit, horizontal, empty }: { title
             </tbody>
           </table>
         ) : (
-          <div style={{ height }} role="img" aria-label={`${title}: ${rows.map((r) => `${r.label} ${fmt(r.value)}`).join(', ')}`}>
+          <div
+            style={{ height }}
+            role="img"
+            aria-label={`${title}: ${rows.map((r) => `${r.label} ${fmt(r.value)}`).join(', ')}`}
+          >
             <ResponsiveContainer width="100%" height="100%">
               {horizontal ? (
-                <BarChart data={rows} layout="vertical" margin={{ top: 0, right: 40, bottom: 0, left: 0 }} barCategoryGap={8}>
+                <BarChart
+                  data={rows}
+                  layout="vertical"
+                  margin={{ top: 0, right: 40, bottom: 0, left: 0 }}
+                  barCategoryGap={8}
+                >
                   <CartesianGrid horizontal={false} stroke={GRID} />
-                  <XAxis type="number" tick={TICK} axisLine={false} tickLine={false} allowDecimals={false} tickFormatter={fmt} />
-                  <YAxis type="category" dataKey="label" tick={TICK} axisLine={false} tickLine={false} width={190} />
-                  <Tooltip cursor={{ fill: '#F5F5F5' }} content={<ChartTooltip money={money} unit={unit} />} />
-                  <Bar isAnimationActive={false} dataKey="value" fill={MARK} radius={[0, 4, 4, 0]} maxBarSize={22} label={{ position: 'right', fill: '#404040', fontSize: 12, formatter: fmt }} />
+                  <XAxis
+                    type="number"
+                    tick={TICK}
+                    axisLine={false}
+                    tickLine={false}
+                    allowDecimals={false}
+                    tickFormatter={fmt}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="label"
+                    tick={TICK}
+                    axisLine={false}
+                    tickLine={false}
+                    width={190}
+                  />
+                  <Tooltip
+                    cursor={{ fill: '#F5F5F5' }}
+                    content={<ChartTooltip money={money} unit={unit} />}
+                  />
+                  <Bar
+                    isAnimationActive={false}
+                    dataKey="value"
+                    fill={MARK}
+                    radius={[0, 4, 4, 0]}
+                    maxBarSize={22}
+                    label={{ position: 'right', fill: '#404040', fontSize: 12, formatter: fmt }}
+                  />
                 </BarChart>
               ) : (
-                <BarChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: 0 }} barCategoryGap="28%">
+                <BarChart
+                  data={rows}
+                  margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+                  barCategoryGap="28%"
+                >
                   <CartesianGrid vertical={false} stroke={GRID} />
-                  <XAxis dataKey="label" tick={TICK} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-                  <YAxis tick={TICK} axisLine={false} tickLine={false} width={money ? 52 : 32} allowDecimals={false} tickFormatter={fmt} />
-                  <Tooltip cursor={{ fill: '#F5F5F5' }} content={<ChartTooltip money={money} unit={unit} />} />
-                  <Bar isAnimationActive={false} dataKey="value" fill={MARK} radius={[4, 4, 0, 0]} maxBarSize={28} />
+                  <XAxis
+                    dataKey="label"
+                    tick={TICK}
+                    axisLine={false}
+                    tickLine={false}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis
+                    tick={TICK}
+                    axisLine={false}
+                    tickLine={false}
+                    width={money ? 52 : 32}
+                    allowDecimals={false}
+                    tickFormatter={fmt}
+                  />
+                  <Tooltip
+                    cursor={{ fill: '#F5F5F5' }}
+                    content={<ChartTooltip money={money} unit={unit} />}
+                  />
+                  <Bar
+                    isAnimationActive={false}
+                    dataKey="value"
+                    fill={MARK}
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={28}
+                  />
                 </BarChart>
               )}
             </ResponsiveContainer>
@@ -157,10 +259,21 @@ export default function Dashboard() {
 
   return (
     <>
-      <PageHeader title="Dashboard" sub={data ? `${data.range.label} · by pickup date · revenue is estimated (orders are paid later)` : 'Overview of your orders'} />
+      <PageHeader
+        title="Dashboard"
+        sub={
+          data
+            ? `${data.range.label} · by pickup date · revenue is estimated (orders are paid later)`
+            : 'Overview of your orders'
+        }
+      />
 
       <div className="mb-6 flex flex-wrap items-center gap-2">
-        <div className="inline-flex rounded-lg border border-neutral-200 bg-white p-1" role="tablist" aria-label="Date range">
+        <div
+          className="inline-flex rounded-lg border border-neutral-200 bg-white p-1"
+          role="tablist"
+          aria-label="Date range"
+        >
           {RANGES.map((r) => (
             <button
               key={r.id}
@@ -168,7 +281,12 @@ export default function Dashboard() {
               role="tab"
               aria-selected={range === r.id}
               onClick={() => setRange(r.id)}
-              className={cn('rounded-md px-3 py-1.5 text-sm font-medium', range === r.id ? 'bg-neutral-900 text-white' : 'text-neutral-600 hover:bg-neutral-100')}
+              className={cn(
+                'rounded-md px-3 py-1.5 text-sm font-medium',
+                range === r.id
+                  ? 'bg-neutral-900 text-white'
+                  : 'text-neutral-600 hover:bg-neutral-100',
+              )}
             >
               {r.label}
             </button>
@@ -176,16 +294,34 @@ export default function Dashboard() {
         </div>
         {range === 'custom' && (
           <div className="flex items-center gap-2">
-            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} aria-label="From date" className="w-40" />
+            <Input
+              type="date"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+              aria-label="From date"
+              className="w-40"
+            />
             <span className="text-neutral-400">–</span>
-            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} aria-label="To date" className="w-40" />
+            <Input
+              type="date"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              aria-label="To date"
+              className="w-40"
+            />
           </div>
         )}
       </div>
 
       {isError && <ErrorState message="Could not load analytics." onRetry={refetch} />}
       {(isLoading || !ready) && !data && (
-        <div className="grid place-items-center py-24">{ready ? <Spinner /> : <p className="text-sm text-neutral-500">Choose a start and end date.</p>}</div>
+        <div className="grid place-items-center py-24">
+          {ready ? (
+            <Spinner />
+          ) : (
+            <p className="text-sm text-neutral-500">Choose a start and end date.</p>
+          )}
+        </div>
       )}
 
       {data && (
@@ -193,10 +329,13 @@ export default function Dashboard() {
           {data.upcoming && (
             <div className="flex flex-col gap-4 overflow-hidden rounded-xl border border-neutral-900 bg-neutral-900 p-5 text-white sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-ghana-gold">Upcoming pickup</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-ghana-gold">
+                  Upcoming pickup
+                </p>
                 <p className="mt-1 text-xl font-semibold">{data.upcoming.label}</p>
                 <p className="text-sm text-neutral-300">
-                  {data.upcoming.orders} order{data.upcoming.orders === 1 ? '' : 's'} · {formatMoney(data.upcoming.revenue)} estimated
+                  {data.upcoming.orders} order{data.upcoming.orders === 1 ? '' : 's'} ·{' '}
+                  {formatMoney(data.upcoming.revenue)} estimated
                 </p>
               </div>
               <div className="flex gap-2">
@@ -205,7 +344,8 @@ export default function Dashboard() {
                 </Link>
                 <Link to={`/admin/prep?date=${data.upcoming.date}`}>
                   <Button variant="brand">
-                    <ClipboardList size={16} aria-hidden /> Prep sheet <ArrowRight size={14} aria-hidden />
+                    <ClipboardList size={16} aria-hidden /> Prep sheet{' '}
+                    <ArrowRight size={14} aria-hidden />
                   </Button>
                 </Link>
               </div>
@@ -214,25 +354,67 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
             <Kpi label="Orders" value={data.kpis.orders} sub={data.range.label} />
-            <Kpi label="Revenue (est.)" value={formatMoney(data.kpis.revenue)} sub={`${formatMoney(data.kpis.unpaidRevenue)} still unpaid`} />
+            <Kpi
+              label="Revenue (est.)"
+              value={formatMoney(data.kpis.revenue)}
+              sub={`${formatMoney(data.kpis.unpaidRevenue)} still unpaid`}
+            />
             <Kpi label="Avg order value" value={formatMoney(data.kpis.avgOrderValue)} />
-            <Kpi label="Customers" value={`${data.kpis.newCustomers} new`} sub={`${data.kpis.returningCustomers} returning`} />
-            <Kpi label="Pending (new)" value={data.kpis.pendingOrders} sub="Need confirming →" href="/admin/orders?status=new" />
+            <Kpi
+              label="Customers"
+              value={`${data.kpis.newCustomers} new`}
+              sub={`${data.kpis.returningCustomers} returning`}
+            />
+            <Kpi
+              label="Pending (new)"
+              value={data.kpis.pendingOrders}
+              sub="Need confirming →"
+              href="/admin/orders?status=new"
+            />
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <ChartCard title="Revenue per pickup day" sub="Last 12 pickup days" rows={data.weekly.map((w) => ({ label: w.label, value: w.revenue }))} money unit="revenue" empty="No orders in the last 12 weeks yet." />
-            <ChartCard title="Orders per pickup day" sub="Last 12 pickup days" rows={data.weekly.map((w) => ({ label: w.label, value: w.orders }))} unit="orders" empty="No orders in the last 12 weeks yet." />
-            <ChartCard title="Best sellers" sub="Boxes sold in range" rows={data.bestSellers.map((b) => ({ label: b.name, value: b.quantity }))} unit="sold" horizontal empty="No sales in this range." />
+            <ChartCard
+              title="Revenue per pickup day"
+              sub="Last 12 pickup days"
+              rows={data.weekly.map((w) => ({ label: w.label, value: w.revenue }))}
+              money
+              unit="revenue"
+              empty="No orders in the last 12 weeks yet."
+            />
+            <ChartCard
+              title="Orders per pickup day"
+              sub="Last 12 pickup days"
+              rows={data.weekly.map((w) => ({ label: w.label, value: w.orders }))}
+              unit="orders"
+              empty="No orders in the last 12 weeks yet."
+            />
+            <ChartCard
+              title="Best sellers"
+              sub="Boxes sold in range"
+              rows={data.bestSellers.map((b) => ({ label: b.name, value: b.quantity }))}
+              unit="sold"
+              horizontal
+              empty="No sales in this range."
+            />
             <ChartCard
               title="Most popular extras & options"
               sub="Units in range"
-              rows={data.extras.map((e) => ({ label: `${e.name} · ${shortItem(e.item)}`, value: e.count }))}
+              rows={data.extras.map((e) => ({
+                label: `${e.name} · ${shortItem(e.item)}`,
+                value: e.count,
+              }))}
               unit="units"
               horizontal
               empty="No extras ordered in this range."
             />
-            <ChartCard title="Orders by pickup window" sub="In range" rows={data.byWindow.map((w) => ({ label: w.label, value: w.orders }))} unit="orders" empty="No orders in this range." />
+            <ChartCard
+              title="Orders by pickup window"
+              sub="In range"
+              rows={data.byWindow.map((w) => ({ label: w.label, value: w.orders }))}
+              unit="orders"
+              empty="No orders in this range."
+            />
           </div>
         </div>
       )}

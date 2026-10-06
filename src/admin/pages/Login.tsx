@@ -17,7 +17,9 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState('');
-  const { register, handleSubmit, formState } = useForm<Form>({ resolver: zodResolver(loginSchema) });
+  const { register, handleSubmit, formState } = useForm<Form>({
+    resolver: zodResolver(loginSchema),
+  });
 
   useEffect(() => {
     document.title = 'Log in · +233 Kitchen Admin';
@@ -26,7 +28,10 @@ export default function Login() {
   const onSubmit = async (data: Form) => {
     setError('');
     try {
-      const res = await api<{ admin: { email: string } }>('/admin/login', { method: 'POST', json: data });
+      const res = await api<{ admin: { email: string } }>('/admin/login', {
+        method: 'POST',
+        json: data,
+      });
       qc.setQueryData(['admin', 'me'], res.admin);
       const from = (location.state as { from?: string } | null)?.from;
       navigate(from && from.startsWith('/admin') ? from : '/admin', { replace: true });
@@ -36,7 +41,7 @@ export default function Login() {
   };
 
   return (
-    <div className="admin grid min-h-screen place-items-center bg-neutral-50 px-4">
+    <div className="admin grid min-h-screen place-items-center bg-neutral-50 px-4 text-neutral-900">
       <div className="w-full max-w-sm overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-card">
         <div className="flex flex-col items-center bg-ink px-6 py-8">
           <Logo size={72} />
@@ -51,14 +56,24 @@ export default function Login() {
             <Input id="email" type="email" autoComplete="username" {...register('email')} />
           </Field>
           <Field label="Password" htmlFor="password" error={formState.errors.password?.message}>
-            <Input id="password" type="password" autoComplete="current-password" {...register('password')} />
+            <Input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              {...register('password')}
+            />
           </Field>
           {error && (
             <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
               {error}
             </p>
           )}
-          <Button type="submit" variant="primary" className="w-full" loading={formState.isSubmitting}>
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-full"
+            loading={formState.isSubmitting}
+          >
             Log in
           </Button>
         </form>

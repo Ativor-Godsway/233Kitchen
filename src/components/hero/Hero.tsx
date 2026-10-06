@@ -1,5 +1,11 @@
 import { useRef } from 'react';
-import { motion, useMotionTemplate, useReducedMotion, useScroll, useTransform } from 'framer-motion';
+import {
+  motion,
+  useMotionTemplate,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { SITE } from '../../content/site';
 import { KenteBand } from '../KenteBand';
@@ -14,7 +20,11 @@ function Headline() {
       {SITE.headline.map((line, i) => (
         <span key={line} className="block overflow-hidden pb-[0.08em]">
           <motion.span
-            className={i === SITE.headline.length - 1 ? 'block bg-gradient-to-r from-cream via-ghana-gold-200 to-ghana-gold bg-clip-text text-transparent' : 'block'}
+            className={
+              i === SITE.headline.length - 1
+                ? 'block bg-gradient-to-r from-cream via-ghana-gold-200 to-ghana-gold bg-clip-text text-transparent'
+                : 'block'
+            }
             initial={reduce ? false : { y: '105%' }}
             animate={{ y: 0 }}
             transition={{ duration: 0.9, delay: 0.1 + i * 0.12, ease: EASE }}
@@ -30,14 +40,26 @@ function Headline() {
 function Intro() {
   const reduce = useReducedMotion();
   const fade = (delay: number) =>
-    reduce ? {} : { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.7, delay, ease: EASE } };
+    reduce
+      ? {}
+      : {
+          initial: { opacity: 0, y: 14 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.7, delay, ease: EASE },
+        };
   return (
     <>
-      <motion.p {...fade(0)} className="mb-5 text-xs font-semibold uppercase tracking-[0.22em] text-ghana-gold sm:text-sm">
+      <motion.p
+        {...fade(0)}
+        className="mb-5 text-xs font-semibold uppercase tracking-[0.22em] text-ghana-gold sm:text-sm"
+      >
         {SITE.eyebrow}
       </motion.p>
       <Headline />
-      <motion.p {...fade(0.45)} className="mx-auto mt-5 max-w-md text-base text-cream/70 sm:text-lg">
+      <motion.p
+        {...fade(0.45)}
+        className="mx-auto mt-5 max-w-md text-base text-cream/70 sm:text-lg"
+      >
         {SITE.subline}
       </motion.p>
       <motion.div {...fade(0.6)} className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -74,7 +96,10 @@ export function Hero() {
 
   if (reduce) {
     return (
-      <section className="relative overflow-hidden bg-ink px-4 pb-20 pt-32 text-center" aria-label="Introduction">
+      <section
+        className="relative overflow-hidden bg-ink px-4 pb-20 pt-32 text-center"
+        aria-label="Introduction"
+      >
         <Intro />
         <HeroVisualStatic />
         <div className="mx-auto mt-14 max-w-xl">
@@ -97,7 +122,12 @@ export function Hero() {
 
         <motion.div
           className="absolute inset-x-0 top-[13svh] z-10 px-4 text-center sm:top-[15svh]"
-          style={{ opacity: introOpacity, y: introY, filter: introFilter, pointerEvents: introPointer }}
+          style={{
+            opacity: introOpacity,
+            y: introY,
+            filter: introFilter,
+            pointerEvents: introPointer,
+          }}
         >
           <Intro />
         </motion.div>
@@ -106,11 +136,12 @@ export function Hero() {
           className="absolute inset-x-0 bottom-[6svh] z-10 mx-auto max-w-xl px-6 text-center"
           style={{ opacity: storyOpacity, y: storyY }}
         >
-          <p className="font-display text-2xl font-semibold leading-tight sm:text-3xl">{SITE.heroStory.title}</p>
+          <p className="font-display text-2xl font-semibold leading-tight sm:text-3xl">
+            {SITE.heroStory.title}
+          </p>
           <p className="mt-2 text-sm text-cream/70 sm:text-base">{SITE.heroStory.body}</p>
           <KenteBand animate height={6} className="mx-auto mt-6 max-w-[220px] rounded-full" />
         </motion.div>
-
       </div>
     </section>
   );

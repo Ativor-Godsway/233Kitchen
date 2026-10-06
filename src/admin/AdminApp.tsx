@@ -32,7 +32,10 @@ function RequireAdmin({ children }: { children: (email: string) => ReactNode }) 
         <ErrorState message="Can’t reach the server." onRetry={refetch} />
       </div>
     );
-  if (!me) return <Navigate to="/admin/login" replace state={{ from: location.pathname + location.search }} />;
+  if (!me)
+    return (
+      <Navigate to="/admin/login" replace state={{ from: location.pathname + location.search }} />
+    );
   return <>{children(me.email)}</>;
 }
 
@@ -59,11 +62,20 @@ const page = (el: ReactNode) => (
   </Suspense>
 );
 
-export default function AdminApp() {
+/** Where to go after login: the page the user originally asked for (e.g. an order link from an email). */
+function LoginRoute() {
   const { data: me, isLoading } = useMe();
+  const location = useLocation();
+  const from = (location.state as { from?: string } | null)?.from;
+  if (isLoading) return <FullScreenSpinner />;
+  if (me) return <Navigate to={from && from.startsWith('/admin') ? from : '/admin'} replace />;
+  return <Login />;
+}
+
+export default function AdminApp() {
   return (
     <Routes>
-      <Route path="login" element={isLoading ? <FullScreenSpinner /> : me ? <Navigate to="/admin" replace /> : <Login />} />
+      <Route path="login" element={<LoginRoute />} />
       <Route element={<RequireAdmin>{(email) => <AdminLayout email={email} />}</RequireAdmin>}>
         <Route index element={page(<Dashboard />)} />
         <Route path="orders" element={page(<Orders />)} />
