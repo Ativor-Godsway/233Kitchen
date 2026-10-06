@@ -38,7 +38,7 @@ class MongoStore implements Store {
   }
 }
 
-function make(prefix: string, windowMs: number, limit: number, message: string) {
+function make(prefix: string, windowMs: number, limit: number, message: string, skipSuccessfulRequests = false) {
   return rateLimit({
     windowMs,
     limit,
@@ -49,9 +49,11 @@ function make(prefix: string, windowMs: number, limit: number, message: string) 
     message: { error: message, code: 'RATE_LIMITED' },
     // Mongo outage should not lock everyone out of ordering.
     passOnStoreError: true,
+    skipSuccessfulRequests,
   });
 }
 
 export const orderLimiter = make('order', 15 * 60_000, 8, 'Too many orders from this device. Please call us instead.');
-export const loginLimiter = make('login', 15 * 60_000, 10, 'Too many login attempts. Try again in 15 minutes.');
+/** Only failed logins count, so the owner is never locked out by normal use. */
+export const loginLimiter = make('login', 15 * 60_000, 10, 'Too many login attempts. Try again in 15 minutes.', true);
 export const publicPostLimiter = make('public', 15 * 60_000, 30, 'Too many requests. Please slow down.');

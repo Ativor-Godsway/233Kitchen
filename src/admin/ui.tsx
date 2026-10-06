@@ -8,10 +8,11 @@ import type { OrderStatus, PaymentStatus } from '../../shared/types';
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'brand';
 
 export const Button = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: 'sm' | 'md'; loading?: boolean }>(
-  function Button({ variant = 'secondary', size = 'md', loading, className, children, disabled, ...rest }, ref) {
+  function Button({ variant = 'secondary', size = 'md', loading, className, children, disabled, type = 'button', ...rest }, ref) {
     return (
       <button
         ref={ref}
+        type={type}
         disabled={disabled || loading}
         className={cn(
           'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition disabled:cursor-not-allowed disabled:opacity-50',

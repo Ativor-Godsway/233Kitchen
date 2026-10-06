@@ -86,3 +86,17 @@ publicRouter.post(
     res.json({ ok: true });
   }),
 );
+
+/** RFC 8058 one-click unsubscribe (List-Unsubscribe-Post) used by Gmail/Yahoo. */
+publicRouter.post(
+  '/unsubscribe/one-click',
+  publicPostLimiter,
+  ah(async (req, res) => {
+    const { token } = parse(z.object({ token: z.string().min(10).max(100) }), req.query);
+    await CustomerModel.updateOne(
+      { unsubscribeToken: token },
+      { $set: { marketingConsent: false, unsubscribedAt: new Date() } },
+    ).setOptions({ sanitizeFilter: true });
+    res.json({ ok: true });
+  }),
+);

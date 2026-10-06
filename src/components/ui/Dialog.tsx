@@ -91,7 +91,7 @@ export function Dialog({ open, onClose, title, hideTitle, variant = 'sheet', cla
                 className,
               )}
             >
-              <h2 id={titleId} tabIndex={-1} className={cn(hideTitle && 'sr-only')}>
+              <h2 id={titleId} tabIndex={-1} className={cn(hideTitle ? 'sr-only' : 'px-6 pb-3 pt-6 text-lg font-semibold outline-none')}>
                 {title}
               </h2>
               {children}

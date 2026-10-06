@@ -286,3 +286,24 @@ export interface PrepSheet {
 export interface OrdersListResponse extends Paginated<OrderDTO> {
   statusCounts: Partial<Record<OrderStatus, number>>;
 }
+
+export type RangeKey = 'week' | '4w' | '3m' | 'custom';
+
+export interface AnalyticsResult {
+  range: { key: RangeKey; from: string; to: string; label: string };
+  kpis: {
+    orders: number;
+    revenue: number;
+    avgOrderValue: number;
+    newCustomers: number;
+    returningCustomers: number;
+    pendingOrders: number;
+    unpaidRevenue: number;
+  };
+  weekly: Array<{ date: string; label: string; orders: number; revenue: number }>;
+  bestSellers: Array<{ name: string; quantity: number; revenue: number }>;
+  extras: Array<{ name: string; item: string; count: number }>;
+  byWindow: Array<{ label: string; orders: number }>;
+  upcoming: { date: string; label: string; orders: number; revenue: number } | null;
+}
+
