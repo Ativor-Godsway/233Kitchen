@@ -1,5 +1,4 @@
 import { Hero } from '../components/hero/Hero';
-import { HowItWorks } from '../components/sections/HowItWorks';
 import { MenuSection } from '../components/sections/MenuSection';
 import { Gallery } from '../components/sections/Gallery';
 import { Pickup } from '../components/sections/Pickup';
@@ -11,7 +10,6 @@ export default function Home() {
     <>
       <Hero />
       <KenteBand animate height={6} />
-      <HowItWorks />
       <MenuSection />
       <Gallery />
       <Pickup />

@@ -8,6 +8,7 @@ import type { EmailLogDTO, Paginated } from '../../../shared/types';
 import { Button, Card, EmptyState, ErrorState, PageHeader, SkeletonRows, Spinner } from '../ui';
 import { fmtDateTime } from '../api';
 import { Dialog } from '../../components/ui/Dialog';
+import { EmailProviderPanel } from '../EmailProviderPanel';
 import { cn } from '../../lib/cn';
 
 const TYPE_LABELS: Record<EmailLogDTO['type'], string> = {
@@ -83,6 +84,9 @@ export default function EmailLog() {
         title="Email log"
         sub="Every email the site sends. Failed emails never block an order, so resend them here."
       />
+      <div className="mb-4">
+        <EmailProviderPanel compact />
+      </div>
       <div className="mb-4 inline-flex rounded-lg border border-neutral-200 bg-white p-1">
         {(['all', 'failed'] as const).map((s) => (
           <button

@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import { imagetools } from 'vite-imagetools';
 
 /**
  * Injects the absolute site URL into index.html (Open Graph / canonical need
@@ -35,7 +36,15 @@ export default defineConfig(({ mode }) => {
       ? `https://${env.VERCEL_PROJECT_PRODUCTION_URL}`
       : 'http://localhost:5173');
   return {
-    plugins: [react(), siteUrlPlugin(siteUrl)],
+    plugins: [
+      react(),
+      siteUrlPlugin(siteUrl),
+      // Turns `?w=…&format=webp` image imports (e.g. the gallery folder) into optimised files.
+      // Auto-rotate first so phone photos with EXIF orientation come out upright.
+      imagetools({
+        extendTransforms: (builtins) => [() => (image) => image.rotate(), ...builtins],
+      }),
+    ],
     server: {
       port: 5173,
       proxy: {

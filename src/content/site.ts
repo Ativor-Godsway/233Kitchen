@@ -11,50 +11,6 @@ export const SITE = {
     title: 'Cooked to order. Never sitting under a heat lamp.',
     body: 'Every box is made fresh for the people who ordered it. That’s why we cook once a week.',
   },
-  howItWorks: [
-    {
-      icon: 'preorder',
-      title: 'Pre-order',
-      body: 'Build your box online and choose a Wednesday pickup time. No payment needed to order.',
-    },
-    {
-      icon: 'cook',
-      title: 'We cook fresh',
-      body: 'Everything is cooked to order in small batches, just for the week’s orders.',
-    },
-    {
-      icon: 'pickup',
-      title: 'Pick up Wednesday',
-      body: 'Collect in Worcester during your time window, or send an Uber courier for it.',
-    },
-  ],
-  gallery: [
-    {
-      src: '/images/fried-rice-chicken-960.webp',
-      alt: 'Fried rice with grilled chicken, plantain, coleslaw and shito',
-      caption: 'Loaded fried rice',
-    },
-    {
-      src: '/images/banku-tilapia-960.webp',
-      alt: 'Grilled tilapia topped with peppers and red cabbage, with pepper sauce and shito',
-      caption: 'Banku & grilled tilapia',
-    },
-    {
-      src: '/images/waakye-meat-960.webp',
-      alt: 'Waakye with red stew, gari, boiled eggs, plantain and coleslaw',
-      caption: 'Hajia waakye',
-    },
-    {
-      src: '/images/waakye-fish-960.webp',
-      alt: 'Waakye with talia, stew, gari, egg, plantain and fried fish',
-      caption: 'Waakye with fish',
-    },
-    {
-      src: '/images/rice-platter-960.webp',
-      alt: 'Rice platter with omelette, sausages, plantain and pepper sauce',
-      caption: 'From our kitchen',
-    },
-  ],
   faq: [
     {
       q: 'When do I need to order by?',

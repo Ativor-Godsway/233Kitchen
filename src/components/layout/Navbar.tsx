@@ -9,7 +9,6 @@ import { cn } from '../../lib/cn';
 
 const LINKS = [
   { href: '/#menu', label: 'Menu' },
-  { href: '/#how-it-works', label: 'How it works' },
   { href: '/#pickup', label: 'Pickup' },
 ];
 

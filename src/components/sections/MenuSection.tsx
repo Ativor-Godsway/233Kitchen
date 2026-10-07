@@ -5,7 +5,7 @@ import { useMenu } from '../../lib/queries';
 import { MenuCard, MenuCardSkeleton } from '../menu/MenuCard';
 import { SectionHeading } from './SectionHeading';
 import { cn } from '../../lib/cn';
-import { CutoffNotice } from './HowItWorks';
+import { CutoffNotice } from './CutoffNotice';
 
 type Filter = 'all' | MenuItem['category'];
 

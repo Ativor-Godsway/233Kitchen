@@ -20,13 +20,27 @@ export function useMe() {
   });
 }
 
+export type EmailProvider = 'resend' | 'smtp' | 'dev' | 'none';
+
+/** Mirrors server providerStatus() (no secrets). */
+export interface EmailStatus {
+  provider: EmailProvider;
+  misconfigured: string | null;
+  label: string;
+  from: string;
+  ownerEmail: string;
+}
+
+export interface AdminSettingsResponse {
+  settings: Settings;
+  emailProvider: EmailProvider;
+  emailStatus: EmailStatus;
+}
+
 export function useAdminSettings() {
   return useQuery({
     queryKey: ['admin', 'settings'],
-    queryFn: () =>
-      api<{ settings: Settings; emailProvider: 'resend' | 'smtp' | 'dev' | 'none' }>(
-        '/admin/settings',
-      ),
+    queryFn: () => api<AdminSettingsResponse>('/admin/settings'),
     staleTime: 60_000,
   });
 }

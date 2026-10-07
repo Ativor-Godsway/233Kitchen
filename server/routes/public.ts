@@ -39,6 +39,7 @@ publicRouter.post(
   '/orders',
   orderLimiter,
   ah(async (req, res) => {
+    // createOrder resolves only after the owner/customer emails have been attempted and logged.
     const { publicOrder, token } = await createOrder(req.body);
     res.status(201).json({ order: publicOrder, token });
   }),

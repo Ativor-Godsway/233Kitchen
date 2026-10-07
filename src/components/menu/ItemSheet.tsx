@@ -147,12 +147,14 @@ function SheetBody({
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-      <div className="relative h-52 shrink-0 sm:h-64 md:h-auto">
+    // Desktop: two columns in a single row capped at the modal height. The photo is absolutely
+    // positioned so its (tall) natural size never stretches the row; only the details scroll.
+    <div className="flex min-h-0 flex-1 flex-col md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:grid-rows-[minmax(0,1fr)]">
+      <div className="relative h-52 shrink-0 sm:h-64 md:h-auto md:min-h-0">
         <MenuImage
           item={item}
           sizes="(min-width: 768px) 460px, 100vw"
-          className="h-full w-full"
+          className="h-full w-full md:absolute md:inset-0"
           eager
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ink-800 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-ink-800/30" />

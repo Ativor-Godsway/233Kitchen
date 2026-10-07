@@ -119,6 +119,11 @@ export interface Settings extends ScheduleSettings {
   paymentInstructions: string;
   /** Shown on the website (street only). */
   pickupAddressPublic: string;
+  /**
+   * Public location for the website map and "Get directions" links. Street only by default,
+   * so the house number stays private unless the owner deliberately adds it here.
+   */
+  mapQuery: string;
   /** Shared only in confirmation emails. */
   pickupAddressFull: string;
   /** Postal address line required in marketing emails (CAN-SPAM). */

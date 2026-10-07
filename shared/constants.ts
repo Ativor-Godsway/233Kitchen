@@ -60,6 +60,7 @@ export const DEFAULT_SETTINGS: Settings = {
   paymentInstructions:
     'No payment now. Once we confirm your order, pay via Zelle (amankwaherica98@gmail.com) or Apple Pay (508-353-8191), or pay at pickup.',
   pickupAddressPublic: 'Hollywood Street, Worcester, MA',
+  mapQuery: 'Hollywood Street, Worcester, MA',
   pickupAddressFull: 'Hollywood Street, Worcester, MA (full address sent on confirmation)',
   businessAddressLine: '+233 Kitchen · Hollywood Street, Worcester, MA',
   businessPhone: '(508) 353-8191',

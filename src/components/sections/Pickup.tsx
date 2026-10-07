@@ -1,5 +1,6 @@
-import { Phone } from 'lucide-react';
+import { Navigation, Phone } from 'lucide-react';
 import { DEFAULT_SETTINGS } from '../../../shared/constants';
+import { mapLinks } from '../../../shared/maps';
 import { usePublicConfig } from '../../lib/queries';
 import { BrandIcon } from '../BrandIcon';
 import { SectionHeading } from './SectionHeading';
@@ -15,42 +16,46 @@ const WEEKDAYS = [
   'Sundays',
 ];
 
-/** Lightweight stylised "map" (no third-party embed). */
-function MapCard({ address }: { address: string }) {
+/** Embedded Google Map (lazy) + Get directions / Apple Maps. Location comes from Settings → mapQuery. */
+function LocationMap({ query }: { query: string }) {
+  const links = mapLinks(query);
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-ink text-cream ring-1 ring-ink/10">
-      <svg
-        viewBox="0 0 400 300"
-        className="h-64 w-full sm:h-full"
-        aria-hidden
-        preserveAspectRatio="xMidYMid slice"
-      >
-        <rect width="400" height="300" fill="#141414" />
-        <g stroke="#2A2A2A" strokeWidth="10" strokeLinecap="round" fill="none">
-          <path d="M-10 70 L410 40" />
-          <path d="M-10 190 L410 230" />
-          <path d="M80 -10 L120 310" />
-          <path d="M300 -10 L260 310" />
-        </g>
-        <g stroke="#1E6131" strokeWidth="14" strokeLinecap="round" fill="none" opacity=".9">
-          <path d="M-10 130 C 120 110, 260 160, 410 140" />
-        </g>
-        <g stroke="#202020" strokeWidth="4" fill="none">
-          <path d="M-10 250 L410 270" />
-          <path d="M190 -10 L200 310" />
-          <path d="M350 -10 L340 310" />
-        </g>
-        <circle cx="210" cy="138" r="38" fill="#E1A10C" opacity=".14" />
-        <circle cx="210" cy="138" r="22" fill="#E1A10C" opacity=".22" />
-      </svg>
-      <div className="absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-full">
-        <div className="grid h-12 w-12 place-items-center rounded-full rounded-bl-none bg-ghana-red shadow-lg shadow-ghana-red/40 [transform:rotate(-45deg)]">
-          <span className="h-3 w-3 rounded-full bg-white" />
-        </div>
+    <div className="overflow-hidden rounded-3xl bg-white shadow-[0_20px_40px_-24px_rgba(0,0,0,.35)] ring-1 ring-ink/10">
+      <div className="relative h-72 bg-cream-300 sm:h-80 lg:h-[420px]">
+        <iframe
+          key={links.embed}
+          src={links.embed}
+          title={`Google Map of the pickup area: ${query}`}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          allowFullScreen
+          className="absolute inset-0 h-full w-full border-0"
+        />
       </div>
-      <div className="absolute inset-x-4 bottom-4 rounded-2xl bg-white/10 p-4 backdrop-blur-md ring-1 ring-white/15">
-        <p className="font-semibold">{address}</p>
-        <p className="text-sm text-cream/70">Exact address is in your confirmation email.</p>
+      <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="min-w-0">
+          <p className="truncate font-semibold">{query}</p>
+          <p className="text-sm text-ink/65">Exact address is in your confirmation email.</p>
+        </div>
+        <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
+          <a
+            href={links.directions}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-ghana-red px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-ghana-red/25 transition hover:bg-ghana-red-400"
+          >
+            <Navigation size={16} aria-hidden /> Get directions
+            <span className="sr-only">(opens Google Maps in a new tab)</span>
+          </a>
+          <a
+            href={links.apple}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-center text-xs font-medium text-ink/70 underline-offset-2 hover:text-ink hover:underline"
+          >
+            Open in Apple Maps<span className="sr-only"> (new tab)</span>
+          </a>
+        </div>
       </div>
     </div>
   );
@@ -64,7 +69,7 @@ export function Pickup() {
 
   return (
     <section id="pickup" className="scroll-mt-16 bg-cream-200 py-24 text-ink sm:py-32">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:items-center">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:items-start">
         <div>
           <SectionHeading
             tone="light"
@@ -121,7 +126,7 @@ export function Pickup() {
             </li>
           </ul>
         </div>
-        <MapCard address={s.pickupAddressPublic} />
+        <LocationMap query={s.mapQuery || s.pickupAddressPublic} />
       </div>
     </section>
   );

@@ -15,7 +15,9 @@ function loadDotEnv(): void {
     }
   }
 }
-if (!process.env.VERCEL) loadDotEnv();
+// Never load .env under tests: real SMTP/Resend credentials there would send real emails.
+const underTest = process.env.NODE_ENV === 'test' || !!process.env.VITEST;
+if (!process.env.VERCEL && !underTest) loadDotEnv();
 
 const isProd = process.env.NODE_ENV === 'production' || !!process.env.VERCEL;
 const isTest = process.env.NODE_ENV === 'test' || !!process.env.VITEST;

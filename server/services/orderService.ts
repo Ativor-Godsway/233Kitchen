@@ -145,6 +145,9 @@ export async function createOrder(raw: unknown, now = new Date()) {
   const order = toOrderDTO(doc.toObject() as OrderRow);
 
   await recomputeCustomerStats(customer?._id);
+  // Must be awaited BEFORE the HTTP response: Vercel can freeze the function once it responds,
+  // which would silently drop in-flight emails. sendNewOrderEmails never throws (failures are
+  // recorded in EmailLog), so the order itself can't fail here.
   await sendNewOrderEmails(order, settings);
 
   return {

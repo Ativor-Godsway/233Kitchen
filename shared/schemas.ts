@@ -160,6 +160,7 @@ export const settingsSchema = z.object({
   notificationEmails: z.array(z.string().trim().toLowerCase().email()).max(10),
   paymentInstructions: z.string().trim().min(1).max(600),
   pickupAddressPublic: z.string().trim().min(1).max(200),
+  mapQuery: z.string().trim().min(3, 'Enter a street, place or address').max(200),
   pickupAddressFull: z.string().trim().min(1).max(300),
   businessAddressLine: z.string().trim().min(1).max(200),
   businessPhone: z.string().trim().min(7).max(30),

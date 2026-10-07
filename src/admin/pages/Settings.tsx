@@ -18,6 +18,8 @@ import {
   Toggle,
 } from '../ui';
 import { useAdminSettings } from '../api';
+import { EmailProviderPanel } from '../EmailProviderPanel';
+import { mapLinks } from '../../../shared/maps';
 import { cn } from '../../lib/cn';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -179,7 +181,6 @@ export default function Settings() {
         .map((e) => e.trim())
         .filter(Boolean),
     });
-  const provider = data?.emailProvider;
 
   return (
     <>
@@ -439,27 +440,7 @@ export default function Settings() {
           title="Notifications"
           sub="Who gets the instant “new order” email, and when customers are emailed."
         >
-          <div
-            className={cn(
-              'rounded-lg px-3 py-2 text-sm',
-              provider === 'none'
-                ? 'bg-red-50 text-red-800'
-                : provider === 'dev'
-                  ? 'bg-ghana-gold-50 text-ghana-gold-900'
-                  : 'bg-ghana-green-50 text-ghana-green-800',
-            )}
-          >
-            Email provider:{' '}
-            <strong>
-              {provider === 'resend'
-                ? 'Resend'
-                : provider === 'smtp'
-                  ? 'SMTP'
-                  : provider === 'dev'
-                    ? 'Development (emails print to the server console)'
-                    : 'Not configured: emails will fail!'}
-            </strong>
-          </div>
+          <EmailProviderPanel />
           <Field
             label="New-order emails go to"
             htmlFor="notif"
@@ -512,6 +493,32 @@ export default function Settings() {
               rows={3}
               value={s.paymentInstructions}
               onChange={(e) => up('paymentInstructions', e.target.value)}
+            />
+          </Field>
+          <Field
+            label="Map location (public)"
+            htmlFor="map-query"
+            hint={
+              <>
+                Shown on the website map and used for “Get directions”. Keep it to the street to
+                keep the house number private; it stays in confirmation emails only.{' '}
+                <a
+                  href={mapLinks(s.mapQuery).directions}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-ghana-green underline"
+                >
+                  Preview in Google Maps
+                </a>
+              </>
+            }
+            error={errors.mapQuery}
+          >
+            <Input
+              id="map-query"
+              value={s.mapQuery}
+              placeholder="Hollywood Street, Worcester, MA"
+              onChange={(e) => up('mapQuery', e.target.value)}
             />
           </Field>
           <div className="grid gap-3 sm:grid-cols-2">

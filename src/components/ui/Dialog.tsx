@@ -74,7 +74,7 @@ export function Dialog({
           <div
             className={cn(
               'fixed inset-0 z-[60] flex',
-              variant === 'sheet' && 'items-end justify-center md:items-center md:p-6',
+              variant === 'sheet' && 'items-end justify-center md:items-center md:p-4',
               variant === 'drawer-right' && 'justify-end',
               variant === 'center' && 'items-center justify-center p-4',
             )}
@@ -100,7 +100,9 @@ export function Dialog({
                 'relative flex flex-col overflow-hidden shadow-2xl outline-none',
                 tone === 'dark' ? 'bg-ink-800 text-cream' : 'bg-white text-neutral-900',
                 variant === 'sheet' &&
-                  'max-h-[92svh] w-full rounded-t-3xl md:max-h-[88vh] md:w-[min(920px,100%)] md:rounded-3xl',
+                  // Mobile: bottom sheet within the smallest viewport (URL bar shown). Desktop: never
+                  // taller than the screen, so the pinned footer is always fully visible.
+                  'max-h-[92svh] w-full rounded-t-3xl md:max-h-[calc(100dvh-2rem)] md:w-[min(920px,100%)] md:rounded-3xl',
                 variant === 'drawer-right' && 'h-full w-full sm:max-w-md',
                 variant === 'center' && 'max-h-[90vh] w-[min(560px,100%)] rounded-2xl',
                 className,

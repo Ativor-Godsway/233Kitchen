@@ -25,7 +25,6 @@ const PHOTOS: Array<{ out: string; names: string[] }> = [
   { out: 'banku-tilapia', names: ['banku-tilapia'] },
   { out: 'waakye-meat', names: ['waakye-meat'] },
   { out: 'waakye-fish', names: ['waakye-fish', 'waakye'] },
-  { out: 'rice-platter', names: ['rice'] },
 ];
 
 const WIDTHS = [480, 960, 1600];

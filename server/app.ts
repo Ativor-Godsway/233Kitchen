@@ -3,6 +3,9 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { env } from './env.js';
+
+/** Origins allowed to be framed (Google Maps embed on the Pickup section). */
+export const MAP_FRAME_SOURCES = ['https://www.google.com', 'https://maps.google.com'];
 import { connectDb } from './db.js';
 import { errorHandler, HttpError } from './middleware/errors.js';
 import { sanitizeInput } from './middleware/sanitize.js';
@@ -15,7 +18,18 @@ export function createApp() {
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
 
-  app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'same-site' },
+      contentSecurityPolicy: {
+        // Helmet defaults + allow the embedded Google Map used in the Pickup section.
+        directives: {
+          'frame-src': ["'self'", ...MAP_FRAME_SOURCES],
+          'child-src': ["'self'", ...MAP_FRAME_SOURCES],
+        },
+      },
+    }),
+  );
   app.use(cors({ origin: env.siteUrl, credentials: true }));
   app.use(express.json({ limit: '200kb' }));
   app.use(cookieParser());
@@ -35,7 +49,9 @@ export function createApp() {
       () => next(),
       (err) => {
         console.error('[api] database unavailable', err);
-        next(new HttpError(503, 'Service is starting up. Please retry in a moment.', 'DB_UNAVAILABLE'));
+        next(
+          new HttpError(503, 'Service is starting up. Please retry in a moment.', 'DB_UNAVAILABLE'),
+        );
       },
     );
   });

@@ -69,12 +69,6 @@ function Intro() {
         >
           Order now <ArrowRight size={18} aria-hidden />
         </a>
-        <a
-          href="#how-it-works"
-          className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-base font-semibold text-cream ring-1 ring-white/25 transition hover:bg-white/10"
-        >
-          How it works
-        </a>
       </motion.div>
     </>
   );

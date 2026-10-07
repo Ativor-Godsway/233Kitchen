@@ -110,12 +110,30 @@ git push -u origin main
    | `JWT_SECRET`     | a long random string. Generate one with `openssl rand -base64 48`       |
    | `ADMIN_EMAIL`    | the owner's login email                                                 |
    | `ADMIN_PASSWORD` | a strong temporary password (≥ 10 characters), used only by the seed    |
-   | `RESEND_API_KEY` | `re_…` from step 2                                                      |
-   | `EMAIL_FROM`     | `"+233 Kitchen <orders@yourdomain.com>"`                                |
-   | `EMAIL_REPLY_TO` | _(optional)_ owner's inbox                                              |
    | `OWNER_EMAIL`    | where new-order alerts go (more can be added later in Admin → Settings) |
    | `SITE_URL`       | `https://yourdomain.com` (no trailing slash)                            |
    | `TZ_BUSINESS`    | `America/New_York`                                                      |
+
+   **Email variables, Gmail (SMTP).** All of these are required when sending through Gmail:
+
+   | Name             | Value                                                                    |
+   | ---------------- | ------------------------------------------------------------------------ |
+   | `EMAIL_PROVIDER` | `smtp`                                                                   |
+   | `SMTP_USER`      | the full Gmail address, e.g. `kitchen@gmail.com`                         |
+   | `SMTP_PASS`      | the 16-character Gmail **App password** (not the normal Gmail password)  |
+   | `EMAIL_FROM`     | `"+233 Kitchen <kitchen@gmail.com>"` (Gmail only sends from `SMTP_USER`) |
+   | `EMAIL_REPLY_TO` | where customer replies should go (can be the same Gmail address)         |
+   | `OWNER_EMAIL`    | where new-order alerts go (listed above; required for Gmail setups too)  |
+   | `SMTP_HOST`      | _(optional)_ defaults to `smtp.gmail.com`                                |
+   | `SMTP_PORT`      | _(optional)_ defaults to `465`                                           |
+
+   **Or Resend:** set `EMAIL_PROVIDER=resend`, `RESEND_API_KEY` (`re_…` from step 2), `EMAIL_FROM`
+   (on your verified domain), `EMAIL_REPLY_TO` and `OWNER_EMAIL`.
+
+   > If `EMAIL_PROVIDER` is set but its credentials are missing, nothing is sent: every email is
+   > recorded as **failed** in Admin → Email log, and the function logs a warning each time. Check
+   > **Vercel → Logs** after deploying for the line
+   > `📧 Email: smtp (Gmail) from … → owner …`, then use **Admin → Settings → Send test email**.
 
 5. Click **Deploy**. When it finishes you'll get a URL like `https://233-kitchen.vercel.app`.
 

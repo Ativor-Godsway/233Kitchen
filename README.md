@@ -16,11 +16,11 @@ npm run dev
 
 With an empty `.env`, `npm run dev` runs three processes:
 
-| Process | What it does                                                                                                                                                      |
-| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db`    | A local MongoDB (mongodb-memory-server), auto-seeded with the menu, settings and admin user. Data persists in `./.data/mongo`. Delete that folder to start fresh. |
-| `api`   | Express API on :3001, hot-reloaded with `tsx watch`.                                                                                                              |
-| `web`   | Vite on :5173, proxying `/api` to the API.                                                                                                                        |
+| Process | What it does                                                                                                                                                                    |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db`    | A local MongoDB (mongodb-memory-server), auto-seeded with the menu, settings and admin user. Data persists in `./.data/mongo`. Delete that folder to start fresh.               |
+| `api`   | Express API on :3001, hot-reloaded with `tsx watch`, and restarted automatically when `.env` / `.env.local` change. On start it logs the active email provider (`📧 Email: …`). |
+| `web`   | Vite on :5173, proxying `/api` to the API.                                                                                                                                      |
 
 Emails aren't sent in dev. They're printed to the terminal, saved as HTML in `./.email-previews/`,
 and recorded in the admin **Email log** as "Sent (dev)".
@@ -77,7 +77,12 @@ reference/          Original brand photos and logo
 - **Headline and marketing copy:** `src/content/site.ts`
 - **Menu, prices, sold-out:** Admin → Menu
 - **Pickup days, windows, cutoff, pause, payment text, address, phone, socials:** Admin → Settings
-- **Photos:** put new files in `reference/`, map them in `scripts/optimize-images.ts`, run `npm run images`
+- **Gallery photos:** drop a `.jpg` / `.jpeg` / `.png` / `.webp` into `src/assets/gallery/` (prefix with a
+  number to set the order, e.g. `06-jollof-rice.jpg`). WebP sizes are generated automatically, with no script
+  to run. Optional caption/alt text goes in `src/content/gallery.ts` → `GALLERY_TEXT`.
+- **Menu / hero photos:** put new files in `reference/`, map them in `scripts/optimize-images.ts`, run `npm run images`
+- **Map location:** Admin → Settings → Map location (public)
 
 Deployment: see [DEPLOY.md](DEPLOY.md). Open business questions: [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+
 # 233Kitchen

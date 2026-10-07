@@ -1,8 +1,10 @@
 /**
  * The only module that talks to an email provider.
- *  - RESEND_API_KEY set (default provider)  → Resend
- *  - EMAIL_PROVIDER=smtp                     → Nodemailer SMTP (e.g. Gmail app password)
- *  - neither, outside production             → printed to the console + HTML preview in ./.email-previews
+ *  - EMAIL_PROVIDER=smtp (or SMTP_USER + SMTP_PASS set)  → Nodemailer SMTP (e.g. Gmail app password)
+ *  - EMAIL_PROVIDER=resend (or RESEND_API_KEY set)       → Resend
+ *  - nothing configured, outside production              → console + HTML preview in ./.email-previews
+ * A provider that is requested but missing credentials is never silently replaced: every
+ * send logs a loud warning and is recorded as FAILED in EmailLog (resendable from the admin).
  * Every attempt is recorded in EmailLog; failures never throw to callers.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -34,22 +36,82 @@ export interface SendResult {
   error?: string;
 }
 
-type Provider = 'resend' | 'smtp' | 'dev' | 'none';
+export type Provider = 'resend' | 'smtp' | 'dev' | 'none';
 
-let warnedMissingSmtp = false;
+export interface ProviderStatus {
+  /** What will actually happen on send. */
+  provider: Provider;
+  /** Set when a provider was requested (explicitly or by partial credentials) but can't be used. */
+  misconfigured: string | null;
+  /** Human label, e.g. "smtp (Gmail)". */
+  label: string;
+  from: string;
+  ownerEmail: string;
+}
+
+/**
+ * Resolves the provider from the live environment. Explicit EMAIL_PROVIDER always wins and is
+ * never swapped for another provider; partial SMTP credentials count as "SMTP requested".
+ */
+export function providerStatus(): ProviderStatus {
+  const explicit = process.env.EMAIL_PROVIDER?.trim().toLowerCase();
+  const hasUser = !!env.smtp.user;
+  const hasPass = !!env.smtp.pass;
+  const smtpReady = hasUser && hasPass;
+  const resendReady = !!env.resendApiKey;
+  const fallback: Provider = env.isProd ? 'none' : 'dev';
+
+  let provider: Provider;
+  let misconfigured: string | null = null;
+  if (explicit === 'smtp' || (!explicit && (hasUser || hasPass) && !resendReady)) {
+    provider = smtpReady ? 'smtp' : fallback;
+    if (!smtpReady) {
+      const missing = [!hasUser && 'SMTP_USER', !hasPass && 'SMTP_PASS']
+        .filter(Boolean)
+        .join(' and ');
+      misconfigured = `SMTP not configured (${missing} missing)`;
+    }
+  } else if (explicit === 'resend') {
+    provider = resendReady ? 'resend' : fallback;
+    if (!resendReady) misconfigured = 'Resend not configured (RESEND_API_KEY missing)';
+  } else if (explicit && explicit !== 'smtp' && explicit !== 'resend') {
+    provider = fallback;
+    misconfigured = `Unknown EMAIL_PROVIDER "${explicit}" (use smtp or resend)`;
+  } else {
+    provider = smtpReady ? 'smtp' : resendReady ? 'resend' : fallback;
+  }
+
+  const smtpLabel = /gmail/i.test(env.smtp.host) ? 'smtp (Gmail)' : `smtp (${env.smtp.host})`;
+  const label =
+    provider === 'smtp'
+      ? smtpLabel
+      : provider === 'resend'
+        ? 'resend'
+        : provider === 'dev'
+          ? 'dev (previews only, NOT sent)'
+          : 'none (emails will FAIL)';
+  return { provider, misconfigured, label, from: env.emailFrom, ownerEmail: env.ownerEmail };
+}
 
 export function activeProvider(): Provider {
-  if (env.emailProvider === 'smtp') {
-    if (env.smtp.user && env.smtp.pass) return 'smtp';
-    if (!warnedMissingSmtp) {
-      warnedMissingSmtp = true;
-      console.warn(
-        '[email] EMAIL_PROVIDER=smtp but SMTP_USER / SMTP_PASS are empty — real emails will NOT be sent.',
-      );
-    }
-  }
-  if (env.resendApiKey) return 'resend';
-  return env.isProd ? 'none' : 'dev';
+  return providerStatus().provider;
+}
+
+/** One-line startup summary. Never includes passwords or API keys. */
+export function describeEmailConfig(): string {
+  const s = providerStatus();
+  const owner = s.ownerEmail || `(OWNER_EMAIL not set; falls back to ${env.adminEmail})`;
+  const line = `📧 Email: ${s.label} from ${s.from} → owner ${owner}`;
+  return s.misconfigured
+    ? `${line}
+⚠️  ${s.misconfigured}. Emails will be logged as FAILED until fixed.`
+    : line;
+}
+
+export function logEmailConfig(): void {
+  const msg = describeEmailConfig();
+  if (providerStatus().misconfigured) console.warn(msg);
+  else console.log(msg);
 }
 
 let resend: Resend | null = null;
@@ -64,11 +126,41 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
   ]);
 }
 
+/** Dev only: print the email and save an HTML preview in ./.email-previews. */
+function writePreview(input: SendInput): void {
+  if (env.isTest || env.isProd) return;
+  const dir = path.resolve('.email-previews');
+  mkdirSync(dir, { recursive: true });
+  const safe = `${new Date().toISOString().replace(/[:.]/g, '-')}-${input.type}-${input.to.replace(/[^a-z0-9@.]/gi, '_')}.html`;
+  const previewPath = path.join(dir, safe);
+  writeFileSync(previewPath, input.html);
+  console.log(
+    `\n📧 [dev email] ${input.type}\n   To: ${input.to}\n   Subject: ${input.subject}\n   HTML: ${previewPath}\n   ---- text ----\n${input.text
+      .split('\n')
+      .map((l) => `   ${l}`)
+      .join('\n')}\n   --------------\n`,
+  );
+}
+
 async function deliver(
   input: SendInput,
 ): Promise<{ status: EmailLogRow['status']; providerId: string | null }> {
-  const provider = activeProvider();
+  const status = providerStatus();
+  const provider = status.provider;
   const replyTo = input.replyTo || env.emailReplyTo || undefined;
+
+  if (status.misconfigured) {
+    // Loud on EVERY attempt so it can't be missed in the terminal or Vercel logs.
+    console.error(
+      `\n⚠️  [email] ${status.misconfigured}: "${input.subject}" to ${input.to} was NOT sent.` +
+        `\n    Fix the env vars and restart; then use Admin → Email log → Resend.\n`,
+    );
+    if (provider === 'dev') {
+      writePreview(input);
+      throw new Error(`${status.misconfigured}. Email saved as dev preview only.`);
+    }
+    throw new Error(`${status.misconfigured}. Email not sent.`);
+  }
 
   if (provider === 'resend') {
     resend ??= new Resend(env.resendApiKey);
@@ -111,20 +203,7 @@ async function deliver(
   }
 
   if (provider === 'dev') {
-    let previewPath = '(preview not written)';
-    if (!env.isTest) {
-      const dir = path.resolve('.email-previews');
-      mkdirSync(dir, { recursive: true });
-      const safe = `${new Date().toISOString().replace(/[:.]/g, '-')}-${input.type}-${input.to.replace(/[^a-z0-9@.]/gi, '_')}.html`;
-      previewPath = path.join(dir, safe);
-      writeFileSync(previewPath, input.html);
-      console.log(
-        `\n📧 [dev email] ${input.type}\n   To: ${input.to}\n   Subject: ${input.subject}\n   HTML: ${previewPath}\n   ---- text ----\n${input.text
-          .split('\n')
-          .map((l) => `   ${l}`)
-          .join('\n')}\n   --------------\n`,
-      );
-    }
+    writePreview(input);
     return { status: 'sent_dev', providerId: null };
   }
 
