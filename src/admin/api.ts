@@ -14,7 +14,9 @@ export function useMe() {
       }
     },
     staleTime: 5 * 60_000,
-    retry: false,
+    // Retry once if the API is still starting up (503); never retry real auth failures.
+    retry: (failureCount, err) => failureCount < 1 && err instanceof ApiError && err.status === 503,
+    retryDelay: 1000,
   });
 }
 

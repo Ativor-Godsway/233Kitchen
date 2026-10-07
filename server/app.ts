@@ -31,7 +31,13 @@ export function createApp() {
 
   // Ensure the (cached) DB connection before any data route.
   app.use('/api', (_req, _res, next) => {
-    connectDb().then(() => next(), next);
+    connectDb().then(
+      () => next(),
+      (err) => {
+        console.error('[api] database unavailable', err);
+        next(new HttpError(503, 'Service is starting up. Please retry in a moment.', 'DB_UNAVAILABLE'));
+      },
+    );
   });
 
   app.use('/api/admin', adminRouter);

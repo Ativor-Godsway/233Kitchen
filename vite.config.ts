@@ -38,7 +38,20 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), siteUrlPlugin(siteUrl)],
     server: {
       port: 5173,
-      proxy: { '/api': { target: 'http://localhost:3001', changeOrigin: true } },
+      proxy: {
+        '/api': {
+          target: 'http://localhost:3001',
+          changeOrigin: true,
+          // While the API is (re)starting, answer with a clean 503 instead of Vite's 500.
+          configure: (proxy) => {
+            proxy.on('error', (_err, _req, res) => {
+              if (!('writeHead' in res) || res.headersSent) return;
+              res.writeHead(503, { 'Content-Type': 'application/json', 'Retry-After': '1' });
+              res.end(JSON.stringify({ error: 'API starting, retry', code: 'API_STARTING' }));
+            });
+          },
+        },
+      },
     },
     build: {
       rollupOptions: {

@@ -80,3 +80,4 @@ reference/          Original brand photos and logo
 - **Photos:** put new files in `reference/`, map them in `scripts/optimize-images.ts`, run `npm run images`
 
 Deployment: see [DEPLOY.md](DEPLOY.md). Open business questions: [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+# 233Kitchen
