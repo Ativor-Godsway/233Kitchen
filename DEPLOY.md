@@ -29,11 +29,11 @@ Allow about 45 minutes. Domain DNS can take longer to verify.
      is still protected by the username and password.
 5. **Get the connection string** (Database → _Connect_ → _Drivers_ → Node.js). It looks like:
    ```
-   mongodb+srv://k233app:<password>@k233.abcde.mongodb.net/?retryWrites=true&w=majority&appName=k233
+   mongodb+srv://<db-user>:<db-password>@<your-cluster-host>/?retryWrites=true&w=majority&appName=k233
    ```
    Replace `<password>` with your password, and add the database name `k233` after `.net/`:
    ```
-   mongodb+srv://k233app:YOUR_PASSWORD@k233.abcde.mongodb.net/k233?retryWrites=true&w=majority&appName=k233
+   mongodb+srv://<db-user>:<db-password>@<your-cluster-host>/k233?retryWrites=true&w=majority&appName=k233
    ```
    If the password contains special characters (`@ : / ? # %`), URL-encode them
    (e.g. `@` → `%40`). This full string is your **`MONGODB_URI`**.
@@ -136,7 +136,7 @@ Run this **once**, from your computer, in the project folder. It creates the men
 settings and the admin account in Atlas:
 
 ```bash
-MONGODB_URI="mongodb+srv://k233app:...@k233.abcde.mongodb.net/k233?retryWrites=true&w=majority" \
+MONGODB_URI="mongodb+srv://<db-user>:<db-password>@<your-cluster-host>/k233?retryWrites=true&w=majority" \
 ADMIN_EMAIL="owner@yourdomain.com" \
 ADMIN_PASSWORD="a-strong-temporary-password" \
 OWNER_EMAIL="owner@yourdomain.com" \

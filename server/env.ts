@@ -45,11 +45,19 @@ export const env = {
   get resendApiKey() {
     return process.env.RESEND_API_KEY?.trim() ?? '';
   },
+  /** Explicit EMAIL_PROVIDER wins; otherwise SMTP is used whenever SMTP_USER + SMTP_PASS are set. */
   get emailProvider(): 'resend' | 'smtp' {
-    return process.env.EMAIL_PROVIDER?.trim() === 'smtp' ? 'smtp' : 'resend';
+    const p = process.env.EMAIL_PROVIDER?.trim().toLowerCase();
+    if (p === 'smtp' || p === 'resend') return p;
+    return process.env.SMTP_USER?.trim() && process.env.SMTP_PASS?.trim() ? 'smtp' : 'resend';
   },
   get emailFrom() {
-    return process.env.EMAIL_FROM?.trim() || '+233 Kitchen <onboarding@resend.dev>';
+    const from = process.env.EMAIL_FROM?.trim();
+    if (from) return from;
+    // Gmail only sends "From" the authenticated account, so default to it.
+    const smtpUser = process.env.SMTP_USER?.trim();
+    if (smtpUser) return `+233 Kitchen <${smtpUser}>`;
+    return '+233 Kitchen <onboarding@resend.dev>';
   },
   get emailReplyTo() {
     return process.env.EMAIL_REPLY_TO?.trim() ?? '';

@@ -36,8 +36,18 @@ export interface SendResult {
 
 type Provider = 'resend' | 'smtp' | 'dev' | 'none';
 
+let warnedMissingSmtp = false;
+
 export function activeProvider(): Provider {
-  if (env.emailProvider === 'smtp' && env.smtp.user && env.smtp.pass) return 'smtp';
+  if (env.emailProvider === 'smtp') {
+    if (env.smtp.user && env.smtp.pass) return 'smtp';
+    if (!warnedMissingSmtp) {
+      warnedMissingSmtp = true;
+      console.warn(
+        '[email] EMAIL_PROVIDER=smtp but SMTP_USER / SMTP_PASS are empty — real emails will NOT be sent.',
+      );
+    }
+  }
   if (env.resendApiKey) return 'resend';
   return env.isProd ? 'none' : 'dev';
 }
@@ -119,6 +129,17 @@ async function deliver(
   }
 
   throw new Error('Email is not configured (set RESEND_API_KEY or SMTP credentials).');
+}
+
+/** Sends one email straight through the provider (no EmailLog / DB needed). Used by `npm run email:test`. */
+export async function sendTestEmail(to: string) {
+  return deliver({
+    type: 'owner_new_order',
+    to,
+    subject: '✅ +233 Kitchen — test email',
+    html: '<p>If you can read this, real email sending from +233 Kitchen is working.</p>',
+    text: 'If you can read this, real email sending from +233 Kitchen is working.',
+  });
 }
 
 const oid = (v: string | Types.ObjectId | null | undefined) =>

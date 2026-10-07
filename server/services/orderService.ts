@@ -1,3 +1,4 @@
+import { env } from '../env.js';
 import { createOrderSchema, normalizeUsPhone } from '../../shared/schemas.js';
 import { priceOrder } from '../../shared/pricing.js';
 import { isDateOrderable, formatPickupDate } from '../../shared/schedule.js';
@@ -40,8 +41,14 @@ export async function sendNewOrderEmails(order: OrderDTO, s: Settings) {
   const owner = ownerNewOrderEmail(order);
   const customer = customerOrderReceivedEmail(order, s, orderToken(order.number));
   const base = { orderId: order.id, orderNumber: order.number };
+  // OWNER_EMAIL from .env always receives new orders, plus any extra addresses set in admin Settings.
+  const ownerRecipients = [
+    ...new Set(
+      [env.ownerEmail, ...s.notificationEmails].filter(Boolean).map((e) => e.toLowerCase()),
+    ),
+  ];
   await Promise.allSettled([
-    ...s.notificationEmails.map((to) =>
+    ...ownerRecipients.map((to) =>
       sendEmail({ ...base, type: 'owner_new_order', to, ...owner, replyTo: order.customer.email }),
     ),
     sendEmail({ ...base, type: 'customer_order_received', to: order.customer.email, ...customer }),
