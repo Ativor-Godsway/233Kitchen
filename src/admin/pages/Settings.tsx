@@ -13,11 +13,12 @@ import {
   Field,
   Input,
   PageHeader,
+  PasswordInput,
   Spinner,
   Textarea,
   Toggle,
 } from '../ui';
-import { useAdminSettings } from '../api';
+import { useAdminSettings, useMe } from '../api';
 import { EmailProviderPanel } from '../EmailProviderPanel';
 import { mapLinks } from '../../../shared/maps';
 import { cn } from '../../lib/cn';
@@ -34,6 +35,7 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
 }
 
 function PasswordCard() {
+  const { data: me } = useMe();
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -69,10 +71,18 @@ function PasswordCard() {
           if (!mismatch) m.mutate();
         }}
       >
+        {/* Lets password managers save the new password against the right account. */}
+        <input
+          type="text"
+          name="username"
+          autoComplete="username"
+          value={me?.email ?? ''}
+          readOnly
+          hidden
+        />
         <Field label="Current password" htmlFor="pw-cur">
-          <Input
+          <PasswordInput
             id="pw-cur"
-            type="password"
             autoComplete="current-password"
             value={current}
             onChange={(e) => setCurrent(e.target.value)}
@@ -80,9 +90,8 @@ function PasswordCard() {
           />
         </Field>
         <Field label="New password" htmlFor="pw-new">
-          <Input
+          <PasswordInput
             id="pw-new"
-            type="password"
             autoComplete="new-password"
             minLength={10}
             value={next}
@@ -95,9 +104,8 @@ function PasswordCard() {
           htmlFor="pw-conf"
           error={mismatch ? 'Passwords don’t match' : undefined}
         >
-          <Input
+          <PasswordInput
             id="pw-conf"
-            type="password"
             autoComplete="new-password"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}

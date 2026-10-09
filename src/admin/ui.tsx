@@ -1,13 +1,18 @@
 /** Light-theme admin UI kit (Linear/Stripe-style): white surfaces, soft borders, brand accents. */
 import {
   forwardRef,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
   type ButtonHTMLAttributes,
   type InputHTMLAttributes,
   type ReactNode,
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
 } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { cn } from '../lib/cn';
 import { PAYMENT_LABELS, STATUS_LABELS } from '../../shared/constants';
 import type { OrderStatus, PaymentStatus } from '../../shared/types';
@@ -114,6 +119,91 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
     return <input ref={ref} className={cn(fieldCls, 'h-10', className)} {...rest} />;
   },
 );
+
+/**
+ * Password field with a show/hide toggle. The toggle never submits, never steals focus from a
+ * focused input (pointer/touch), keeps the caret where it was, and the field goes back to
+ * hidden whenever its form is submitted.
+ */
+export const PasswordInput = forwardRef<
+  HTMLInputElement,
+  Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & {
+    autoComplete: 'current-password' | 'new-password';
+  }
+>(function PasswordInput({ className, ...rest }, ref) {
+  const [visible, setVisible] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const caret = useRef<{ start: number | null; end: number | null; focused: boolean } | null>(null);
+
+  const setRefs = useCallback(
+    (el: HTMLInputElement | null) => {
+      inputRef.current = el;
+      if (typeof ref === 'function') ref(el);
+      else if (ref) ref.current = el;
+    },
+    [ref],
+  );
+
+  // Hide again after the form is submitted, so the password isn't left on screen.
+  useEffect(() => {
+    const form = inputRef.current?.form;
+    if (!form) return;
+    const hide = () => setVisible(false);
+    form.addEventListener('submit', hide);
+    return () => form.removeEventListener('submit', hide);
+  }, []);
+
+  // Changing `type` can reset the selection in some browsers; put the caret back.
+  useLayoutEffect(() => {
+    const el = inputRef.current;
+    const c = caret.current;
+    caret.current = null;
+    if (!el || !c) return;
+    if (c.focused) el.focus();
+    if (c.start !== null && c.end !== null) el.setSelectionRange(c.start, c.end);
+  }, [visible]);
+
+  const toggle = () => {
+    const el = inputRef.current;
+    caret.current = el
+      ? {
+          start: el.selectionStart,
+          end: el.selectionEnd,
+          focused: document.activeElement === el,
+        }
+      : null;
+    setVisible((v) => !v);
+  };
+
+  const label = visible ? 'Hide password' : 'Show password';
+  return (
+    <div className="relative">
+      <input
+        ref={setRefs}
+        type={visible ? 'text' : 'password'}
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+        className={cn(fieldCls, 'h-10 pr-11', className)}
+        {...rest}
+      />
+      <button
+        type="button"
+        onClick={toggle}
+        // Keep focus (and the mobile keyboard) on the input when tapped or clicked.
+        onPointerDown={(e) => e.preventDefault()}
+        onMouseDown={(e) => e.preventDefault()}
+        aria-label={label}
+        aria-pressed={visible}
+        aria-controls={rest.id}
+        title={label}
+        className="absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-lg text-neutral-500 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ghana-green/40"
+      >
+        {visible ? <EyeOff size={18} aria-hidden /> : <Eye size={18} aria-hidden />}
+      </button>
+    </div>
+  );
+});
 
 export const Textarea = forwardRef<
   HTMLTextAreaElement,

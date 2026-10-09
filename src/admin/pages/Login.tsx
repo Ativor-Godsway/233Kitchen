@@ -8,7 +8,7 @@ import { api, ApiError } from '../../lib/api';
 import { loginSchema } from '../../../shared/schemas';
 import { Logo } from '../../components/Logo';
 import { KenteBand } from '../../components/KenteBand';
-import { Button, Field, Input } from '../ui';
+import { Button, Field, Input, PasswordInput } from '../ui';
 
 type Form = z.infer<typeof loginSchema>;
 
@@ -56,9 +56,8 @@ export default function Login() {
             <Input id="email" type="email" autoComplete="username" {...register('email')} />
           </Field>
           <Field label="Password" htmlFor="password" error={formState.errors.password?.message}>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               autoComplete="current-password"
               {...register('password')}
             />
