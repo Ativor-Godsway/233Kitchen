@@ -178,7 +178,9 @@ describe('admin orders', () => {
     expect(sheet.orderCount).toBe(2);
     const rice = sheet.items.find((i: { slug: string }) => i.slug === 'loaded-fried-rice-chicken');
     expect(rice.quantity).toBe(3);
-    expect(rice.options).toEqual([{ group: 'Extras', name: 'Extra plantain', count: 4 }]);
+    expect(rice.options).toEqual([
+      { group: 'Extras', name: 'Extra plantain', count: 4, icon: 'plantain' },
+    ]);
     const kenkey = sheet.items.find((i: { slug: string }) => i.slug === 'ice-kenkey');
     expect(kenkey.quantity).toBe(3);
     const counts = Object.fromEntries(

@@ -41,6 +41,7 @@ const selectionSchema = new Schema(
     name: String,
     qty: Number,
     unitPrice: Number,
+    icon: String,
   },
   { _id: false },
 );
@@ -127,6 +128,7 @@ export function toOrderDTO(o: OrderRow): OrderDTO {
         name: s.name,
         qty: s.qty,
         unitPrice: s.unitPrice,
+        ...(s.icon ? { icon: s.icon } : {}),
       })),
       quantity: l.quantity,
       notes: l.notes ?? '',

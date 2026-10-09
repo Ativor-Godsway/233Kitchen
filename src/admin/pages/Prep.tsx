@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Car, ClipboardList, Download, Printer, Store } from 'lucide-react';
 import { api } from '../../lib/api';
 import { describeSelections, formatMoney } from '../../../shared/pricing';
+import { ExtraIcon } from '../../components/menu/ExtraIcon';
 import { PAYMENT_LABELS } from '../../../shared/constants';
 import type { PrepSheet, PublicConfig } from '../../../shared/types';
 import {
@@ -154,9 +155,15 @@ export default function Prep() {
                             {i.options.map((o) => (
                               <li
                                 key={`${o.group}-${o.name}`}
-                                className="rounded-md bg-neutral-100 px-2 py-0.5 text-sm"
+                                className="inline-flex items-center gap-1.5 rounded-md bg-neutral-100 px-2 py-0.5 text-sm"
                               >
-                                <span className="font-semibold tabular-nums">{o.count}</span>{' '}
+                                <ExtraIcon
+                                  name={o.icon}
+                                  size={24}
+                                  surface="light"
+                                  className="print:hidden"
+                                />
+                                <span className="font-semibold tabular-nums">{o.count}</span>
                                 {o.name}
                               </li>
                             ))}

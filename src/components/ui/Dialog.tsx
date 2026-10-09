@@ -24,6 +24,9 @@ interface DialogProps {
   tone?: 'light' | 'dark';
 }
 
+/** Open dialogs, innermost last: Escape only closes the top one (e.g. a photo over a sheet). */
+const openStack: string[] = [];
+
 /** Accessible modal primitive: portal, focus trap, Escape to close, scroll lock. */
 export function Dialog({
   open,
@@ -42,13 +45,16 @@ export function Dialog({
     if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    openStack.push(titleId);
+    const onKey = (e: KeyboardEvent) =>
+      e.key === 'Escape' && openStack[openStack.length - 1] === titleId && onClose();
     window.addEventListener('keydown', onKey);
     return () => {
       document.body.style.overflow = prev;
       window.removeEventListener('keydown', onKey);
+      openStack.splice(openStack.indexOf(titleId), 1);
     };
-  }, [open, onClose]);
+  }, [open, onClose, titleId]);
 
   const panelMotion =
     variant === 'drawer-right'

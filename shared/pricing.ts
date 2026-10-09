@@ -124,6 +124,7 @@ export function priceLine(item: MenuItem, input: LineInput): PricedLine {
         name: option.name,
         qty: s.qty,
         unitPrice: option.price,
+        ...(option.icon ? { icon: option.icon } : {}),
       });
     }
   }

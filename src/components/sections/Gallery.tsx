@@ -12,12 +12,12 @@ const IDLE_RESUME_MS = 4000;
 const COPIES = 3;
 
 /**
- * "Real boxes, real portions." auto-playing, looping photo carousel.
+ * "Cooked fresh, every Wednesday." auto-playing, looping photo carousel.
  * - Native horizontal scroll (touch swipe, trackpad) + mouse drag + prev/next buttons + arrow keys.
  * - Autoplay every 3s; pauses on hover, focus, touch/drag/wheel (resumes after 4s idle),
  *   when the tab is hidden or the carousel is off-screen, and via the pause button.
  * - prefers-reduced-motion: no autoplay and no smooth scrolling (manual only).
- * Photos come from src/assets/gallery/ (see src/content/gallery.ts).
+ * Photos are listed in src/content/gallery.ts.
  */
 export function Gallery() {
   const reduce = useReducedMotion();
@@ -192,8 +192,8 @@ export function Gallery() {
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 sm:flex-row sm:items-end sm:justify-between sm:px-6">
         <SectionHeading
           eyebrow="From the kitchen"
-          title="Real boxes, real portions."
-          sub="Every photo is a box we packed for a customer."
+          title="Cooked fresh, every Wednesday."
+          sub="Tap any dish on the menu to see the real box you’ll receive."
         />
         {loop && (
           <div className="flex shrink-0 items-center gap-2">

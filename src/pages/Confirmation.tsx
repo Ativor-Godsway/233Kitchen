@@ -4,11 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 import { motion, useReducedMotion } from 'framer-motion';
 import { CalendarPlus, Check, Clock, Mail, MapPin, Navigation, Phone, Wallet } from 'lucide-react';
 import { api } from '../lib/api';
-import { describeSelections, formatMoney } from '../../shared/pricing';
+import { formatMoney } from '../../shared/pricing';
 import { FULFILMENT_LABELS } from '../../shared/constants';
 import { mapLinks, streetLine } from '../../shared/maps';
 import type { PublicOrderDTO } from '../../shared/types';
 import { KenteBand } from '../components/KenteBand';
+import { SelectionList } from '../components/menu/SelectionList';
 import { Skeleton } from '../components/ui/Skeleton';
 
 export default function Confirmation() {
@@ -140,9 +141,7 @@ export default function Confirmation() {
                 <p className="font-medium">
                   {l.quantity}× {l.name}
                 </p>
-                {l.selections.length > 0 && (
-                  <p className="text-xs text-cream/55">{describeSelections(l.selections)}</p>
-                )}
+                <SelectionList selections={l.selections} className="mt-1 text-xs text-cream/55" />
                 {l.notes && <p className="text-xs italic text-cream/60">“{l.notes}”</p>}
               </div>
               <p className="tabular-nums">{formatMoney(l.lineTotal)}</p>

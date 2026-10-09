@@ -162,7 +162,7 @@ TZ_BUSINESS="America/New_York" \
 npm run seed
 ```
 
-You should see `Seed complete: { menuCreated: 4, settingsCreated: true, adminCreated: true, … }`.
+You should see `Seed complete: { menuCreated: 5, settingsCreated: true, adminCreated: true, … }`.
 Running it again is safe: it only creates what's missing.
 
 > If your home IP can't reach Atlas, check that Network Access includes `0.0.0.0/0` (step 1.4).
@@ -200,6 +200,24 @@ Running it again is safe: it only creates what's missing.
 
 Push to `main` and Vercel redeploys automatically. Menu, prices, settings and copy that live in the
 admin change instantly, with no deploy needed.
+
+### Database migrations
+
+Some releases change data that already lives in Atlas. Run the migration **before** pushing the
+release, from your computer, in the project folder. Each one is safe to run more than once.
+
+| Release  | Command                             | What it changes                                                                                                                                                                 |
+| -------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Oct 2026 | `npm run migrate:client-updates`    | Waakye description ("spaghetti") and the full pickup address in Settings                                                                                                        |
+| Oct 2026 | `npm run migrate:menu-images-icons` | Menu only: plated images, "What you'll receive" box photos, extras icons, Ice Kenkey photo + order, adds the Braised Rice Plate. Keeps prices and descriptions edited in admin. |
+
+```bash
+MONGODB_URI="mongodb+srv://<db-user>:<db-password>@<your-cluster-host>/k233?retryWrites=true&w=majority" \
+npm run migrate:menu-images-icons
+```
+
+It prints what it inserted and which fields it filled in per dish. A second run prints
+`Inserted: none`, `Updated: none`.
 
 ## Troubleshooting
 

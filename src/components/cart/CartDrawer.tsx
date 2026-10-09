@@ -3,10 +3,11 @@ import { AlertTriangle, Pencil, ShoppingBag, Trash2, X } from 'lucide-react';
 import { Dialog } from '../ui/Dialog';
 import { Stepper } from '../ui/Stepper';
 import { MenuImage } from '../menu/MenuImage';
+import { SelectionList } from '../menu/SelectionList';
 import { useUi } from '../../store/ui';
 import { useCart } from '../../store/cart';
 import { useBag } from '../../lib/useBag';
-import { describeSelections, formatMoney, MAX_LINE_QUANTITY } from '../../../shared/pricing';
+import { formatMoney, MAX_LINE_QUANTITY } from '../../../shared/pricing';
 
 export function CartDrawer() {
   const open = useUi((s) => s.bagOpen);
@@ -72,10 +73,11 @@ export function CartDrawer() {
                       {priced ? formatMoney(priced.lineTotal) : '–'}
                     </p>
                   </div>
-                  {priced && priced.selections.length > 0 && (
-                    <p className="mt-1 text-xs text-cream/60">
-                      {describeSelections(priced.selections)}
-                    </p>
+                  {priced && (
+                    <SelectionList
+                      selections={priced.selections}
+                      className="mt-1.5 text-xs text-cream/60"
+                    />
                   )}
                   {line.notes && (
                     <p className="mt-1 text-xs italic text-cream/50">“{line.notes}”</p>

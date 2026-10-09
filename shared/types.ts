@@ -11,6 +11,8 @@ export interface MenuOption {
   /** Price in cents (per unit for `quantity` groups). */
   price: number;
   isAvailable: boolean;
+  /** Icon name from shared/icons.ts (public/icons/<icon>-*.webp), e.g. "plantain". */
+  icon?: string;
 }
 
 export interface OptionGroup {
@@ -35,6 +37,8 @@ export interface MenuItem {
   basePrice: number;
   /** Image URL. Local images follow `/images/<name>-960.webp` so srcsets can be derived. */
   image: string | null;
+  /** Real box photos for "What you'll receive", e.g. `/images/box/<name>-480.webp`. */
+  boxImages?: string[];
   isAvailable: boolean;
   sortOrder: number;
   optionGroups: OptionGroup[];
@@ -61,6 +65,8 @@ export interface PricedSelection {
   name: string;
   qty: number;
   unitPrice: number;
+  /** Option icon at the time of ordering (see MenuOption.icon). */
+  icon?: string;
 }
 
 export interface PricedLine {
@@ -274,7 +280,7 @@ export interface PrepItemTotal {
   slug: string;
   name: string;
   quantity: number;
-  options: Array<{ group: string; name: string; count: number }>;
+  options: Array<{ group: string; name: string; count: number; icon?: string }>;
 }
 
 export interface PrepSheet {

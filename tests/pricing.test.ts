@@ -193,6 +193,31 @@ describe('priceLine', () => {
     );
   });
 
+  it('prices Braised Rice Plate extras and carries their icons', () => {
+    const l = priceLine(item('braised-rice-plate'), {
+      slug: 'braised-rice-plate',
+      quantity: 2,
+      selections: [
+        { groupKey: 'extras', optionKey: 'extra-sauce', qty: 1 }, // $2
+        { groupKey: 'extras', optionKey: 'extra-plantain', qty: 2 }, // 2 × $3
+        { groupKey: 'extras', optionKey: 'extra-fried-eggs', qty: 1 }, // $3
+      ],
+    });
+    expect(l.unitBase).toBe(2000);
+    expect(l.unitTotal).toBe(2000 + 200 + 600 + 300);
+    expect(l.lineTotal).toBe(6200);
+    expect(l.selections.map((s) => s.icon)).toEqual(['red-sauce', 'plantain', 'omelette']);
+    expectPricingError(
+      () =>
+        priceLine(item('braised-rice-plate'), {
+          slug: 'braised-rice-plate',
+          quantity: 1,
+          selections: [{ groupKey: 'extras', optionKey: 'extra-fried-eggs', qty: 6 }],
+        }),
+      'INVALID_QUANTITY',
+    );
+  });
+
   it('sums multiple lines', () => {
     const o = priceOrder(menu, [
       { slug: 'loaded-fried-rice-chicken', quantity: 1, selections: [] },

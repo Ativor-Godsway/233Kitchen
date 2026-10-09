@@ -77,10 +77,12 @@ reference/          Original brand photos and logo
 - **Headline and marketing copy:** `src/content/site.ts`
 - **Menu, prices, sold-out:** Admin → Menu
 - **Pickup days, windows, cutoff, pause, payment text, address, phone, socials:** Admin → Settings
-- **Gallery photos:** drop a `.jpg` / `.jpeg` / `.png` / `.webp` into `src/assets/gallery/` (prefix with a
-  number to set the order, e.g. `06-jollof-rice.jpg`). WebP sizes are generated automatically, with no script
-  to run. Optional caption/alt text goes in `src/content/gallery.ts` → `GALLERY_TEXT`.
-- **Menu / hero photos:** put new files in `reference/`, map them in `scripts/optimize-images.ts`, run `npm run images`
+- **Images:** `npm run images` builds any missing outputs and never overwrites existing ones
+  (`-- --force` rebuilds). Plated photos: `reference/ai/dishes/<dish>.jpg` → `public/images/`.
+  Real box photos: `reference/*.jpeg` → `public/images/box/`. Icons:
+  `reference/ai/icons-cutout/icon-<name>.png` → `public/icons/`. See `reference/ai/README.md`.
+- **Gallery photos:** listed in `src/content/gallery.ts` (plated photos from `public/images`).
+- **Menu photos, "What you'll receive" box photos and extras icons:** Admin → Menu → edit a dish.
 - **Map location:** Admin → Settings → Map location (public)
 
 Deployment: see [DEPLOY.md](DEPLOY.md). Open business questions: [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

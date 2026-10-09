@@ -4,6 +4,8 @@ import { toast } from 'sonner';
 import { Dialog } from '../ui/Dialog';
 import { Stepper } from '../ui/Stepper';
 import { MenuImage } from './MenuImage';
+import { ExtraIcon } from './ExtraIcon';
+import { imageAt, srcSetFor } from '../../lib/images';
 import { useUi } from '../../store/ui';
 import { useCart, type CartLine } from '../../store/cart';
 import { useMenu } from '../../lib/queries';
@@ -64,6 +66,72 @@ function GroupHeader({ group, error }: { group: OptionGroup; error?: string }) {
   );
 }
 
+/** "What you'll receive": thumbnails of the real box photos; tap to enlarge. */
+function BoxPhotos({ item }: { item: MenuItem }) {
+  const photos = item.boxImages ?? [];
+  const [open, setOpen] = useState<number | null>(null);
+  if (!photos.length) return null;
+  const label = (i: number) =>
+    photos.length > 1 ? `${item.name}, box photo ${i + 1}` : `${item.name}, box photo`;
+  return (
+    <div className="mt-5">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ghana-gold">
+        What you’ll receive
+      </p>
+      <ul className="mt-2 flex gap-2">
+        {photos.map((src, i) => (
+          <li key={src}>
+            <button
+              type="button"
+              onClick={() => setOpen(i)}
+              className="group block h-20 w-20 overflow-hidden rounded-xl bg-ink-700 ring-1 ring-white/15 transition hover:ring-ghana-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ghana-gold sm:h-24 sm:w-24"
+              aria-label={`Enlarge ${label(i)}`}
+            >
+              <img
+                src={src}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+              />
+            </button>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-1.5 text-xs text-cream/50">A real box from our kitchen.</p>
+      <Dialog
+        open={open !== null}
+        onClose={() => setOpen(null)}
+        title={open !== null ? label(open) : 'Box photo'}
+        hideTitle
+        variant="center"
+        tone="dark"
+        className="md:w-[min(760px,100%)]"
+      >
+        {open !== null && (
+          <div className="relative min-h-0">
+            <img
+              src={imageAt(photos[open], 960)}
+              srcSet={srcSetFor(photos[open])}
+              sizes="(min-width: 800px) 760px, 100vw"
+              alt={label(open)}
+              className="max-h-[80vh] w-full object-contain"
+            />
+            <button
+              type="button"
+              onClick={() => setOpen(null)}
+              className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-ink/70 text-cream backdrop-blur transition hover:bg-ink"
+              aria-label="Close photo"
+            >
+              <X size={20} aria-hidden />
+            </button>
+          </div>
+        )}
+      </Dialog>
+    </div>
+  );
+}
+
 function SheetBody({
   item,
   editing,
@@ -80,8 +148,12 @@ function SheetBody({
   const [notes, setNotes] = useState(editing?.notes ?? '');
   const [errorGroup, setErrorGroup] = useState<{ key: string; message: string } | null>(null);
   const groupRefs = useRef<Record<string, HTMLFieldSetElement | null>>({});
+  /** Bumped when an extra's quantity goes up, to replay its icon's pop animation. */
+  const [pops, setPops] = useState<Record<string, number>>({});
 
   const setQty = (g: string, o: string, qty: number) => {
+    if (qty > (sel[g]?.[o] ?? 0))
+      setPops((p) => ({ ...p, [`${g}:${o}`]: (p[`${g}:${o}`] ?? 0) + 1 }));
     setSel((s) => ({ ...s, [g]: { ...(s[g] ?? {}), [o]: qty } }));
     if (errorGroup?.key === g) setErrorGroup(null);
   };
@@ -176,6 +248,7 @@ function SheetBody({
           </p>
           <p className="mt-1 font-display text-lg text-ghana-gold">{formatMoney(item.basePrice)}</p>
           <p className="mt-3 text-sm text-cream/70">{item.description}</p>
+          <BoxPhotos item={item} />
 
           {item.optionGroups.map((group) => {
             const err = errorGroup?.key === group.key ? errorGroup.message : undefined;
@@ -209,11 +282,12 @@ function SheetBody({
                       <li
                         key={o.key}
                         className={cn(
-                          'flex items-center justify-between gap-3 px-4 py-3',
+                          'flex items-center gap-3 px-4 py-3',
                           !o.isAvailable && 'opacity-40',
                         )}
                       >
-                        <div>
+                        <ExtraIcon name={o.icon} pop={pops[`${group.key}:${o.key}`]} />
+                        <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium">{o.name}</p>
                           <p className="text-xs text-cream/60">
                             {o.isAvailable ? priceTag(o.price) : 'Sold out'}
@@ -233,7 +307,15 @@ function SheetBody({
                 )}
 
                 {group.type === 'single' && (
-                  <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={group.name}>
+                  <div
+                    className={cn(
+                      'grid grid-cols-2 gap-2',
+                      group.options.some((o) => o.icon) &&
+                        'sm:grid-cols-4 md:grid-cols-2 lg:grid-cols-4',
+                    )}
+                    role="radiogroup"
+                    aria-label={group.name}
+                  >
                     {group.options.map((o) => {
                       const checked = !!sel[group.key]?.[o.key];
                       return (
@@ -241,6 +323,7 @@ function SheetBody({
                           key={o.key}
                           className={cn(
                             'relative flex cursor-pointer items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium ring-1 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ghana-gold',
+                            o.icon && 'flex-col justify-start px-3 pb-3 pt-4 text-center',
                             checked
                               ? 'bg-ghana-gold/15 ring-ghana-gold'
                               : 'bg-white/[0.04] ring-white/10 hover:ring-white/30',
@@ -255,9 +338,18 @@ function SheetBody({
                             disabled={!o.isAvailable}
                             onChange={() => pickSingle(group.key, o.key)}
                           />
+                          {o.icon && (
+                            <ExtraIcon
+                              name={o.icon}
+                              size={64}
+                              pop={checked ? 1 : undefined}
+                              className={cn('transition', !checked && 'opacity-80')}
+                            />
+                          )}
                           <span
                             className={cn(
                               'grid h-5 w-5 shrink-0 place-items-center rounded-full ring-2',
+                              o.icon && 'absolute right-2.5 top-2.5',
                               checked ? 'bg-ghana-gold ring-ghana-gold' : 'ring-white/30',
                             )}
                           >
@@ -291,7 +383,8 @@ function SheetBody({
                               !o.isAvailable && 'cursor-not-allowed opacity-40',
                             )}
                           >
-                            <span>
+                            <ExtraIcon name={o.icon} pop={on ? 1 : undefined} />
+                            <span className="min-w-0 flex-1">
                               <span className="block text-sm font-medium">{o.name}</span>
                               <span className="block text-xs text-cream/60">
                                 {o.isAvailable ? priceTag(o.price) : 'Sold out'}

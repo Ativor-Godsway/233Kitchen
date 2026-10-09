@@ -249,6 +249,39 @@ describe('menu management', () => {
     };
     const created = await a.post('/api/admin/menu').send(item).expect(201);
     await a.post('/api/admin/menu').send(item).expect(409);
+    expect(created.body.item.boxImages).toEqual([]);
+
+    // Extras icons + "What you'll receive" photos are editable; unknown icons are rejected.
+    const withIcons = {
+      ...item,
+      boxImages: ['/images/box/braised-rice-480.webp'],
+      optionGroups: [
+        {
+          key: 'extras',
+          name: 'Extras',
+          type: 'quantity',
+          required: false,
+          min: 0,
+          max: 5,
+          options: [
+            { key: 'gizzard', name: 'Gizzard', price: 300, isAvailable: true, icon: 'gizzard' },
+            { key: 'plain', name: 'Plain', price: 0, isAvailable: true, icon: '' },
+          ],
+        },
+      ],
+    };
+    const id = created.body.item.id;
+    const saved = await a.put(`/api/admin/menu/${id}`).send(withIcons).expect(200);
+    expect(saved.body.item.boxImages).toEqual(['/images/box/braised-rice-480.webp']);
+    expect(saved.body.item.optionGroups[0].options[0].icon).toBe('gizzard');
+    expect(saved.body.item.optionGroups[0].options[1].icon).toBeUndefined();
+    const bad = structuredClone(withIcons);
+    bad.optionGroups[0].options[0].icon = 'pizza';
+    await a.put(`/api/admin/menu/${id}`).send(bad).expect(400);
+    await a
+      .put(`/api/admin/menu/${id}`)
+      .send({ ...withIcons, boxImages: ['javascript:alert(1)'] })
+      .expect(400);
     await a.delete(`/api/admin/menu/${created.body.item.id}`).expect(200);
   });
 });

@@ -6,7 +6,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Car, Info, Loader2, ShoppingBag, Store } from 'lucide-react';
 import { toast } from 'sonner';
 import { checkoutSchema, type CheckoutForm } from '../../shared/schemas';
-import { describeSelections, formatMoney } from '../../shared/pricing';
+import { formatMoney } from '../../shared/pricing';
+import { SelectionList } from '../components/menu/SelectionList';
 import type { PublicOrderDTO } from '../../shared/types';
 import { useBag } from '../lib/useBag';
 import { usePublicConfig } from '../lib/queries';
@@ -27,8 +28,11 @@ function Summary({ compact }: { compact?: boolean }) {
               <p className="font-medium">
                 {line.quantity}× {item?.name ?? line.slug}
               </p>
-              {priced && priced.selections.length > 0 && (
-                <p className="text-xs text-cream/55">{describeSelections(priced.selections)}</p>
+              {priced && (
+                <SelectionList
+                  selections={priced.selections}
+                  className="mt-1 text-xs text-cream/55"
+                />
               )}
               {line.notes && <p className="text-xs italic text-cream/60">“{line.notes}”</p>}
             </div>

@@ -7,6 +7,7 @@ const optionSchema = new Schema(
     name: { type: String, required: true },
     price: { type: Number, required: true, min: 0 },
     isAvailable: { type: Boolean, default: true },
+    icon: { type: String },
   },
   { _id: false },
 );
@@ -32,6 +33,7 @@ const menuItemSchema = new Schema(
     category: { type: String, enum: ['mains', 'desserts-drinks'], required: true },
     basePrice: { type: Number, required: true, min: 0 },
     image: { type: String, default: null },
+    boxImages: { type: [String], default: [] },
     isAvailable: { type: Boolean, default: true },
     sortOrder: { type: Number, default: 0 },
     optionGroups: { type: [groupSchema], default: [] },
@@ -57,6 +59,7 @@ export function toMenuItem(
     category: d.category as MenuItem['category'],
     basePrice: d.basePrice,
     image: d.image ?? null,
+    boxImages: d.boxImages ?? [],
     isAvailable: d.isAvailable ?? true,
     sortOrder: d.sortOrder ?? 0,
     optionGroups: (d.optionGroups ?? []).map((g) => ({
@@ -71,6 +74,7 @@ export function toMenuItem(
         name: o.name,
         price: o.price,
         isAvailable: o.isAvailable ?? true,
+        ...(o.icon ? { icon: o.icon } : {}),
       })),
     })),
   };

@@ -19,6 +19,7 @@
     "test:watch": "vitest",
     "seed": "tsx server/scripts/seed.ts",
     "migrate:client-updates": "tsx server/scripts/migrate-client-updates.ts",
+    "migrate:menu-images-icons": "tsx server/scripts/migrate-menu-images-icons.ts",
     "email:test": "tsx server/scripts/test-email.ts",
     "images": "tsx scripts/optimize-images.ts",
     "dev:db": "tsx scripts/dev-db.ts"

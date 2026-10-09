@@ -5,6 +5,8 @@ import { ChevronDown, ImageOff, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { api, ApiError } from '../../lib/api';
 import { formatMoney } from '../../../shared/pricing';
 import { CATEGORY_LABELS } from '../../../shared/menu.seed';
+import { EXTRA_ICONS, iconLabel } from '../../../shared/icons';
+import { ExtraIcon } from '../../components/menu/ExtraIcon';
 import type { MenuItem, OptionGroup } from '../../../shared/types';
 import {
   Button,
@@ -40,6 +42,7 @@ const BLANK: Draft = {
   category: 'mains',
   basePrice: 0,
   image: '',
+  boxImages: [],
   isAvailable: true,
   sortOrder: 10,
   optionGroups: [],
@@ -165,7 +168,17 @@ function GroupEditor({
       </div>
       <ul className="mt-4 space-y-2">
         {group.options.map((o, i) => (
-          <li key={i} className="grid grid-cols-[1fr_96px_auto_auto] items-center gap-2">
+          <li
+            key={i}
+            className="grid grid-cols-[40px_minmax(0,1fr)_96px_auto_auto] items-center gap-x-2 gap-y-1.5"
+          >
+            <span className="row-span-2 grid h-10 w-10 place-items-center self-start rounded-lg bg-neutral-100">
+              {o.icon ? (
+                <ExtraIcon name={o.icon} size={32} surface="light" />
+              ) : (
+                <ImageOff size={14} className="text-neutral-300" aria-hidden />
+              )}
+            </span>
             <Input
               aria-label="Option name"
               value={o.name}
@@ -197,6 +210,19 @@ function GroupEditor({
             >
               <X size={16} aria-hidden />
             </button>
+            <Select
+              aria-label={`${o.name || 'Option'} icon`}
+              className="col-span-2 h-9 py-1 text-sm"
+              value={o.icon ?? ''}
+              onChange={(e) => setOpt(i, { icon: e.target.value || undefined })}
+            >
+              <option value="">No icon</option>
+              {EXTRA_ICONS.map((n) => (
+                <option key={n} value={n}>
+                  {iconLabel(n)}
+                </option>
+              ))}
+            </Select>
           </li>
         ))}
       </ul>
@@ -230,6 +256,7 @@ function Editor({ initial, onClose }: { initial: Draft; onClose: () => void }) {
         id: undefined,
         slug: d.slug || slugify(d.name),
         image: d.image || null,
+        boxImages: (d.boxImages ?? []).map((u) => u.trim()).filter(Boolean),
         optionGroups: d.optionGroups.map((g, gi) => ({
           ...g,
           key: g.key || slugify(g.name) || `group-${gi + 1}`,
@@ -357,6 +384,40 @@ function Editor({ initial, onClose }: { initial: Draft; onClose: () => void }) {
                 value={d.image ?? ''}
                 onChange={(e) => setD({ ...d, image: e.target.value })}
                 placeholder="https://…"
+              />
+            </div>
+          </Field>
+          <Field
+            label="Box photos (“What you’ll receive”)"
+            htmlFor="m-box"
+            hint="One per line, e.g. /images/box/waakye-fish-480.webp. Leave empty to hide the row."
+          >
+            <div className="flex gap-3">
+              <div className="flex shrink-0 gap-1">
+                {(d.boxImages ?? []).filter(Boolean).length ? (
+                  (d.boxImages ?? [])
+                    .filter(Boolean)
+                    .slice(0, 3)
+                    .map((u) => (
+                      <img
+                        key={u}
+                        src={u}
+                        alt=""
+                        className="h-16 w-16 rounded-lg bg-neutral-100 object-cover"
+                      />
+                    ))
+                ) : (
+                  <div className="grid h-16 w-16 place-items-center rounded-lg bg-neutral-100">
+                    <ImageOff size={18} className="text-neutral-400" aria-hidden />
+                  </div>
+                )}
+              </div>
+              <Textarea
+                id="m-box"
+                rows={2}
+                value={(d.boxImages ?? []).join('\n')}
+                onChange={(e) => setD({ ...d, boxImages: e.target.value.split('\n') })}
+                placeholder="/images/box/…-480.webp"
               />
             </div>
           </Field>
@@ -582,7 +643,13 @@ export default function MenuPage() {
                           key={o.key}
                           className="flex items-center justify-between gap-3 px-3 py-2 text-sm"
                         >
-                          <span className={cn(!o.isAvailable && 'text-neutral-400 line-through')}>
+                          <span
+                            className={cn(
+                              'inline-flex items-center gap-2',
+                              !o.isAvailable && 'text-neutral-400 line-through',
+                            )}
+                          >
+                            <ExtraIcon name={o.icon} size={24} surface="light" />
                             {o.name}
                           </span>
                           <span className="ml-auto tabular-nums text-neutral-500">

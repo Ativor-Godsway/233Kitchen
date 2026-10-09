@@ -10,11 +10,15 @@ const MAIN = {
   src: '/images/fried-rice-chicken-960.webp',
   alt: 'Loaded fried rice with grilled chicken, plantain and coleslaw',
 };
+/** Left, right, back. */
 const FAN = [
   { src: '/images/banku-tilapia-960.webp', alt: 'Banku with grilled tilapia' },
-  { src: '/images/waakye-meat-960.webp', alt: 'Loaded Hajia waakye' },
-  { src: '/images/waakye-fish-960.webp', alt: 'Waakye with fried fish' },
+  { src: '/images/waakye-fish-960.webp', alt: 'Loaded Hajia waakye with fried fish' },
+  { src: '/images/braised-rice-960.webp', alt: 'Braised rice plate with plantain and omelette' },
 ];
+
+/** Matches the card widths below: w-[min(48vw,300px)] md:w-[min(26vw,300px)]. */
+const SIZES = '(min-width: 768px) min(26vw, 300px), min(52vw, 300px)';
 
 function useIsWide() {
   const [wide, setWide] = useState(
@@ -47,7 +51,7 @@ function Card({
       <img
         src={src}
         srcSet={srcSetFor(src)}
-        sizes="(min-width: 768px) 300px, 48vw"
+        sizes={SIZES}
         alt={alt}
         className="h-full w-full object-cover"
         loading={eager ? 'eager' : 'lazy'}

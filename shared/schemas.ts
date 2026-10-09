@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ORDER_STATUSES, PAYMENT_STATUSES } from './constants.js';
+import { EXTRA_ICONS } from './icons.js';
 import { MAX_LINE_QUANTITY, MAX_NOTES_LENGTH } from './pricing.js';
 
 /** Normalises a US phone number to "(508) 353-8191", or returns null. */
@@ -79,6 +80,11 @@ const optionSchema = z.object({
   name: z.string().trim().min(1).max(80),
   price: z.number().int().min(0).max(100_000),
   isAvailable: z.boolean(),
+  // '' (no icon chosen in admin) is stored as no icon.
+  icon: z
+    .union([z.enum(EXTRA_ICONS), z.literal('')])
+    .optional()
+    .transform((v) => v || undefined),
 });
 
 const optionGroupSchema = z
@@ -112,6 +118,20 @@ export const menuItemSchema = z.object({
       'Use an https:// URL or /images/… path',
     )
     .nullable(),
+  boxImages: z
+    .array(
+      z
+        .string()
+        .trim()
+        .max(500)
+        .refine(
+          (v) => v.startsWith('/') || /^https:\/\//.test(v),
+          'Use an https:// URL or /images/… path',
+        ),
+    )
+    .max(6)
+    .optional()
+    .default([]),
   isAvailable: z.boolean(),
   sortOrder: z.number().int().min(0).max(1000),
   optionGroups: z

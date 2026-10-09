@@ -101,6 +101,42 @@ describe('POST /api/orders — happy path', () => {
   });
 });
 
+describe('POST /api/orders — Braised Rice Plate', () => {
+  beforeEach(resetDb);
+  afterAll(disconnectDb);
+
+  it('prices extras on the server, ignoring client prices, and stores option icons', async () => {
+    const res = await request(app)
+      .post('/api/orders')
+      .send(
+        orderBody({
+          items: [
+            {
+              slug: 'braised-rice-plate',
+              quantity: 1,
+              price: 1,
+              selections: [
+                { groupKey: 'extras', optionKey: 'extra-sauce', qty: 2, unitPrice: 0 },
+                { groupKey: 'extras', optionKey: 'extra-fried-eggs', qty: 1 },
+              ],
+            },
+          ],
+        }),
+      )
+      .expect(201);
+    expect(res.body.order.total).toBe(2000 + 2 * 200 + 300);
+    const saved = await OrderModel.findOne({ number: res.body.order.number }).lean();
+    expect(saved!.items[0].selections.map((s) => [s.optionKey, s.unitPrice, s.icon])).toEqual([
+      ['extra-sauce', 200, 'red-sauce'],
+      ['extra-fried-eggs', 300, 'omelette'],
+    ]);
+    const view = await request(app)
+      .get(`/api/orders/${res.body.order.number}?t=${res.body.token}`)
+      .expect(200);
+    expect(view.body.order.items[0].selections[0].icon).toBe('red-sauce');
+  });
+});
+
 describe('POST /api/orders — validation', () => {
   it('returns field errors for bad customer details', async () => {
     const res = await request(app)

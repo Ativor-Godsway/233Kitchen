@@ -11,16 +11,22 @@ export async function buildPrepSheet(date: string, s: Settings): Promise<PrepShe
     .sort({ pickupWindowId: 1, seq: 1 })
     .lean();
   const orders = rows.map(toOrderDTO);
-  const menuOrder = new Map(
-    (await MenuItemModel.find().select('slug sortOrder').lean()).map((m) => [
-      m.slug,
-      m.sortOrder ?? 0,
-    ]),
+  const menu = await MenuItemModel.find().select('slug sortOrder optionGroups').lean();
+  const menuOrder = new Map(menu.map((m) => [m.slug, m.sortOrder ?? 0]));
+  // Current icons, for orders placed before icons existed.
+  const menuIcons = new Map(
+    menu.flatMap((m) =>
+      (m.optionGroups ?? []).flatMap((g) =>
+        (g.options ?? []).map((o) => [`${m.slug}:${g.key}:${o.key}`, o.icon ?? undefined]),
+      ),
+    ),
   );
 
   const items = new Map<
     string,
-    PrepItemTotal & { opt: Map<string, { group: string; name: string; count: number }> }
+    PrepItemTotal & {
+      opt: Map<string, { group: string; name: string; count: number; icon?: string }>;
+    }
   >();
   for (const o of orders) {
     for (const l of o.items) {
@@ -34,7 +40,13 @@ export async function buildPrepSheet(date: string, s: Settings): Promise<PrepShe
       t.quantity += l.quantity;
       for (const sel of l.selections) {
         const key = `${sel.groupKey}:${sel.optionKey}`;
-        const cur = t.opt.get(key) ?? { group: sel.groupName, name: sel.name, count: 0 };
+        const icon = sel.icon ?? menuIcons.get(`${l.slug}:${key}`);
+        const cur = t.opt.get(key) ?? {
+          group: sel.groupName,
+          name: sel.name,
+          count: 0,
+          ...(icon ? { icon } : {}),
+        };
         // Extras multiply by the line quantity (2 boxes × 1 extra plantain = 2 extra plantain).
         cur.count += sel.qty * l.quantity;
         t.opt.set(key, cur);
