@@ -3,12 +3,13 @@
  * npm run images -- --force → rebuilds everything
  *
  * - reference/*.jpeg (the owner's real box photos)   → public/images/box/<dish>-{480,960,1600}.webp
- * - reference/ai/dishes/*.jpg (plated photos)        → public/images/<dish>-{480,960,1600}.webp
+ * - reference/ai/dishes/*.jpg (plated photos)        → public/images/<dish>-{480,720,960,1600}.webp
  * - reference/ai/icons-cutout/icon-*.png (cutouts)   → public/icons/<name>-{128,256}.webp + -256.png
  * - reference/logo.*                                  → logo badge + favicons
  * - plated fried-rice-chicken + logo                  → public/images/og-image.jpg
  *
  * Real photos only ever go to box/, so they can never replace the plated photos.
+ * Photos are checked per size, so adding a new width only writes that width.
  */
 import sharp, { type OverlayOptions } from 'sharp';
 import { existsSync, mkdirSync, readdirSync } from 'node:fs';
@@ -20,7 +21,9 @@ const ICONS = 'reference/ai/icons-cutout';
 const OUT = 'public/images';
 const OUT_BOX = 'public/images/box';
 const OUT_ICONS = 'public/icons';
-const WIDTHS = [480, 960, 1600];
+/** Keep in sync with src/lib/images.ts. */
+const BOX_WIDTHS = [480, 960, 1600];
+const PLATED_WIDTHS = [480, 720, 960, 1600];
 const FORCE = process.argv.includes('--force');
 
 for (const d of [OUT, OUT_BOX, OUT_ICONS]) mkdirSync(d, { recursive: true });
@@ -36,6 +39,20 @@ async function build(outputs: string[], make: () => Promise<unknown>) {
   await make();
   built += outputs.length;
   return true;
+}
+
+/** Writes `<base>-<w>.webp` for each width that's missing (all of them with --force). */
+async function buildWidths(
+  base: string,
+  widths: number[],
+  make: (width: number, out: string) => Promise<unknown>,
+) {
+  const made: number[] = [];
+  for (const w of widths) {
+    const out = `${base}-${w}.webp`;
+    if (await build([out], () => make(w, out))) made.push(w);
+  }
+  if (made.length) console.log(`✓ ${base.replace(`${OUT}/`, '')} (${made.join(', ')})`);
 }
 
 /** Finds a file in `dir` by any of the given base names, regardless of extension. */
@@ -65,19 +82,13 @@ async function boxPhotos() {
       console.warn(`⚠️  missing box photo for ${p.out}`);
       continue;
     }
-    const outs = WIDTHS.map((w) => `${OUT_BOX}/${p.out}-${w}.webp`);
-    const did = await build(outs, () =>
-      Promise.all(
-        WIDTHS.map((w, i) =>
-          sharp(src)
-            .rotate()
-            .resize({ width: w, withoutEnlargement: true })
-            .webp({ quality: 74 })
-            .toFile(outs[i]),
-        ),
-      ),
+    await buildWidths(`${OUT_BOX}/${p.out}`, BOX_WIDTHS, (w, out) =>
+      sharp(src)
+        .rotate()
+        .resize({ width: w, withoutEnlargement: true })
+        .webp({ quality: 74 })
+        .toFile(out),
     );
-    if (did) console.log(`✓ box/${p.out}`);
   }
 }
 
@@ -87,19 +98,13 @@ async function platedPhotos() {
   for (const file of readdirSync(DISHES).filter((f) => /\.(jpe?g|png|webp)$/i.test(f))) {
     const name = path.parse(file).name;
     const src = path.join(DISHES, file);
-    const outs = WIDTHS.map((w) => `${OUT}/${name}-${w}.webp`);
-    const did = await build(outs, () =>
-      Promise.all(
-        WIDTHS.map((w, i) =>
-          sharp(src)
-            .rotate()
-            .resize({ width: w, kernel: 'lanczos3' })
-            .webp({ quality: 78 })
-            .toFile(outs[i]),
-        ),
-      ),
+    await buildWidths(`${OUT}/${name}`, PLATED_WIDTHS, (w, out) =>
+      sharp(src)
+        .rotate()
+        .resize({ width: w, kernel: 'lanczos3' })
+        .webp({ quality: 78 })
+        .toFile(out),
     );
-    if (did) console.log(`✓ ${name}`);
   }
 }
 

@@ -41,7 +41,7 @@ export function MenuCard({ item, index }: { item: MenuItem; index: number }) {
       >
         <MenuImage
           item={item}
-          sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 92vw"
+          sizes="(min-width: 1152px) 352px, (min-width: 1024px) calc((100vw - 6rem) / 3), (min-width: 640px) calc((100vw - 4.5rem) / 2), calc(100vw - 2rem)"
           className={cn(
             'h-full w-full transition duration-700 group-hover:scale-[1.04]',
             soldOut && 'grayscale',

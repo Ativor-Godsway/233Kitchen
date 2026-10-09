@@ -78,7 +78,7 @@ reference/          Original brand photos and logo
 - **Menu, prices, sold-out:** Admin → Menu
 - **Pickup days, windows, cutoff, pause, payment text, address, phone, socials:** Admin → Settings
 - **Images:** `npm run images` builds any missing outputs and never overwrites existing ones
-  (`-- --force` rebuilds). Plated photos: `reference/ai/dishes/<dish>.jpg` → `public/images/`.
+  (`-- --force` rebuilds). Plated photos: `reference/ai/dishes/<dish>.jpg` → `public/images/` (480/720/960/1600).
   Real box photos: `reference/*.jpeg` → `public/images/box/`. Icons:
   `reference/ai/icons-cutout/icon-<name>.png` → `public/icons/`. See `reference/ai/README.md`.
 - **Gallery photos:** listed in `src/content/gallery.ts` (plated photos from `public/images`).

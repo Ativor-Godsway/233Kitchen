@@ -16,7 +16,7 @@
       "destination": "/api"
     },
     {
-      "source": "/((?!api/|assets/|images/).*)",
+      "source": "/((?!api/|assets/|images/|icons/|fonts/).*)",
       "destination": "/index.html"
     }
   ],
@@ -27,6 +27,24 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/fonts/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000"
+        }
+      ]
+    },
+    {
+      "source": "/icons/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800"
         }
       ]
     },

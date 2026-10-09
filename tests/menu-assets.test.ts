@@ -5,13 +5,15 @@ import { EXTRA_ICONS } from '../shared/icons.js';
 import { imageAt, srcSetFor } from '../src/lib/images.js';
 
 const pub = (p: string) => `public${p}`;
-const sizes = (src: string) => [480, 960, 1600].map((w) => pub(imageAt(src, w as 480)));
+const sizes = (src: string, widths: ReadonlyArray<480 | 720 | 960 | 1600> = [480, 960, 1600]) =>
+  widths.map((w) => pub(imageAt(src, w)));
 
 describe('menu images and icons', () => {
   it('every seed image and box photo exists in all three sizes', () => {
     for (const item of MENU_SEED) {
       expect(item.image, item.slug).toMatch(/^\/images\/[a-z-]+-960\.webp$/);
-      for (const f of sizes(item.image!)) expect(existsSync(f), f).toBe(true);
+      for (const f of sizes(item.image!, [480, 720, 960, 1600]))
+        expect(existsSync(f), f).toBe(true);
       for (const box of item.boxImages ?? []) {
         expect(box).toMatch(/^\/images\/box\/[a-z-]+-480\.webp$/);
         for (const f of sizes(box)) expect(existsSync(f), f).toBe(true);
@@ -50,6 +52,12 @@ describe('menu images and icons', () => {
       'index.html',
     ];
     for (const f of files) expect(readFileSync(f, 'utf8'), f).not.toMatch(/\/images\/waakye-meat/);
+  });
+
+  it('srcSetFor offers 720 for plated photos (not box photos)', () => {
+    expect(srcSetFor('/images/braised-rice-960.webp')).toBe(
+      '/images/braised-rice-480.webp 480w, /images/braised-rice-720.webp 720w, /images/braised-rice-960.webp 960w, /images/braised-rice-1600.webp 1600w',
+    );
   });
 
   it('srcSetFor supports the box/ subfolder', () => {
