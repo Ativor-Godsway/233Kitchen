@@ -1,6 +1,6 @@
 import { Navigation, Phone } from 'lucide-react';
 import { DEFAULT_SETTINGS } from '../../../shared/constants';
-import { mapLinks } from '../../../shared/maps';
+import { mapLinks, streetLine } from '../../../shared/maps';
 import { usePublicConfig } from '../../lib/queries';
 import { BrandIcon } from '../BrandIcon';
 import { SectionHeading } from './SectionHeading';
@@ -35,11 +35,11 @@ function LocationMap({ query }: { query: string }) {
       <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div className="min-w-0">
           <p className="truncate font-semibold">{query}</p>
-          <p className="text-sm text-ink/65">Exact address is in your confirmation email.</p>
+          <p className="text-sm text-ink/65">Pickup only. We’ll meet you at the curb.</p>
         </div>
         <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
           <a
-            href={links.directions}
+            href={links.search}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 rounded-full bg-ghana-red px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-ghana-red/25 transition hover:bg-ghana-red-400"
@@ -83,8 +83,17 @@ export function Pickup() {
               <div>
                 <p className="font-semibold">{s.pickupAddressPublic}</p>
                 <p className="text-sm text-ink/65">
-                  Street pickup in Worcester. Full address sent with your confirmation.
+                  Meet us at the curb outside {streetLine(s.pickupAddressPublic)}.
                 </p>
+                <a
+                  href={mapLinks(s.mapQuery || s.pickupAddressPublic).search}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-ghana-red hover:underline"
+                >
+                  <Navigation size={14} aria-hidden /> Get directions
+                  <span className="sr-only">(opens Google Maps in a new tab)</span>
+                </a>
               </div>
             </li>
             <li className="flex gap-4">

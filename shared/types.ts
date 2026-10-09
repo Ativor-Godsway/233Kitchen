@@ -117,14 +117,13 @@ export interface Settings extends ScheduleSettings {
   pausedMessage: string;
   notificationEmails: string[];
   paymentInstructions: string;
-  /** Shown on the website (street only). */
+  /** Pickup address shown on the website (full street address). */
   pickupAddressPublic: string;
   /**
-   * Public location for the website map and "Get directions" links. Street only by default,
-   * so the house number stays private unless the owner deliberately adds it here.
+   * Public location for the website map and "Get directions" links.
    */
   mapQuery: string;
-  /** Shared only in confirmation emails. */
+  /** Used in customer emails and the calendar invite LOCATION. */
   pickupAddressFull: string;
   /** Postal address line required in marketing emails (CAN-SPAM). */
   businessAddressLine: string;
@@ -134,7 +133,7 @@ export interface Settings extends ScheduleSettings {
   notifyOnStatus: OrderStatus[];
 }
 
-/** Settings safe to expose publicly (no notification emails, no full address). */
+/** Settings safe to expose publicly (no notification emails; the email address copy is server-only). */
 export type PublicSettings = Omit<Settings, 'notificationEmails' | 'pickupAddressFull'>;
 
 export interface WindowAvailability extends TimeWindow {

@@ -55,9 +55,9 @@ is named.
 
 ## Ordering & pickup
 
-11. **Full pickup address** is still the placeholder _"Hollywood Street, Worcester, MA (full address
-    sent on confirmation)"_. Add the house number in **Settings → Full pickup address**. It only
-    appears in emails and the calendar file, never on the website.
+11. **Pickup address:** 25 Hollywood St, Worcester, MA 01610, shown in full on the website, in
+    emails, the calendar file and the marketing-email footer (client request, Oct 2026). Editable
+    in **Settings**; an existing database is updated with `npm run migrate:client-updates`.
 12. **Pickup windows:** 12–2, 2–4, 4–6 and 6–8 PM, with **no capacity limit**. Set a max per window in
     Settings if the kitchen can only handle so many orders.
 13. **Cutoff:** Monday 11:59 PM Eastern for Wednesday pickup. Customers can book **3 weeks ahead**.

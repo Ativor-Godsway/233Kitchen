@@ -2,10 +2,11 @@ import { useEffect } from 'react';
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion, useReducedMotion } from 'framer-motion';
-import { CalendarPlus, Check, Clock, Mail, MapPin, Phone, Wallet } from 'lucide-react';
+import { CalendarPlus, Check, Clock, Mail, MapPin, Navigation, Phone, Wallet } from 'lucide-react';
 import { api } from '../lib/api';
 import { describeSelections, formatMoney } from '../../shared/pricing';
 import { FULFILMENT_LABELS } from '../../shared/constants';
+import { mapLinks, streetLine } from '../../shared/maps';
 import type { PublicOrderDTO } from '../../shared/types';
 import { KenteBand } from '../components/KenteBand';
 import { Skeleton } from '../components/ui/Skeleton';
@@ -110,7 +111,18 @@ export default function Confirmation() {
             <MapPin size={14} aria-hidden /> Where
           </p>
           <p className="mt-2 font-semibold">{order.pickupAddressPublic}</p>
-          <p className="text-sm text-cream/60">The exact address is in your confirmation email.</p>
+          <p className="text-sm text-cream/60">
+            Meet us at the curb outside {streetLine(order.pickupAddressPublic)}.
+          </p>
+          <a
+            href={mapLinks(order.pickupAddressPublic).search}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-ghana-gold hover:underline"
+          >
+            <Navigation size={14} aria-hidden /> Get directions
+            <span className="sr-only">(opens Google Maps in a new tab)</span>
+          </a>
         </div>
       </div>
 

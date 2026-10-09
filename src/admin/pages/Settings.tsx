@@ -500,10 +500,9 @@ export default function Settings() {
             htmlFor="map-query"
             hint={
               <>
-                Shown on the website map and used for “Get directions”. Keep it to the street to
-                keep the house number private; it stays in confirmation emails only.{' '}
+                Shown on the website map and used for “Get directions”.{' '}
                 <a
-                  href={mapLinks(s.mapQuery).directions}
+                  href={mapLinks(s.mapQuery).search}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-medium text-ghana-green underline"
@@ -517,7 +516,7 @@ export default function Settings() {
             <Input
               id="map-query"
               value={s.mapQuery}
-              placeholder="Hollywood Street, Worcester, MA"
+              placeholder="25 Hollywood St, Worcester, MA 01610"
               onChange={(e) => up('mapQuery', e.target.value)}
             />
           </Field>
@@ -525,7 +524,7 @@ export default function Settings() {
             <Field
               label="Pickup address on the website"
               htmlFor="addr-pub"
-              hint="Street only."
+              hint="Full address, shown on the home page, footer and order page."
               error={errors.pickupAddressPublic}
             >
               <Input
@@ -535,7 +534,7 @@ export default function Settings() {
               />
             </Field>
             <Field
-              label="Full pickup address (emails only)"
+              label="Pickup address (emails & calendar invite)"
               htmlFor="addr-full"
               error={errors.pickupAddressFull}
             >

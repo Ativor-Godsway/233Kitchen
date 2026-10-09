@@ -63,7 +63,7 @@ export const MENU_SEED: MenuSeedItem[] = [
     name: 'Loaded Hajia Waakye',
     slug: 'loaded-hajia-waakye',
     description:
-      'Hajia-style waakye (rice and beans slow-cooked the proper way) with rich red stew, gari, boiled eggs, talia, sweet fried plantain, coleslaw and a hit of shito.',
+      'Hajia-style waakye (rice and beans slow-cooked the proper way) with rich red stew, gari, boiled eggs, spaghetti, sweet fried plantain, coleslaw and a hit of shito.',
     category: 'mains',
     basePrice: 2000,
     image: '/images/waakye-meat-960.webp',

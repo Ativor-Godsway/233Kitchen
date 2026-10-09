@@ -18,6 +18,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "seed": "tsx server/scripts/seed.ts",
+    "migrate:client-updates": "tsx server/scripts/migrate-client-updates.ts",
     "email:test": "tsx server/scripts/test-email.ts",
     "images": "tsx scripts/optimize-images.ts",
     "dev:db": "tsx scripts/dev-db.ts"

@@ -174,8 +174,8 @@ Running it again is safe: it only creates what's missing.
 1. Open `https://yourdomain.com/admin` and log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 2. Go to **Settings → Change password** and set a new, private password. This also signs out every
    other session.
-3. In **Settings**, check the payment instructions, the full pickup address (house number, which
-   appears in confirmation emails), the notification emails, pickup windows and social links.
+3. In **Settings**, check the payment instructions, the pickup address, the notification emails,
+   pickup windows and social links.
 4. If the password is ever forgotten, reset it from your computer:
    ```bash
    MONGODB_URI="…" ADMIN_EMAIL="owner@yourdomain.com" ADMIN_PASSWORD="new-password-here" \

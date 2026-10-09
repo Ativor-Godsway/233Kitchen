@@ -40,6 +40,9 @@ export const FULFILMENT_LABELS: Record<Fulfilment, string> = {
   uber: 'I’ll send an Uber courier',
 };
 
+/** Exact pickup address, shown on the website, in emails and in the calendar invite. */
+export const PICKUP_ADDRESS = '25 Hollywood St, Worcester, MA 01610';
+
 export const DEFAULT_SETTINGS: Settings = {
   timezone: 'America/New_York',
   pickupDays: [3],
@@ -59,10 +62,10 @@ export const DEFAULT_SETTINGS: Settings = {
   notificationEmails: [],
   paymentInstructions:
     'No payment now. Once we confirm your order, pay via Zelle (amankwaherica98@gmail.com) or Apple Pay (508-353-8191), or pay at pickup.',
-  pickupAddressPublic: 'Hollywood Street, Worcester, MA',
-  mapQuery: 'Hollywood Street, Worcester, MA',
-  pickupAddressFull: 'Hollywood Street, Worcester, MA (full address sent on confirmation)',
-  businessAddressLine: '+233 Kitchen · Hollywood Street, Worcester, MA',
+  pickupAddressPublic: PICKUP_ADDRESS,
+  mapQuery: PICKUP_ADDRESS,
+  pickupAddressFull: PICKUP_ADDRESS,
+  businessAddressLine: `+233 Kitchen · ${PICKUP_ADDRESS}`,
   businessPhone: '(508) 353-8191',
   social: { instagram: '', whatsapp: '', tiktok: '', facebook: '' },
   notifyOnStatus: ['confirmed', 'ready', 'cancelled'],

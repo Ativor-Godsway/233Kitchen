@@ -122,7 +122,7 @@ describe('campaigns', () => {
       .expect(200);
     expect(preview.body.recipientCount).toBe(1);
     expect(preview.body.html).toContain('/unsubscribe?token=');
-    expect(preview.body.html).toContain('Hollywood Street');
+    expect(preview.body.html).toContain('25 Hollywood St, Worcester, MA 01610');
 
     const sent = await a
       .post('/api/admin/campaigns/send')

@@ -5,7 +5,7 @@
 export const SITE = {
   /** Main hero headline. Alternatives are listed in OPEN_QUESTIONS.md. */
   headline: ['Ghana,', 'boxed with love.'],
-  eyebrow: 'Ghanaian home kitchen · Worcester, MA',
+  eyebrow: '+233 Kitchen · Worcester, MA',
   subline: 'Pre-order from the menu. Pick up fresh every Wednesday in Worcester.',
   heroStory: {
     title: 'Cooked to order. Never sitting under a heat lamp.',

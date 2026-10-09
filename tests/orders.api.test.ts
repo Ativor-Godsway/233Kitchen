@@ -41,6 +41,8 @@ describe('POST /api/orders — happy path', () => {
     const owner = logs.find((l) => l.type === 'owner_new_order')!;
     expect(owner.to).toBe('owner@233kitchen.test');
     expect(owner.subject).toMatch(/^🧾 New order 233-0001 — \$51 — \w{3}, \w{3} \d+, 2–4 PM$/);
+    const received = logs.find((l) => l.type === 'customer_order_received')!;
+    expect(received.text).toContain('Where: 25 Hollywood St, Worcester, MA 01610');
   });
 
   it('increments order numbers and merges repeat customers', async () => {
@@ -94,6 +96,8 @@ describe('POST /api/orders — happy path', () => {
     expect(ics.headers['content-type']).toMatch(/text\/calendar/);
     expect(ics.text).toContain('BEGIN:VEVENT');
     expect(ics.text).toContain(`${number}@233kitchen`);
+    expect(ics.text).toContain('LOCATION:25 Hollywood St\\, Worcester\\, MA 01610');
+    expect(view.body.order.pickupAddressPublic).toBe('25 Hollywood St, Worcester, MA 01610');
   });
 });
 

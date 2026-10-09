@@ -25,7 +25,7 @@ const GALLERY_TEXT: Record<string, { caption?: string; alt?: string }> = {
   },
   'waakye-with-fish': {
     caption: 'Waakye with fish',
-    alt: 'Waakye with talia, stew, gari, egg, fried plantain and fried fish',
+    alt: 'Waakye with spaghetti, stew, gari, egg, fried plantain and fried fish',
   },
   'rice-platter': {
     caption: 'From our kitchen',
