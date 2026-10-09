@@ -2,14 +2,16 @@ import mongoose from 'mongoose';
 import { mkdirSync } from 'node:fs';
 import { env } from './env.js';
 import { seedDatabase } from './services/seed.js';
-import { DEV_DB_URI, waitForDevDb } from './devDb.js';
+import { DEV_ADMIN, DEV_DB_URI, waitForDevDb } from './devDb.js';
+import { assertProductionEnv } from './productionEnv.js';
 
 /**
  * Cached Mongoose connection. On Vercel each warm function instance reuses the
  * same connection instead of opening a new one per request.
  *
  * With no MONGODB_URI outside production, an in-memory MongoDB is started
- * (data persisted to ./.data/mongo in dev) and seeded automatically.
+ * (data persisted to ./.data/mongo in dev) and seeded automatically. None of that can happen in
+ * production: the environment is validated first and a missing MONGODB_URI is a hard error.
  */
 interface Cache {
   promise: Promise<typeof mongoose> | null;
@@ -22,6 +24,7 @@ const cache: Cache = (g.__k233Mongo ??= { promise: null, memoryServer: null });
 mongoose.set('strictQuery', true);
 
 async function startMemoryServer(): Promise<string> {
+  if (env.isProd) throw new Error('The in-memory database is not available in production');
   // Indirect specifier so serverless bundlers never pull the dev-only package in.
   const pkg = 'mongodb-memory-server-core';
   const { MongoMemoryServer } = (await import(pkg)) as typeof import('mongodb-memory-server-core');
@@ -51,6 +54,7 @@ export function connectDb(): Promise<typeof mongoose> {
   if (cache.promise) return cache.promise;
 
   cache.promise = (async () => {
+    assertProductionEnv();
     let uri = env.mongoUri;
     let autoSeed = false;
     if (!uri) {
@@ -63,18 +67,24 @@ export function connectDb(): Promise<typeof mongoose> {
       maxPoolSize: 5,
       serverSelectionTimeoutMS: 8000,
     });
-    if (autoSeed) {
-      const result = await seedDatabase({
-        adminEmail: env.adminEmail,
-        adminPassword: env.adminPassword,
-      });
+    if (autoSeed && !env.isProd) {
+      const useDevAdmin = !env.adminEmail || !env.adminPassword;
+      const admin = useDevAdmin
+        ? DEV_ADMIN
+        : { email: env.adminEmail, password: env.adminPassword };
+      const result = await seedDatabase({ admin });
       if (!env.isTest) {
         console.log(
           '\n  🗄️  Using local dev MongoDB (no MONGODB_URI set). Data kept in ./.data/mongo',
         );
         if (result.adminCreated || result.menuCreated)
           console.log('  🌱 Seeded:', JSON.stringify(result));
-        console.log(`  🔑 Dev admin login: ${env.adminEmail} / ${env.adminPassword}  (dev only)\n`);
+        // Only the throwaway dev password is ever printed, never one from .env.
+        console.log(
+          useDevAdmin
+            ? `  🔑 Dev admin login: ${DEV_ADMIN.email} / ${DEV_ADMIN.password}  (local dev DB only)\n`
+            : `  🔑 Dev admin login: ${env.adminEmail} / (ADMIN_PASSWORD from .env)\n`,
+        );
       }
     }
     return mongoose;

@@ -100,7 +100,8 @@ export function activeProvider(): Provider {
 /** One-line startup summary. Never includes passwords or API keys. */
 export function describeEmailConfig(): string {
   const s = providerStatus();
-  const owner = s.ownerEmail || `(OWNER_EMAIL not set; falls back to ${env.adminEmail})`;
+  const owner =
+    s.ownerEmail || '(OWNER_EMAIL not set; only admin Settings addresses get new orders)';
   const line = `📧 Email: ${s.label} from ${s.from} → owner ${owner}`;
   return s.misconfigured
     ? `${line}

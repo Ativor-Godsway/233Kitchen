@@ -166,6 +166,3 @@ export const CATEGORY_LABELS: Record<MenuItem['category'], string> = {
   mains: 'Mains',
   'desserts-drinks': 'Desserts & Drinks',
 };
-
-/** Offline/mock menu for the client when the API is unreachable. */
-export const MENU_FALLBACK: MenuItem[] = MENU_SEED.map((m) => ({ ...m, id: m.slug }));

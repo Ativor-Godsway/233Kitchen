@@ -1,6 +1,7 @@
 /**
  * Central, typed access to environment variables.
- * In production a missing secret is a hard error; in dev we fall back to safe local defaults.
+ * In production a missing secret is a hard error (see productionEnv.ts); dev-only fallbacks are
+ * never used when NODE_ENV=production or VERCEL=1.
  */
 import { existsSync, readFileSync } from 'node:fs';
 
@@ -20,7 +21,10 @@ const underTest = process.env.NODE_ENV === 'test' || !!process.env.VITEST;
 if (!process.env.VERCEL && !underTest) loadDotEnv();
 
 const isProd = process.env.NODE_ENV === 'production' || !!process.env.VERCEL;
-const isTest = process.env.NODE_ENV === 'test' || !!process.env.VITEST;
+const isTest = !isProd && (process.env.NODE_ENV === 'test' || !!process.env.VITEST);
+
+/** Signs local dev sessions only. Production refuses to start without a real JWT_SECRET. */
+const DEV_JWT_SECRET = 'dev-only-insecure-secret-change-me';
 
 function required(name: string, devDefault: string): string {
   const v = process.env[name]?.trim();
@@ -36,13 +40,14 @@ export const env = {
     return process.env.MONGODB_URI?.trim() ?? '';
   },
   get jwtSecret() {
-    return required('JWT_SECRET', 'dev-only-insecure-secret-change-me');
+    return required('JWT_SECRET', DEV_JWT_SECRET);
   },
+  /** Only used by seeding. There are no defaults: see devDb.ts for the local dev login. */
   get adminEmail() {
-    return (process.env.ADMIN_EMAIL?.trim() || 'admin@233kitchen.local').toLowerCase();
+    return process.env.ADMIN_EMAIL?.trim().toLowerCase() ?? '';
   },
   get adminPassword() {
-    return process.env.ADMIN_PASSWORD?.trim() || 'admin1234';
+    return process.env.ADMIN_PASSWORD?.trim() ?? '';
   },
   get resendApiKey() {
     return process.env.RESEND_API_KEY?.trim() ?? '';
@@ -56,10 +61,10 @@ export const env = {
   get emailFrom() {
     const from = process.env.EMAIL_FROM?.trim();
     if (from) return from;
-    // Gmail only sends "From" the authenticated account, so default to it.
+    // Gmail only sends "From" the authenticated account, so default to it (dev convenience;
+    // production requires EMAIL_FROM to be set explicitly).
     const smtpUser = process.env.SMTP_USER?.trim();
-    if (smtpUser) return `+233 Kitchen <${smtpUser}>`;
-    return '+233 Kitchen <onboarding@resend.dev>';
+    return smtpUser ? `+233 Kitchen <${smtpUser}>` : '';
   },
   get emailReplyTo() {
     return process.env.EMAIL_REPLY_TO?.trim() ?? '';
@@ -82,7 +87,7 @@ export const env = {
     },
   },
   get siteUrl() {
-    return (process.env.SITE_URL?.trim() || 'http://localhost:5173').replace(/\/$/, '');
+    return required('SITE_URL', 'http://localhost:5173').replace(/\/$/, '');
   },
   get tz() {
     return process.env.TZ_BUSINESS?.trim() || 'America/New_York';

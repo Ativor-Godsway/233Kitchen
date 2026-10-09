@@ -15,7 +15,7 @@ export function CartDrawer() {
   const openItem = useUi((s) => s.openItem);
   const setQuantity = useCart((s) => s.setQuantity);
   const remove = useCart((s) => s.remove);
-  const { items, subtotal, count, hasProblems } = useBag();
+  const { items, subtotal, count, hasProblems, menuUnavailable } = useBag();
   const navigate = useNavigate();
 
   return (
@@ -137,14 +137,21 @@ export function CartDrawer() {
             <p className="mt-1 text-xs text-cream/50">
               No payment now. Pickup day and time are chosen at checkout.
             </p>
-            {hasProblems && (
-              <p className="mt-3 text-sm text-ghana-gold">
-                Remove or edit the highlighted items to continue.
+            {menuUnavailable ? (
+              <p className="mt-3 text-sm text-ghana-gold" role="status">
+                Our menu is temporarily unavailable, so ordering is paused. Please try again in a
+                few minutes.
               </p>
+            ) : (
+              hasProblems && (
+                <p className="mt-3 text-sm text-ghana-gold">
+                  Remove or edit the highlighted items to continue.
+                </p>
+              )
             )}
             <button
               type="button"
-              disabled={hasProblems}
+              disabled={hasProblems || menuUnavailable}
               onClick={() => {
                 close();
                 navigate('/checkout');

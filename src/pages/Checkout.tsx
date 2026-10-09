@@ -54,7 +54,7 @@ function Summary({ compact }: { compact?: boolean }) {
 export default function Checkout() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { items, hasProblems, count } = useBag();
+  const { items, hasProblems, count, menuUnavailable } = useBag();
   const lines = useCart((s) => s.lines);
   const clear = useCart((s) => s.clear);
   const {
@@ -227,7 +227,6 @@ export default function Checkout() {
                   type="tel"
                   inputMode="tel"
                   autoComplete="tel"
-                  placeholder="(508) 555-0123"
                   className="field"
                   aria-invalid={!!errors.phone}
                   aria-describedby={errors.phone ? 'phone-err' : undefined}
@@ -452,16 +451,31 @@ export default function Checkout() {
 
           <button
             type="submit"
-            disabled={submitting || hasProblems || !!paused || !!noDates || configLoading}
+            disabled={
+              submitting ||
+              hasProblems ||
+              menuUnavailable ||
+              !!paused ||
+              !!noDates ||
+              configLoading ||
+              configError
+            }
             className="flex w-full items-center justify-center gap-2 rounded-full bg-ghana-red py-4 text-lg font-semibold text-white shadow-lg shadow-ghana-red/25 transition hover:bg-ghana-red-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting && <Loader2 size={20} className="animate-spin" aria-hidden />}
             {submitting ? 'Placing order…' : 'Place pre-order'}
           </button>
-          {hasProblems && (
-            <p className="text-center text-sm text-ghana-gold">
-              Some items in your bag are unavailable. Please update your bag.
+          {menuUnavailable ? (
+            <p className="text-center text-sm text-ghana-gold" role="status">
+              Our menu is temporarily unavailable, so ordering is paused. Please try again in a few
+              minutes.
             </p>
+          ) : (
+            hasProblems && (
+              <p className="text-center text-sm text-ghana-gold">
+                Some items in your bag are unavailable. Please update your bag.
+              </p>
+            )
           )}
         </form>
 

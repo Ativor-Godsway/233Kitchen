@@ -1,10 +1,20 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 
-const adminUserSchema = new Schema(
+export interface AdminUserRow {
+  _id: Types.ObjectId;
+  email: string;
+  passwordHash: string;
+  /** Bumped on password change to invalidate existing sessions. */
+  tokenVersion: number;
+  lastLoginAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const adminUserSchema = new Schema<AdminUserRow>(
   {
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     passwordHash: { type: String, required: true },
-    /** Bumped on password change to invalidate existing sessions. */
     tokenVersion: { type: Number, default: 0 },
     lastLoginAt: { type: Date, default: null },
   },
@@ -12,4 +22,5 @@ const adminUserSchema = new Schema(
 );
 
 export const AdminUserModel =
-  mongoose.models.AdminUser || mongoose.model('AdminUser', adminUserSchema);
+  (mongoose.models.AdminUser as mongoose.Model<AdminUserRow>) ||
+  mongoose.model<AdminUserRow>('AdminUser', adminUserSchema);

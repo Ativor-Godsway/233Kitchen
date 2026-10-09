@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { CATEGORY_LABELS } from '../../../shared/menu.seed';
 import type { MenuItem } from '../../../shared/types';
-import { useMenu } from '../../lib/queries';
+import { useMenu, usePublicConfig } from '../../lib/queries';
+import { DEFAULT_SETTINGS } from '../../../shared/constants';
 import { MenuCard, MenuCardSkeleton } from '../menu/MenuCard';
 import { SectionHeading } from './SectionHeading';
 import { cn } from '../../lib/cn';
@@ -11,6 +12,7 @@ type Filter = 'all' | MenuItem['category'];
 
 export function MenuSection() {
   const { data: menu, isLoading, isError, refetch } = useMenu();
+  const phone = usePublicConfig().data?.settings.businessPhone ?? DEFAULT_SETTINGS.businessPhone;
   const [filter, setFilter] = useState<Filter>('all');
 
   const groups = useMemo(() => {
@@ -72,13 +74,29 @@ export function MenuSection() {
           </div>
         </div>
 
-        {isError && (
-          <div className="mt-10 rounded-2xl bg-white p-6 text-center ring-1 ring-ink/10">
-            <p className="font-semibold">We couldn’t load the menu.</p>
+        {isError && !menu && (
+          <div
+            className="mt-10 rounded-2xl bg-white p-6 text-center ring-1 ring-ink/10 sm:p-8"
+            role="status"
+          >
+            <p className="font-display text-xl font-semibold">Menu temporarily unavailable</p>
+            <p className="mx-auto mt-2 max-w-md text-sm text-ink/70">
+              We can’t load this week’s menu right now, so online ordering is paused. Please try
+              again in a few minutes
+              {phone ? (
+                <>
+                  , or call or text{' '}
+                  <a href={`tel:+1${phone.replace(/\D/g, '')}`} className="font-semibold underline">
+                    {phone}
+                  </a>
+                </>
+              ) : null}
+              .
+            </p>
             <button
               type="button"
               onClick={() => refetch()}
-              className="mt-3 rounded-full bg-ink px-5 py-2 text-sm font-semibold text-cream"
+              className="mt-4 min-h-11 rounded-full bg-ink px-6 py-2.5 text-sm font-semibold text-cream"
             >
               Try again
             </button>

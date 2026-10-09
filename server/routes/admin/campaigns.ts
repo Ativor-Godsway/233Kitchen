@@ -29,12 +29,8 @@ campaignsRouter.post(
     const s = await getSettings();
     const { transactional, customers } = await resolveAudience(input);
     const sample = customers[0] ?? null;
-    const content = renderFor(
-      input,
-      s,
-      sample ?? { name: 'Ama Mensah', unsubscribeToken: 'preview' },
-      transactional,
-    );
+    // With no recipients yet, preview without a personal greeting rather than a made-up name.
+    const content = renderFor(input, s, sample, transactional);
     res.json({
       recipientCount: customers.length,
       transactional,

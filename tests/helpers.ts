@@ -23,8 +23,7 @@ export async function resetDb() {
     MenuItemModel.deleteMany({}),
   ]);
   await seedDatabase({
-    adminEmail: process.env.ADMIN_EMAIL!,
-    adminPassword: process.env.ADMIN_PASSWORD!,
+    admin: { email: process.env.ADMIN_EMAIL!, password: process.env.ADMIN_PASSWORD! },
   });
 }
 

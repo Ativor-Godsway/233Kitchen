@@ -67,12 +67,8 @@ export function renderFor(
 }
 
 export async function sendTest(input: CampaignInput, s: Settings, to: string) {
-  const content = renderFor(
-    input,
-    s,
-    { name: 'Ama Mensah', unsubscribeToken: 'test-preview-token' },
-    input.segment === 'single',
-  );
+  // No real customer behind a test send: no greeting, and the generic unsubscribe page.
+  const content = renderFor(input, s, null, input.segment === 'single');
   return sendEmail({ type: 'test', to, ...content, subject: `[TEST] ${content.subject}` });
 }
 

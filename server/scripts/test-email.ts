@@ -6,7 +6,8 @@ import { env } from '../env.js';
 import { describeEmailConfig, providerStatus, sendTestEmail } from '../services/emailService.js';
 
 async function main() {
-  const to = process.argv[2] || env.ownerEmail || env.adminEmail;
+  const to = process.argv[2] || env.ownerEmail;
+  if (!to) throw new Error('Pass an address (npm run email:test -- you@x.com) or set OWNER_EMAIL.');
   const { provider } = providerStatus();
   console.log(describeEmailConfig());
   console.log(`Sending test to: ${to}`);

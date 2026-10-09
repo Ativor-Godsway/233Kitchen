@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { MENU_FALLBACK } from '../shared/menu.seed.js';
+import { MENU_SEED } from '../shared/menu.seed.js';
 import { formatMoney, lineKey, priceLine, priceOrder, PricingError } from '../shared/pricing.js';
 import type { LineInput, MenuItem } from '../shared/types.js';
 
-const menu: MenuItem[] = structuredClone(MENU_FALLBACK);
+const menu: MenuItem[] = structuredClone(MENU_SEED.map((m) => ({ ...m, id: m.slug })));
 const item = (slug: string) => menu.find((m) => m.slug === slug)!;
 
 function expectPricingError(fn: () => unknown, code: string) {

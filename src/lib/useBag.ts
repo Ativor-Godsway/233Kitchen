@@ -14,7 +14,7 @@ export interface BagLine {
 /** Bag lines priced against the current menu (an estimate; the server re-prices on submit). */
 export function useBag() {
   const lines = useCart((s) => s.lines);
-  const { data: menu, isLoading } = useMenu();
+  const { data: menu, isLoading, isError } = useMenu();
   return useMemo(() => {
     const items: BagLine[] = lines.map((line) => {
       const item = menu?.find((m) => m.slug === line.slug);
@@ -34,6 +34,8 @@ export function useBag() {
     const subtotal = items.reduce((n, b) => n + (b.priced?.lineTotal ?? 0), 0);
     const count = lines.reduce((n, l) => n + l.quantity, 0);
     const hasProblems = items.some((b) => b.problem);
-    return { items, subtotal, count, hasProblems, isLoading };
-  }, [lines, menu, isLoading]);
+    /** The live menu couldn't be loaded, so nothing can be priced or ordered. */
+    const menuUnavailable = !menu && isError;
+    return { items, subtotal, count, hasProblems, isLoading, menuUnavailable };
+  }, [lines, menu, isLoading, isError]);
 }

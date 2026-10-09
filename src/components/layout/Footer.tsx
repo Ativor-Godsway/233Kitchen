@@ -5,22 +5,29 @@ import { KenteBand } from '../KenteBand';
 import { FacebookIcon, InstagramIcon, TikTokIcon, WhatsAppIcon } from '../SocialIcons';
 import { usePublicConfig } from '../../lib/queries';
 import { DEFAULT_SETTINGS } from '../../../shared/constants';
+import { cn } from '../../lib/cn';
 
 export function Footer() {
   const { data } = usePublicConfig();
   const s = data?.settings ?? DEFAULT_SETTINGS;
   const tel = s.businessPhone.replace(/\D/g, '');
+  // Only accounts with a real link (set in admin → Settings) are shown; no placeholders.
   const socials = [
     { label: 'Instagram', href: s.social.instagram, Icon: InstagramIcon },
     { label: 'WhatsApp', href: s.social.whatsapp, Icon: WhatsAppIcon },
     { label: 'TikTok', href: s.social.tiktok, Icon: TikTokIcon },
     { label: 'Facebook', href: s.social.facebook, Icon: FacebookIcon },
-  ];
+  ].filter((x) => /^https:\/\//.test(x.href));
 
   return (
     <footer className="bg-ink text-cream">
       <KenteBand height={10} />
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
+      <div
+        className={cn(
+          'mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6',
+          socials.length ? 'md:grid-cols-[1.4fr_1fr_1fr]' : 'md:grid-cols-[1.4fr_1fr]',
+        )}
+      >
         <div className="flex items-start gap-4">
           <Logo size={64} />
           <div>
@@ -41,35 +48,28 @@ export function Footer() {
           </a>
           <p className="mt-2 text-sm text-cream/60">{s.pickupAddressPublic}</p>
         </div>
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cream/50">Follow</p>
-          <ul className="mt-3 flex gap-2">
-            {socials.map(({ label, href, Icon }) => (
-              <li key={label}>
-                {href ? (
+        {socials.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cream/50">
+              Follow
+            </p>
+            <ul className="mt-3 flex gap-2">
+              {socials.map(({ label, href, Icon }) => (
+                <li key={label}>
                   <a
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="grid h-10 w-10 place-items-center rounded-full bg-white/5 ring-1 ring-white/10 transition hover:bg-white/15"
-                    aria-label={label}
+                    className="grid h-11 w-11 place-items-center rounded-full bg-white/5 ring-1 ring-white/10 transition hover:bg-white/15"
+                    aria-label={`${label} (opens in a new tab)`}
                   >
                     <Icon />
                   </a>
-                ) : (
-                  <span
-                    className="grid h-10 w-10 place-items-center rounded-full bg-white/5 text-cream/50 ring-1 ring-white/5"
-                    title={`${label} coming soon`}
-                    aria-label={`${label} (coming soon)`}
-                    role="img"
-                  >
-                    <Icon />
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-6 text-xs text-cream/60 sm:flex-row sm:justify-between sm:px-6">

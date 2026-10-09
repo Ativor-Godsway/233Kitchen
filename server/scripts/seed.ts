@@ -1,35 +1,43 @@
 /**
- * npm run seed            → creates menu, settings and admin user if missing
- * npm run seed -- --reset-menu            → also overwrite menu items with shared/menu.seed.ts
- * npm run seed -- --reset-admin-password  → set the admin password to ADMIN_PASSWORD
+ * npm run seed              → creates the menu and settings if the database has none
+ * npm run seed -- --force   → REPLACES the menu and settings with the defaults in
+ *                             shared/menu.seed.ts / shared/constants.ts (owner edits are lost)
  *
- * Point MONGODB_URI at Atlas to seed production. ADMIN_EMAIL / ADMIN_PASSWORD are required then.
+ * An admin is created only when BOTH ADMIN_EMAIL and ADMIN_PASSWORD are set (there are no
+ * defaults), and an existing admin is never changed. To create or update an admin, or to
+ * change a password, use `npm run admin:set -- --email <email>` instead.
  */
 import { env } from '../env.js';
 import { connectDb, disconnectDb } from '../db.js';
-import { seedDatabase } from '../services/seed.js';
+import { MIN_ADMIN_PASSWORD, seedDatabase } from '../services/seed.js';
 
 async function main() {
-  const args = new Set(process.argv.slice(2));
-  if (env.mongoUri && (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD)) {
-    throw new Error('Set ADMIN_EMAIL and ADMIN_PASSWORD when seeding a real database.');
+  const force = process.argv.includes('--force');
+  const email = env.adminEmail;
+  const password = env.adminPassword;
+  if (!!email !== !!password) {
+    throw new Error('Set BOTH ADMIN_EMAIL and ADMIN_PASSWORD to create an admin (or neither).');
   }
-  if (env.mongoUri && env.adminPassword.length < 10) {
-    throw new Error('ADMIN_PASSWORD must be at least 10 characters for a real database.');
+  if (password && password.length < MIN_ADMIN_PASSWORD) {
+    throw new Error(`ADMIN_PASSWORD must be at least ${MIN_ADMIN_PASSWORD} characters.`);
+  }
+  if (!env.mongoUri) {
+    throw new Error('MONGODB_URI is not set. (Local dev seeds itself automatically: npm run dev.)');
   }
   await connectDb();
   const result = await seedDatabase({
-    adminEmail: env.adminEmail,
-    adminPassword: env.adminPassword,
-    resetMenu: args.has('--reset-menu'),
-    resetAdminPassword: args.has('--reset-admin-password'),
+    admin: email ? { email, password } : undefined,
+    force,
   });
   console.log('Seed complete:', result);
+  if (result.menuSkipped)
+    console.log('Menu already exists, left unchanged (use --force to replace it).');
+  if (!email) console.log('No admin created. Use: npm run admin:set -- --email you@example.com');
   await disconnectDb();
 }
 
 main().catch(async (err) => {
-  console.error(err);
+  console.error(err instanceof Error ? err.message : err);
   await disconnectDb().catch(() => undefined);
   process.exit(1);
 });

@@ -12,7 +12,9 @@ npm run dev
 ```
 
 - Site: <http://localhost:5173>
-- Admin: <http://localhost:5173/admin>, log in with **admin@233kitchen.local / admin1234** (dev only)
+- Admin: <http://localhost:5173/admin>, log in with **admin@233kitchen.local / admin1234**. This
+  login exists only in the local dev database (`server/devDb.ts`); production refuses to start
+  without a real database and never creates a default admin.
 
 With an empty `.env`, `npm run dev` runs three processes:
 
@@ -30,15 +32,15 @@ To use real services locally, copy `.env.example` to `.env` and fill in `MONGODB
 
 ## Scripts
 
-| Command                           | Purpose                                                                              |
-| --------------------------------- | ------------------------------------------------------------------------------------ |
-| `npm run dev`                     | Local DB + API + site                                                                |
-| `npm run build`                   | Type-check the client and build `dist/`                                              |
-| `npm run typecheck`               | Type-check client and server                                                         |
-| `npm run lint` / `npm run format` | ESLint / Prettier                                                                    |
-| `npm test`                        | Vitest: pricing, cutoff/DST, capacity, cart, order + admin APIs                      |
-| `npm run seed`                    | Seed menu, settings and admin (add `-- --reset-menu` or `-- --reset-admin-password`) |
-| `npm run images`                  | Rebuild WebP images, favicons and the OG image from `./reference`                    |
+| Command                           | Purpose                                                                     |
+| --------------------------------- | --------------------------------------------------------------------------- |
+| `npm run dev`                     | Local DB + API + site                                                       |
+| `npm run build`                   | Type-check the client and build `dist/`                                     |
+| `npm run typecheck`               | Type-check client and server                                                |
+| `npm run lint` / `npm run format` | ESLint / Prettier                                                           |
+| `npm test`                        | Vitest: pricing, cutoff/DST, capacity, cart, order + admin APIs             |
+| `npm run seed`                    | Seed menu + settings if missing (`-- --force` replaces them); see DEPLOY.md |
+| `npm run images`                  | Rebuild WebP images, favicons and the OG image from `./reference`           |
 
 ## Structure
 
@@ -90,5 +92,3 @@ reference/          Original brand photos and logo
 - **Map location:** Admin → Settings → Map location (public)
 
 Deployment: see [DEPLOY.md](DEPLOY.md). Open business questions: [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
-
-# 233Kitchen

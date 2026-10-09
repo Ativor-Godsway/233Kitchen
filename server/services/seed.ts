@@ -6,59 +6,71 @@ import { MenuItemModel } from '../models/MenuItem.js';
 import { SettingsModel } from '../models/Settings.js';
 import { env } from '../env.js';
 
+export const MIN_ADMIN_PASSWORD = 10;
+
 export interface SeedOptions {
-  adminEmail: string;
-  adminPassword: string;
-  /** Overwrite existing menu items with the seed values. */
-  resetMenu?: boolean;
-  /** Reset the admin password if the admin already exists. */
-  resetAdminPassword?: boolean;
+  /** Admin to create if no admin with that email exists. Omit to leave admins alone. */
+  admin?: { email: string; password: string };
+  /**
+   * Replace the existing menu and settings with the seed values. Without it, a database that
+   * already has a menu or settings is never touched (the owner's edits are kept).
+   */
+  force?: boolean;
 }
 
-/** Idempotent: only creates what is missing unless asked to reset. */
-export async function seedDatabase(opts: SeedOptions) {
+/** Idempotent: creates what is missing; overwrites menu/settings only with `force`. */
+export async function seedDatabase(opts: SeedOptions = {}) {
   const result = {
     menuCreated: 0,
     menuUpdated: 0,
+    menuSkipped: false,
     settingsCreated: false,
+    settingsReset: false,
     adminCreated: false,
-    adminPasswordReset: false,
   };
 
-  for (const item of MENU_SEED) {
-    const existing = await MenuItemModel.findOne({ slug: item.slug });
-    if (!existing) {
-      await MenuItemModel.create(item);
-      result.menuCreated++;
-    } else if (opts.resetMenu) {
-      existing.set(item);
-      await existing.save();
-      result.menuUpdated++;
+  const hasMenu = (await MenuItemModel.estimatedDocumentCount()) > 0;
+  if (hasMenu && !opts.force) {
+    result.menuSkipped = true;
+  } else {
+    for (const item of MENU_SEED) {
+      const existing = await MenuItemModel.findOne({ slug: item.slug });
+      if (!existing) {
+        await MenuItemModel.create(item);
+        result.menuCreated++;
+      } else {
+        existing.set(item);
+        await existing.save();
+        result.menuUpdated++;
+      }
     }
   }
 
   const settings = await SettingsModel.findById('global');
-  if (!settings) {
-    const notificationEmails = [env.ownerEmail || opts.adminEmail.toLowerCase()];
-    await SettingsModel.create({
-      _id: 'global',
-      data: { ...DEFAULT_SETTINGS, timezone: env.tz, notificationEmails },
-    });
-    result.settingsCreated = true;
+  if (!settings || opts.force) {
+    const notificationEmails = [env.ownerEmail || opts.admin?.email.toLowerCase()].filter(
+      (e): e is string => !!e,
+    );
+    await SettingsModel.updateOne(
+      { _id: 'global' },
+      { $set: { data: { ...DEFAULT_SETTINGS, timezone: env.tz, notificationEmails } } },
+      { upsert: true },
+    );
+    if (settings) result.settingsReset = true;
+    else result.settingsCreated = true;
   }
 
-  const email = opts.adminEmail.toLowerCase();
-  const admin = await AdminUserModel.findOne({ email }).setOptions({ sanitizeFilter: true });
-  if (!admin) {
-    await AdminUserModel.create({ email, passwordHash: await bcrypt.hash(opts.adminPassword, 12) });
-    result.adminCreated = true;
-  } else if (opts.resetAdminPassword) {
-    admin.set({
-      passwordHash: await bcrypt.hash(opts.adminPassword, 12),
-      tokenVersion: (admin.tokenVersion ?? 0) + 1,
-    });
-    await admin.save();
-    result.adminPasswordReset = true;
+  if (opts.admin) {
+    const email = opts.admin.email.trim().toLowerCase();
+    if (!email || !opts.admin.password) throw new Error('Admin email and password are required');
+    const exists = await AdminUserModel.exists({ email }).setOptions({ sanitizeFilter: true });
+    if (!exists) {
+      await AdminUserModel.create({
+        email,
+        passwordHash: await bcrypt.hash(opts.admin.password, 12),
+      });
+      result.adminCreated = true;
+    }
   }
   return result;
 }
