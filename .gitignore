@@ -12,3 +12,4 @@ playwright-report
 *.log
 .tmp-*
 _to_delete/
+backups/

@@ -24,7 +24,8 @@
     "email:test": "tsx server/scripts/test-email.ts",
     "images": "tsx scripts/optimize-images.ts",
     "assets:manifest": "tsx scripts/asset-manifest.ts",
-    "dev:db": "tsx scripts/dev-db.ts"
+    "dev:db": "tsx scripts/dev-db.ts",
+    "prod:reset-test-data": "tsx server/scripts/reset-test-data.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
