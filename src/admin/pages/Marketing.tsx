@@ -2,10 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Eye, FlaskConical, Megaphone, Send } from 'lucide-react';
+import { AlertTriangle, Eye, FlaskConical, Megaphone, Play, Send } from 'lucide-react';
 import { api, ApiError } from '../../lib/api';
 import type { CampaignInput } from '../../../shared/schemas';
-import type { CampaignDTO, CustomerDTO, SegmentType } from '../../../shared/types';
+import type { CampaignDTO, CustomerDTO, EmailQuota, SegmentType } from '../../../shared/types';
 import {
   Button,
   Card,
@@ -52,6 +52,7 @@ const SEGMENTS: Array<{ id: SegmentType; label: string; hint: string }> = [
 
 type Preview = {
   recipientCount: number;
+  quota: EmailQuota;
   transactional: boolean;
   sample: Array<{ name: string; email: string }>;
   html: string;
@@ -59,6 +60,42 @@ type Preview = {
 };
 
 const EMPTY = { subject: '', heading: '', body: '', imageUrl: '', ctaLabel: '', ctaUrl: '' };
+
+type BatchResult = { campaign: CampaignDTO; quota: EmailQuota };
+
+const STATUS_TEXT: Record<CampaignDTO['status'], string> = {
+  sending: 'In progress',
+  paused: 'Paused (daily limit)',
+  sent: 'Sent',
+  partial: 'Partly sent',
+  failed: 'Failed',
+};
+
+/** Warns before a send that would run into the daily email limit (Gmail: ~500/day). */
+function QuotaNote({ quota, recipients }: { quota: EmailQuota; recipients: number }) {
+  if (!quota.limit || quota.remaining === null) return null;
+  const over = recipients > quota.remaining;
+  return (
+    <div
+      className={
+        over
+          ? 'mx-4 mt-4 flex gap-2 rounded-lg bg-ghana-gold-50 p-3 text-sm text-ghana-gold-900'
+          : 'mx-4 mt-4 flex gap-2 rounded-lg bg-neutral-50 p-3 text-sm text-neutral-600'
+      }
+      role={over ? 'alert' : 'note'}
+    >
+      <AlertTriangle size={16} className="mt-0.5 shrink-0" aria-hidden />
+      <p>
+        Your email account can send about {quota.limit} emails a day (Gmail’s limit is ~500).{' '}
+        {quota.sentLast24h} sent in the last 24 hours, so up to <strong>{quota.remaining}</strong>{' '}
+        more today.
+        {over
+          ? ` This email goes to ${recipients}: it will pause after ${quota.remaining} and you can resume it tomorrow from Campaign history.`
+          : ` Emails go out in batches of ${quota.batchSize}; keep this page open while it sends.`}
+      </p>
+    </div>
+  );
+}
 
 export default function Marketing() {
   const qc = useQueryClient();
@@ -142,28 +179,60 @@ export default function Marketing() {
       ),
     onError,
   });
-  const sendM = useMutation({
-    mutationFn: () =>
-      api<{ campaign: CampaignDTO }>('/admin/campaigns/send', { method: 'POST', json: payload }),
-    onSuccess: ({ campaign }) => {
-      setConfirmOpen(false);
+  /** Progress of the campaign being sent from this tab (one request per batch). */
+  const [progress, setProgress] = useState<CampaignDTO | null>(null);
+  const [sending, setSending] = useState(false);
+
+  const report = ({ campaign: c }: BatchResult) => {
+    if (c.status === 'paused')
+      toast.warning(
+        `Paused at today’s email limit: ${c.sentCount} of ${c.recipientCount} sent. Resume it tomorrow from Campaign history.`,
+        { duration: 10_000 },
+      );
+    else if (c.failedCount)
+      toast.warning(
+        `Sent ${c.sentCount} of ${c.recipientCount}. ${c.failedCount} failed. See the Email log.`,
+      );
+    else toast.success(`Sent to ${c.sentCount} customer${c.sentCount === 1 ? '' : 's'}`);
+  };
+
+  /** Sends batch after batch until the campaign finishes, pauses or a request fails. */
+  const drive = async (first: () => Promise<BatchResult>) => {
+    setSending(true);
+    try {
+      let r = await first();
+      setProgress(r.campaign);
+      while (r.campaign.status === 'sending') {
+        const id = r.campaign.id;
+        r = await api<BatchResult>(`/admin/campaigns/${id}/continue`, { method: 'POST' });
+        setProgress(r.campaign);
+      }
+      report(r);
+      return r;
+    } catch (e) {
+      onError(e);
+      return null;
+    } finally {
+      setSending(false);
+      setProgress(null);
+      qc.invalidateQueries({ queryKey: ['admin', 'campaigns'] });
+      qc.invalidateQueries({ queryKey: ['admin', 'emails'] });
+    }
+  };
+
+  const send = async () => {
+    const r = await drive(() =>
+      api<BatchResult>('/admin/campaigns/send', { method: 'POST', json: payload }),
+    );
+    setConfirmOpen(false);
+    if (r) {
       setPreview(null);
       setForm(EMPTY);
-      qc.invalidateQueries({ queryKey: ['admin', 'campaigns'] });
-      if (campaign.failedCount)
-        toast.warning(
-          `Sent ${campaign.sentCount} of ${campaign.recipientCount}. ${campaign.failedCount} failed. See the Email log.`,
-        );
-      else
-        toast.success(
-          `Sent to ${campaign.sentCount} customer${campaign.sentCount === 1 ? '' : 's'}`,
-        );
-    },
-    onError: (e) => {
-      setConfirmOpen(false);
-      onError(e);
-    },
-  });
+    }
+  };
+
+  const resume = (id: string) =>
+    drive(() => api<BatchResult>(`/admin/campaigns/${id}/continue`, { method: 'POST' }));
 
   const set = (k: keyof typeof EMPTY) => (e: { target: { value: string } }) => {
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -342,6 +411,9 @@ export default function Marketing() {
             </div>
           ) : preview ? (
             <>
+              {preview.recipientCount > 0 && !preview.transactional && (
+                <QuotaNote quota={preview.quota} recipients={preview.recipientCount} />
+              )}
               {preview.recipientCount === 0 && (
                 <p className="m-4 rounded-lg bg-ghana-gold-50 p-3 text-sm text-ghana-gold-900">
                   No eligible recipients. Only customers who opted in can receive marketing emails.
@@ -390,6 +462,9 @@ export default function Marketing() {
                   <th className="px-4 py-3 text-right">Recipients</th>
                   <th className="px-4 py-3">Delivery</th>
                   <th className="px-4 py-3">Sent</th>
+                  <th className="px-4 py-3">
+                    <span className="sr-only">Actions</span>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100">
@@ -402,12 +477,36 @@ export default function Marketing() {
                     </td>
                     <td className="px-4 py-3 text-right tabular-nums">{c.recipientCount}</td>
                     <td className="whitespace-nowrap px-4 py-3">
-                      <span className={c.failedCount ? 'text-ghana-red' : 'text-ghana-green-700'}>
+                      <span
+                        className={
+                          c.failedCount
+                            ? 'text-ghana-red'
+                            : c.pendingCount
+                              ? 'text-ghana-gold-800'
+                              : 'text-ghana-green-700'
+                        }
+                      >
                         {c.sentCount} sent{c.failedCount ? ` · ${c.failedCount} failed` : ''}
+                        {c.pendingCount ? ` · ${c.pendingCount} waiting` : ''}
+                      </span>
+                      <span className="block text-xs text-neutral-500">
+                        {STATUS_TEXT[c.status]}
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-neutral-600">
                       {c.sentAt ? fmtDateTime(c.sentAt) : '–'}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-right">
+                      {(c.status === 'paused' || c.status === 'sending') && (
+                        <Button
+                          size="sm"
+                          onClick={() => resume(c.id)}
+                          disabled={sending}
+                          aria-label={`Resume sending “${c.subject}”`}
+                        >
+                          <Play size={14} aria-hidden /> Resume
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -428,11 +527,30 @@ export default function Marketing() {
             “{form.subject}” will be sent to <strong>{preview?.recipientCount}</strong> customer
             {preview?.recipientCount === 1 ? '' : 's'}. This can’t be undone.
           </p>
+          {progress && (
+            <div aria-live="polite">
+              <p className="text-sm font-medium">
+                Sending… {progress.sentCount + progress.failedCount + progress.skippedCount} of{' '}
+                {progress.recipientCount}
+              </p>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-neutral-100">
+                <div
+                  className="h-full bg-ghana-green transition-all"
+                  style={{
+                    width: `${Math.round(((progress.recipientCount - progress.pendingCount) / progress.recipientCount) * 100)}%`,
+                  }}
+                />
+              </div>
+              <p className="mt-2 text-xs text-neutral-500">
+                Keep this page open until it finishes.
+              </p>
+            </div>
+          )}
           <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setConfirmOpen(false)}>
+            <Button variant="ghost" disabled={sending} onClick={() => setConfirmOpen(false)}>
               Cancel
             </Button>
-            <Button variant="brand" loading={sendM.isPending} onClick={() => sendM.mutate()}>
+            <Button variant="brand" loading={sending} onClick={send}>
               <Send size={16} aria-hidden /> Send now
             </Button>
           </div>

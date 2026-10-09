@@ -1,15 +1,18 @@
 # Deploying +233 Kitchen
 
-You'll set up three services, in this order:
+You'll set up three things, in this order:
 
 1. **MongoDB Atlas** (database)
-2. **Resend** (email)
+2. **Email**: the owner's **Gmail** now; switch to **Resend** on your own domain later (env-only)
 3. **Vercel** (hosting for the site and API)
 
-Allow about 45 minutes. Domain DNS can take longer to verify.
+Allow about 45 minutes.
 
-> **Before you start:** buy or choose the domain you'll use (e.g. `233kitchen.com`). Emails must send
-> from that domain, and `SITE_URL` must match it.
+> **Production refuses to start with incomplete settings.** When `NODE_ENV=production` or
+> `VERCEL=1`, the API checks `MONGODB_URI`, `JWT_SECRET` (≥ 32 characters), an `https://`
+> `SITE_URL`, a working email provider, `EMAIL_FROM` and `OWNER_EMAIL`. If anything is missing,
+> every API request fails and **Vercel → Logs** lists exactly what to fix. There is no in-memory
+> database, no default admin and no "pretend" email sending in production.
 
 ---
 
@@ -27,11 +30,8 @@ Allow about 45 minutes. Domain DNS can take longer to verify.
    - Enter `0.0.0.0/0` (_Allow access from anywhere_) and confirm.
    - This is required because Vercel's serverless functions don't have fixed IP addresses. Access
      is still protected by the username and password.
-5. **Get the connection string** (Database → _Connect_ → _Drivers_ → Node.js). It looks like:
-   ```
-   mongodb+srv://<db-user>:<db-password>@<your-cluster-host>/?retryWrites=true&w=majority&appName=k233
-   ```
-   Replace `<password>` with your password, and add the database name `k233` after `.net/`:
+5. **Get the connection string** (Database → _Connect_ → _Drivers_ → Node.js) and add the database
+   name `k233` after the host:
    ```
    mongodb+srv://<db-user>:<db-password>@<your-cluster-host>/k233?retryWrites=true&w=majority&appName=k233
    ```
@@ -43,45 +43,70 @@ Allow about 45 minutes. Domain DNS can take longer to verify.
 
 ---
 
-## 2. Resend (email)
+## 2. Email
 
-1. Sign up at <https://resend.com>.
-2. **Add your domain** (Domains → _Add Domain_). Enter your domain (e.g. `233kitchen.com`), region
-   **us-east-1**.
-3. Resend shows DNS records unique to your account. Add **each one exactly as shown** at your domain
-   registrar (GoDaddy, Namecheap, Cloudflare, Google Domains…). They're typically:
+All email settings are environment variables; switching provider never needs a code change.
 
-   | Type  | Name / Host              | Value (copy from Resend)                              | Purpose                             |
-   | ----- | ------------------------ | ----------------------------------------------------- | ----------------------------------- |
-   | `MX`  | `send`                   | `feedback-smtp.us-east-1.amazonses.com` (priority 10) | Bounce handling                     |
-   | `TXT` | `send`                   | `v=spf1 include:amazonses.com ~all`                   | SPF                                 |
-   | `TXT` | `resend._domainkey`      | `p=MIGfMA0GCSq…` (long key)                           | DKIM signature                      |
-   | `TXT` | `_dmarc` _(recommended)_ | `v=DMARC1; p=none;`                                   | DMARC (helps Gmail/Yahoo trust you) |
+### 2a. Gmail (now)
 
-   Some registrars add your domain to the host automatically. If so, enter just `send` and not
-   `send.233kitchen.com`.
+1. Sign in to the owner's Gmail account and turn on **2-Step Verification**
+   (<https://myaccount.google.com/security>).
+2. Create an **App password** at <https://myaccount.google.com/apppasswords> (name it
+   "233 Kitchen website"). Google shows 16 letters like `abcd efgh ijkl mnop`; that is `SMTP_PASS`
+   (spaces are fine, they are ignored). It is **not** the normal Gmail password.
+3. Use these values:
 
-4. Click **Verify DNS Records**. Verification usually takes a few minutes, but can take up to 48 hours.
-   Wait until the domain shows **Verified**.
-5. **Create an API key** (API Keys → _Create API Key_, permission _Sending access_, domain = yours).
-   Copy it. This is your **`RESEND_API_KEY`** (starts with `re_`).
-6. Choose the sender. **`EMAIL_FROM`** must use the verified domain, e.g.
-   `"+233 Kitchen <orders@233kitchen.com>"`.
-7. Optional: set **`EMAIL_REPLY_TO`** to the owner's personal inbox (e.g. her Gmail), so customer
-   replies reach her.
+   | Name             | Value                                                         |
+   | ---------------- | ------------------------------------------------------------- |
+   | `EMAIL_PROVIDER` | `gmail`                                                       |
+   | `SMTP_HOST`      | `smtp.gmail.com`                                              |
+   | `SMTP_PORT`      | `465`                                                         |
+   | `SMTP_SECURE`    | `true`                                                        |
+   | `SMTP_USER`      | the owner's Gmail address, e.g. `owner@gmail.com`             |
+   | `SMTP_PASS`      | the App password from step 2                                  |
+   | `EMAIL_FROM`     | `+233 Kitchen <owner@gmail.com>` (**must** match `SMTP_USER`) |
+   | `OWNER_EMAIL`    | the owner's Gmail (gets every new-order email)                |
+   | `EMAIL_REPLY_TO` | _(optional)_ defaults to `OWNER_EMAIL`                        |
 
-> **Until the domain is verified**, Resend only lets you send _to your own Resend account email_, from
-> `onboarding@resend.dev`. Customer emails will fail, but orders still save and the failures show in
-> Admin → Email log, where you can **Resend** them once the domain is verified.
+   Gmail only sends "From" the account you log in with, so the API refuses to start if
+   `EMAIL_FROM` uses a different address.
 
-### Fallback: Gmail SMTP (only if you can't use Resend)
+4. **Replies:** customer emails (order received, status updates, marketing) carry
+   `Reply-To: OWNER_EMAIL` (or `EMAIL_REPLY_TO`), so a customer pressing Reply reaches the owner.
+   The owner's new-order email has `Reply-To` set to the customer.
 
-1. On the Gmail account, turn on 2-Step Verification, then create an **App password**
-   (<https://myaccount.google.com/apppasswords>).
-2. Set these env vars instead of `RESEND_API_KEY`:
-   `EMAIL_PROVIDER=smtp`, `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=465`, `SMTP_USER=the@gmail.com`,
-   `SMTP_PASS=<app password>`, `EMAIL_FROM="+233 Kitchen <the@gmail.com>"`.
-3. Gmail allows about 500 emails per day and isn't suited to marketing blasts. Use Resend for those.
+**Gmail's daily limit.** A Gmail account can send about **500 emails per day**. Order emails
+always go out. Marketing emails go out in batches of 50 (5 seconds apart) and **pause at 400 sent
+in the last 24 hours**, keeping room for order emails. The composer warns before sending, and a
+paused campaign shows a **Resume** button in Campaign history for the next day; nobody gets an email
+twice, and anyone who unsubscribed in the meantime is skipped. Tune with `EMAIL_DAILY_LIMIT`,
+`EMAIL_BATCH_SIZE` and `EMAIL_BATCH_DELAY_MS`.
+
+### 2b. Later: Resend on your own domain
+
+When you have a domain (e.g. `233kitchen.com`):
+
+1. Sign up at <https://resend.com> → **Domains → Add Domain** (region us-east-1).
+2. Add **each DNS record exactly as Resend shows it** at your registrar (typically an `MX` and a
+   `TXT` on `send`, a DKIM `TXT` on `resend._domainkey`, and a recommended `_dmarc` `TXT`
+   `v=DMARC1; p=none;`). Wait until the domain shows **Verified**.
+3. **API Keys → Create API Key** (Sending access, your domain). It starts with `re_`.
+4. In Vercel (Production), change only these and redeploy:
+
+   | Name                | Value                                                   |
+   | ------------------- | ------------------------------------------------------- |
+   | `EMAIL_PROVIDER`    | `resend`                                                |
+   | `RESEND_API_KEY`    | `re_…`                                                  |
+   | `EMAIL_FROM`        | `+233 Kitchen <orders@233kitchen.com>`                  |
+   | `EMAIL_DAILY_LIMIT` | `0` for no cap, or your Resend plan's limit (free: 100) |
+
+   You can then delete `SMTP_USER` / `SMTP_PASS` and revoke the Gmail App password.
+
+### 2c. Check it after every deploy
+
+Admin → **Settings → Notifications → Send test email to me** sends a real email to the logged-in
+admin and shows the exact result. **Test the new-order inboxes** sends one to every new-order
+address. Failures (and their reasons) are listed in Admin → **Email log**, where they can be re-sent.
 
 ---
 
@@ -101,99 +126,92 @@ git push -u origin main
 2. _Add New… → Project_ → import the `233-kitchen` repo.
 3. Vercel detects **Vite** from `vercel.json`. Leave Build Command (`npm run build`) and Output
    Directory (`dist`) as they are. Root Directory: `./`.
-4. Open **Environment Variables** and add the following (Environment: _Production_; add the same to
-   _Preview_ if you use preview deployments):
+4. Open **Environment Variables** and add the following with **Environment: Production only**
+   (untick Preview and Development; see [Preview deployments](#preview-deployments)):
 
-   | Name             | Value                                                                   |
-   | ---------------- | ----------------------------------------------------------------------- |
-   | `MONGODB_URI`    | your Atlas string from step 1                                           |
-   | `JWT_SECRET`     | a long random string. Generate one with `openssl rand -base64 48`       |
-   | `ADMIN_EMAIL`    | the owner's login email                                                 |
-   | `ADMIN_PASSWORD` | a strong temporary password (≥ 10 characters), used only by the seed    |
-   | `OWNER_EMAIL`    | where new-order alerts go (more can be added later in Admin → Settings) |
-   | `SITE_URL`       | `https://yourdomain.com` (no trailing slash)                            |
-   | `TZ_BUSINESS`    | `America/New_York`                                                      |
+   | Name          | Value                                                      |
+   | ------------- | ---------------------------------------------------------- |
+   | `MONGODB_URI` | your Atlas string from step 1                              |
+   | `JWT_SECRET`  | 32+ random characters: `openssl rand -base64 48`           |
+   | `SITE_URL`    | `https://233-kitchen.vercel.app` or your domain (no `/`)   |
+   | `TZ_BUSINESS` | `America/New_York`                                         |
+   | email         | everything from [2a. Gmail](#2a-gmail-now) (or 2b. Resend) |
 
-   **Email variables, Gmail (SMTP).** All of these are required when sending through Gmail:
+   Don't add `ADMIN_EMAIL` / `ADMIN_PASSWORD` to Vercel; admins are created from your computer
+   (step 4).
 
-   | Name             | Value                                                                    |
-   | ---------------- | ------------------------------------------------------------------------ |
-   | `EMAIL_PROVIDER` | `smtp`                                                                   |
-   | `SMTP_USER`      | the full Gmail address, e.g. `kitchen@gmail.com`                         |
-   | `SMTP_PASS`      | the 16-character Gmail **App password** (not the normal Gmail password)  |
-   | `EMAIL_FROM`     | `"+233 Kitchen <kitchen@gmail.com>"` (Gmail only sends from `SMTP_USER`) |
-   | `EMAIL_REPLY_TO` | where customer replies should go (can be the same Gmail address)         |
-   | `OWNER_EMAIL`    | where new-order alerts go (listed above; required for Gmail setups too)  |
-   | `SMTP_HOST`      | _(optional)_ defaults to `smtp.gmail.com`                                |
-   | `SMTP_PORT`      | _(optional)_ defaults to `465`                                           |
+5. Click **Deploy**. Then open **Vercel → Logs** and look for
+   `📧 Email: smtp (Gmail) from +233 Kitchen <…> → owner …`. A `Refusing to start` error lists
+   any missing variable.
 
-   **Or Resend:** set `EMAIL_PROVIDER=resend`, `RESEND_API_KEY` (`re_…` from step 2), `EMAIL_FROM`
-   (on your verified domain), `EMAIL_REPLY_TO` and `OWNER_EMAIL`.
-
-   > If `EMAIL_PROVIDER` is set but its credentials are missing, nothing is sent: every email is
-   > recorded as **failed** in Admin → Email log, and the function logs a warning each time. Check
-   > **Vercel → Logs** after deploying for the line
-   > `📧 Email: smtp (Gmail) from … → owner …`, then use **Admin → Settings → Send test email**.
-
-5. Click **Deploy**. When it finishes you'll get a URL like `https://233-kitchen.vercel.app`.
-
-### 3c. Custom domain
+### 3c. Custom domain (optional)
 
 1. Project → Settings → **Domains** → add `yourdomain.com` (and `www.yourdomain.com`, set to
    redirect to the apex).
 2. Add the DNS records Vercel shows at your registrar (usually an `A` record for `@` →
-   `76.76.21.21` and a `CNAME` for `www` → `cname.vercel-dns.com`). Keep the Resend records from step 2.
-3. Make sure `SITE_URL` is `https://yourdomain.com`, then **Redeploy**. `SITE_URL` is baked into the
-   Open Graph tags, sitemap and email links at build time.
+   `76.76.21.21` and a `CNAME` for `www` → `cname.vercel-dns.com`).
+3. Set `SITE_URL` to `https://yourdomain.com`, then **Redeploy**. `SITE_URL` is baked into the
+   Open Graph tags, sitemap and email links at build time, and it is the only origin the API
+   accepts cross-origin requests from.
 
 ---
 
-## 4. Seed the production database
+## 4. Database setup and admin accounts
 
-Run this **once**, from your computer, in the project folder. It creates the menu, the default
-settings and the admin account in Atlas:
+Run these from your computer, in the project folder. They use `MONGODB_URI` from `.env` (or from
+the command line, which wins over `.env`).
+
+**Menu and settings** (once). Only creates what is missing; an existing menu or settings are never
+touched unless you add `-- --force`, which replaces them with the defaults:
 
 ```bash
-MONGODB_URI="mongodb+srv://<db-user>:<db-password>@<your-cluster-host>/k233?retryWrites=true&w=majority" \
-ADMIN_EMAIL="owner@yourdomain.com" \
-ADMIN_PASSWORD="a-strong-temporary-password" \
-OWNER_EMAIL="owner@yourdomain.com" \
-TZ_BUSINESS="America/New_York" \
 npm run seed
 ```
 
-You should see `Seed complete: { menuCreated: 5, settingsCreated: true, adminCreated: true, … }`.
-Running it again is safe: it only creates what's missing.
+**Admin accounts.** You are asked for the password twice (hidden, at least 10 characters). It is
+never typed on the command line or stored in a file:
 
-> If your home IP can't reach Atlas, check that Network Access includes `0.0.0.0/0` (step 1.4).
+```bash
+npm run admin:set -- --email you@gmail.com          # the developer
+npm run admin:set -- --email owner@gmail.com        # the owner
+npm run admin:list                                   # who can log in
+npm run admin:remove -- --email you@gmail.com       # when handing over (never removes the last admin)
+```
+
+Running `admin:set` for an existing email **changes that admin's password** and signs them out on
+every device. That is also how to reset a forgotten password. Each admin can change their own
+password in **Settings → Change password**, which also signs out their other sessions.
 
 ---
 
-## 5. First login and password change
+## 5. Clear test data before launch
 
-1. Open `https://yourdomain.com/admin` and log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
-2. Go to **Settings → Change password** and set a new, private password. This also signs out every
-   other session.
-3. In **Settings**, check the payment instructions, the pickup address, the notification emails,
-   pickup windows and social links.
-4. If the password is ever forgotten, reset it from your computer:
-   ```bash
-   MONGODB_URI="…" ADMIN_EMAIL="owner@yourdomain.com" ADMIN_PASSWORD="new-password-here" \
-   npm run seed -- --reset-admin-password
-   ```
+Test orders, customers, emails and campaigns can be removed in one go. Menu items, settings and
+admin accounts are kept, and order numbers restart at **233-0001**:
+
+```bash
+npm run prod:reset-test-data -- --dry-run   # shows what would be deleted; changes nothing
+npm run prod:reset-test-data                # backs up, asks you to type the database name, deletes
+```
+
+Before deleting, it writes a full JSON backup to `backups/<timestamp>/` (not committed to git).
+Restore a collection with
+`mongoimport --uri "$MONGODB_URI" --collection orders --jsonArray --file backups/<timestamp>/orders.json`.
 
 ---
 
 ## 6. Go-live checklist
 
+- [ ] Admin → Settings → **Send test email to me** says "sent", and it arrives.
 - [ ] Place a real test order on the live site from your phone.
 - [ ] The owner receives the **🧾 New order** email within a minute.
-- [ ] The customer email arrives (check spam the first time; mark it "Not spam").
+- [ ] The customer email arrives (check spam the first time; mark it "Not spam"). Replying to it
+      goes to the owner.
 - [ ] In `/admin`, the order appears, a toast pops up within 20s on an open admin tab, and marking it
       **Confirmed** sends the customer a confirmation email.
 - [ ] Admin → **Email log** shows no failures.
 - [ ] **Prep sheet** shows the order; **Print slips** prints cleanly.
-- [ ] Cancel the test order (it frees capacity and is excluded from analytics).
+- [ ] Run `npm run prod:reset-test-data` to remove the test order (section 5).
 - [ ] Share the link on WhatsApp/Instagram and check the preview card shows the logo and food image.
 
 ## Updating the site later
@@ -221,10 +239,12 @@ It prints what it inserted and which fields it filled in per dish. A second run 
 
 ## Troubleshooting
 
-| Symptom                                                    | Fix                                                                                                                                 |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Site loads but menu says "couldn't load"                   | `MONGODB_URI` wrong, or Atlas Network Access missing `0.0.0.0/0`. Check Vercel → Deployments → Functions logs.                      |
-| `Missing required environment variable JWT_SECRET` in logs | Add it in Vercel and redeploy.                                                                                                      |
-| Emails in Email log show "domain is not verified"          | Finish Resend DNS verification, then press **Resend** on each failed email.                                                         |
-| Admin login keeps returning to the login page              | The browser is blocking cookies (e.g. private mode with strict settings), or you're on plain `http://`. Use the `https://` address. |
-| "Too many login attempts"                                  | 10 failed attempts per 15 minutes per network; wait 15 minutes.                                                                     |
+| Symptom                                                           | Fix                                                                                                                                 |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Site loads but menu says "couldn't load"                          | `MONGODB_URI` wrong, or Atlas Network Access missing `0.0.0.0/0`. Check Vercel → Deployments → Functions logs.                      |
+| `Refusing to start: production configuration is incomplete`       | The log lists each missing variable. Add them in Vercel (Production) and redeploy.                                                  |
+| Email log: `Invalid login` / `Username and Password not accepted` | `SMTP_PASS` must be a Gmail **App password**, and 2-Step Verification must be on. Create a new one and redeploy.                    |
+| Email log: "domain is not verified" (Resend)                      | Finish Resend DNS verification, then press **Resend** on each failed email.                                                         |
+| Marketing email paused                                            | The daily limit was reached (section 2a). Press **Resume** in Campaign history the next day.                                        |
+| Admin login keeps returning to the login page                     | The browser is blocking cookies (e.g. private mode with strict settings), or you're on plain `http://`. Use the `https://` address. |
+| "Too many login attempts"                                         | 10 failed attempts per 15 minutes per network; wait 15 minutes.                                                                     |

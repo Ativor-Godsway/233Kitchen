@@ -181,7 +181,7 @@ describe('campaigns', () => {
       .post('/api/admin/campaigns/test')
       .send({ ...msg, segment: 'all_opted_in' })
       .expect(200);
-    expect(res.body.to).toBe('owner@233kitchen.test');
+    expect(res.body.to).toBe(process.env.ADMIN_EMAIL);
     expect(
       await EmailLogModel.countDocuments({ type: 'test', subject: '[TEST] New: Jollof Fridays' }),
     ).toBe(1);

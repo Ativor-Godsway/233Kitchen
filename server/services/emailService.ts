@@ -1,10 +1,13 @@
 /**
- * The only module that talks to an email provider.
- *  - EMAIL_PROVIDER=smtp (or SMTP_USER + SMTP_PASS set)  → Nodemailer SMTP (e.g. Gmail app password)
- *  - EMAIL_PROVIDER=resend (or RESEND_API_KEY set)       → Resend
- *  - nothing configured, outside production              → console + HTML preview in ./.email-previews
+ * The only module that talks to an email provider. Switching provider is env-only:
+ *  - EMAIL_PROVIDER=gmail  (SMTP_USER + SMTP_PASS app password) → Gmail SMTP via Nodemailer
+ *  - EMAIL_PROVIDER=smtp   (SMTP_HOST/PORT/SECURE/USER/PASS)     → any SMTP server
+ *  - EMAIL_PROVIDER=resend (RESEND_API_KEY)                      → Resend
+ *  - unset: SMTP when SMTP_USER + SMTP_PASS are set, else Resend when RESEND_API_KEY is set
+ *  - nothing configured: dev → console + HTML preview in ./.email-previews;
+ *    production → every email is recorded as FAILED with a clear error (never "pretend sent")
  * A provider that is requested but missing credentials is never silently replaced: every
- * send logs a loud warning and is recorded as FAILED in EmailLog (resendable from the admin).
+ * send logs a loud error and is recorded as FAILED in EmailLog (resendable from the admin).
  * Every attempt is recorded in EmailLog; failures never throw to callers.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -54,7 +57,9 @@ export interface ProviderStatus {
  * never swapped for another provider; partial SMTP credentials count as "SMTP requested".
  */
 export function providerStatus(): ProviderStatus {
-  const explicit = process.env.EMAIL_PROVIDER?.trim().toLowerCase();
+  const raw = process.env.EMAIL_PROVIDER?.trim().toLowerCase();
+  // "gmail" is SMTP with Gmail's settings (SMTP_HOST defaults to smtp.gmail.com).
+  const explicit = raw === 'gmail' ? 'smtp' : raw;
   const hasUser = !!env.smtp.user;
   const hasPass = !!env.smtp.pass;
   const smtpReady = hasUser && hasPass;
@@ -76,7 +81,7 @@ export function providerStatus(): ProviderStatus {
     if (!resendReady) misconfigured = 'Resend not configured (RESEND_API_KEY missing)';
   } else if (explicit && explicit !== 'smtp' && explicit !== 'resend') {
     provider = fallback;
-    misconfigured = `Unknown EMAIL_PROVIDER "${explicit}" (use smtp or resend)`;
+    misconfigured = `Unknown EMAIL_PROVIDER "${explicit}" (use gmail, smtp or resend)`;
   } else {
     provider = smtpReady ? 'smtp' : resendReady ? 'resend' : fallback;
   }
@@ -113,6 +118,13 @@ export function logEmailConfig(): void {
   const msg = describeEmailConfig();
   if (providerStatus().misconfigured) console.warn(msg);
   else console.log(msg);
+}
+
+/** "kofi.mensah@gmail.com" → "ko***@gmail.com": enough to recognise, not a full address in logs. */
+export function maskEmail(email: string): string {
+  const [user, domain] = email.split('@');
+  if (!domain) return '***';
+  return `${user.slice(0, 2)}***@${domain}`;
 }
 
 let resend: Resend | null = null;
@@ -153,7 +165,7 @@ async function deliver(
   if (status.misconfigured) {
     // Loud on EVERY attempt so it can't be missed in the terminal or Vercel logs.
     console.error(
-      `\n⚠️  [email] ${status.misconfigured}: "${input.subject}" to ${input.to} was NOT sent.` +
+      `\n⚠️  [email] ${status.misconfigured}: ${input.type} email to ${maskEmail(input.to)} was NOT sent.` +
         `\n    Fix the env vars and restart; then use Admin → Email log → Resend.\n`,
     );
     if (provider === 'dev') {
@@ -185,8 +197,12 @@ async function deliver(
     smtp ??= nodemailer.createTransport({
       host: env.smtp.host,
       port: env.smtp.port,
-      secure: env.smtp.port === 465,
+      secure: env.smtp.secure,
       auth: { user: env.smtp.user, pass: env.smtp.pass },
+      // Reuse a few connections for batches (Gmail dislikes many parallel logins).
+      pool: true,
+      maxConnections: 3,
+      maxMessages: 100,
     });
     const info = await withTimeout(
       smtp.sendMail({
@@ -208,7 +224,13 @@ async function deliver(
     return { status: 'sent_dev', providerId: null };
   }
 
-  throw new Error('Email is not configured (set RESEND_API_KEY or SMTP credentials).');
+  console.error(
+    `\n⛔ [email] No email provider is configured: ${input.type} email to ${maskEmail(input.to)} was NOT sent.` +
+      `\n    Set EMAIL_PROVIDER=gmail + SMTP_USER + SMTP_PASS (or resend + RESEND_API_KEY) and redeploy.\n`,
+  );
+  throw new Error(
+    'Email is not configured (set EMAIL_PROVIDER=gmail with SMTP_USER + SMTP_PASS, or resend with RESEND_API_KEY). Email not sent.',
+  );
 }
 
 /** Sends one email straight through the provider (no EmailLog / DB needed). Used by `npm run email:test`. */
@@ -234,7 +256,7 @@ export async function sendEmail(input: SendInput): Promise<SendResult> {
     ({ status, providerId } = await deliver(input));
   } catch (e) {
     error = e instanceof Error ? e.message : String(e);
-    console.error(`[email] ${input.type} to ${input.to} failed:`, error);
+    console.error(`[email] ${input.type} to ${maskEmail(input.to)} failed: ${error}`);
   }
   try {
     const log = await EmailLogModel.create({

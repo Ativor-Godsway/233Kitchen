@@ -52,12 +52,6 @@ export const env = {
   get resendApiKey() {
     return process.env.RESEND_API_KEY?.trim() ?? '';
   },
-  /** Explicit EMAIL_PROVIDER wins; otherwise SMTP is used whenever SMTP_USER + SMTP_PASS are set. */
-  get emailProvider(): 'resend' | 'smtp' {
-    const p = process.env.EMAIL_PROVIDER?.trim().toLowerCase();
-    if (p === 'smtp' || p === 'resend') return p;
-    return process.env.SMTP_USER?.trim() && process.env.SMTP_PASS?.trim() ? 'smtp' : 'resend';
-  },
   get emailFrom() {
     const from = process.env.EMAIL_FROM?.trim();
     if (from) return from;
@@ -66,8 +60,9 @@ export const env = {
     const smtpUser = process.env.SMTP_USER?.trim();
     return smtpUser ? `+233 Kitchen <${smtpUser}>` : '';
   },
+  /** Reply-To on customer emails: EMAIL_REPLY_TO, else the owner's address. */
   get emailReplyTo() {
-    return process.env.EMAIL_REPLY_TO?.trim() ?? '';
+    return process.env.EMAIL_REPLY_TO?.trim() || process.env.OWNER_EMAIL?.trim() || '';
   },
   get ownerEmail() {
     return process.env.OWNER_EMAIL?.trim().toLowerCase() || '';
@@ -79,11 +74,42 @@ export const env = {
     get port() {
       return Number(process.env.SMTP_PORT || 465);
     },
+    /** SMTP_SECURE=true|false; defaults to implicit TLS on port 465, STARTTLS otherwise. */
+    get secure() {
+      const v = process.env.SMTP_SECURE?.trim().toLowerCase();
+      if (v === 'true' || v === '1') return true;
+      if (v === 'false' || v === '0') return false;
+      return this.port === 465;
+    },
     get user() {
       return process.env.SMTP_USER?.trim() ?? '';
     },
     get pass() {
-      return process.env.SMTP_PASS?.trim() ?? '';
+      const pass = process.env.SMTP_PASS?.trim() ?? '';
+      // Google shows app passwords as "abcd efgh ijkl mnop"; the spaces are not part of it.
+      return /gmail\.com$/i.test(this.host) ? pass.replace(/\s+/g, '') : pass;
+    },
+  },
+  /**
+   * Bulk (marketing) sending. Gmail allows ~500 emails a day, so by default marketing stops at
+   * 400 in any 24 hours (leaving room for order emails), in batches of 50.
+   */
+  email: {
+    get dailyLimit() {
+      const v = Number(process.env.EMAIL_DAILY_LIMIT);
+      if (Number.isFinite(v) && v >= 0 && process.env.EMAIL_DAILY_LIMIT?.trim()) return v;
+      const provider = process.env.EMAIL_PROVIDER?.trim().toLowerCase();
+      return provider === 'resend' ? 0 : 400; // 0 = no cap
+    },
+    get batchSize() {
+      const v = Number(process.env.EMAIL_BATCH_SIZE);
+      return Number.isInteger(v) && v >= 1 && v <= 100 ? v : 50;
+    },
+    get batchDelayMs() {
+      const v = Number(process.env.EMAIL_BATCH_DELAY_MS);
+      return Number.isFinite(v) && v >= 0 && v <= 20_000 && process.env.EMAIL_BATCH_DELAY_MS
+        ? v
+        : 5000;
     },
   },
   get siteUrl() {

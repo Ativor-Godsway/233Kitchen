@@ -32,7 +32,7 @@ const GOOD = {
   MONGODB_URI: 'mongodb+srv://u:p@cluster.example.net/k233',
   JWT_SECRET: 'x'.repeat(48),
   SITE_URL: 'https://233kitchen.example',
-  EMAIL_PROVIDER: 'smtp',
+  EMAIL_PROVIDER: 'gmail',
   SMTP_HOST: 'smtp.gmail.com',
   SMTP_USER: 'kitchen@gmail.com',
   SMTP_PASS: 'abcd efgh ijkl mnop',

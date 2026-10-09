@@ -263,10 +263,24 @@ export interface CampaignDTO {
   recipientCount: number;
   sentCount: number;
   failedCount: number;
-  status: 'sending' | 'sent' | 'partial' | 'failed';
+  skippedCount: number;
+  /** Recipients not yet sent to (a campaign in progress, or paused at the daily limit). */
+  pendingCount: number;
+  /** "paused": stopped at the daily email limit; resume later from the campaign history. */
+  status: 'sending' | 'paused' | 'sent' | 'partial' | 'failed';
   isTransactional: boolean;
   sentAt: string | null;
   createdAt: string;
+}
+
+/** Daily sending allowance (Gmail allows ~500/day). limit 0 = no cap. */
+export interface EmailQuota {
+  limit: number;
+  sentLast24h: number;
+  /** null when there is no cap. */
+  remaining: number | null;
+  batchSize: number;
+  provider: string;
 }
 
 export interface Paginated<T> {

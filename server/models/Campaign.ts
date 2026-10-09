@@ -14,9 +14,17 @@ export interface CampaignRow {
   recipientCount: number;
   sentCount: number;
   failedCount: number;
+  /** Recipients who unsubscribed (or were deleted) after the campaign started. */
+  skippedCount: number;
   status: CampaignDTO['status'];
   isTransactional: boolean;
   sentAt: Date | null;
+  /** Everyone the campaign goes to, in order; `cursor` is the next one to send. */
+  recipientIds: Types.ObjectId[];
+  cursor: number;
+  lastBatchAt: Date | null;
+  /** Set while a batch is being sent, so two tabs can't send the same batch twice. */
+  lockedUntil: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,9 +42,14 @@ const campaignSchema = new Schema<CampaignRow>(
     recipientCount: { type: Number, default: 0 },
     sentCount: { type: Number, default: 0 },
     failedCount: { type: Number, default: 0 },
+    skippedCount: { type: Number, default: 0 },
     status: { type: String, default: 'sending' },
     isTransactional: { type: Boolean, default: false },
     sentAt: { type: Date, default: null },
+    recipientIds: { type: [Schema.Types.ObjectId], default: [] },
+    cursor: { type: Number, default: 0 },
+    lastBatchAt: { type: Date, default: null },
+    lockedUntil: { type: Date, default: null },
   },
   { timestamps: true },
 );
@@ -59,6 +72,8 @@ export function toCampaignDTO(c: CampaignRow): CampaignDTO {
     recipientCount: c.recipientCount,
     sentCount: c.sentCount,
     failedCount: c.failedCount,
+    skippedCount: c.skippedCount ?? 0,
+    pendingCount: Math.max(0, (c.recipientIds?.length ?? 0) - (c.cursor ?? 0)),
     status: c.status,
     isTransactional: c.isTransactional,
     sentAt: c.sentAt ? new Date(c.sentAt).toISOString() : null,
