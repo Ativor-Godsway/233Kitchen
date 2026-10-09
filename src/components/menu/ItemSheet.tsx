@@ -6,6 +6,7 @@ import { Stepper } from '../ui/Stepper';
 import { MenuImage } from './MenuImage';
 import { ExtraIcon } from './ExtraIcon';
 import { imageAt, srcSetFor } from '../../lib/images';
+import { assetUrl } from '../../../shared/assets';
 import { useUi } from '../../store/ui';
 import { useCart, type CartLine } from '../../store/cart';
 import { useMenu } from '../../lib/queries';
@@ -88,7 +89,7 @@ function BoxPhotos({ item }: { item: MenuItem }) {
               aria-label={`Enlarge ${label(i)}`}
             >
               <img
-                src={src}
+                src={assetUrl(src)}
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -111,7 +112,7 @@ function BoxPhotos({ item }: { item: MenuItem }) {
         {open !== null && (
           <div className="relative min-h-0">
             <img
-              src={imageAt(photos[open], 960)}
+              src={assetUrl(imageAt(photos[open], 960))}
               srcSet={srcSetFor(photos[open])}
               sizes="(min-width: 800px) 760px, 100vw"
               alt={label(open)}

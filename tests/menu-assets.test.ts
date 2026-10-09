@@ -5,6 +5,7 @@ import { EXTRA_ICONS } from '../shared/icons.js';
 import { imageAt, srcSetFor } from '../src/lib/images.js';
 
 const pub = (p: string) => `public${p}`;
+const unversioned = (s: string | undefined) => s?.replace(/\?v=[0-9a-f]{8}/g, '');
 const sizes = (src: string, widths: ReadonlyArray<480 | 720 | 960 | 1600> = [480, 960, 1600]) =>
   widths.map((w) => pub(imageAt(src, w)));
 
@@ -55,13 +56,13 @@ describe('menu images and icons', () => {
   });
 
   it('srcSetFor offers 720 for plated photos (not box photos)', () => {
-    expect(srcSetFor('/images/braised-rice-960.webp')).toBe(
+    expect(unversioned(srcSetFor('/images/braised-rice-960.webp'))).toBe(
       '/images/braised-rice-480.webp 480w, /images/braised-rice-720.webp 720w, /images/braised-rice-960.webp 960w, /images/braised-rice-1600.webp 1600w',
     );
   });
 
   it('srcSetFor supports the box/ subfolder', () => {
-    expect(srcSetFor('/images/box/waakye-meat-480.webp')).toBe(
+    expect(unversioned(srcSetFor('/images/box/waakye-meat-480.webp'))).toBe(
       '/images/box/waakye-meat-480.webp 480w, /images/box/waakye-meat-960.webp 960w, /images/box/waakye-meat-1600.webp 1600w',
     );
     expect(imageAt('/images/box/waakye-meat-480.webp', 1600)).toBe(

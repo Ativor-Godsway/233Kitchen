@@ -81,6 +81,10 @@ reference/          Original brand photos and logo
   (`-- --force` rebuilds). Plated photos: `reference/ai/dishes/<dish>.jpg` → `public/images/` (480/720/960/1600).
   Real box photos: `reference/*.jpeg` → `public/images/box/`. Icons:
   `reference/ai/icons-cutout/icon-<name>.png` → `public/icons/`. See `reference/ai/README.md`.
+- **Replacing an image:** files in `public/images` and `public/icons` are cached for a year, so URLs
+  carry a content hash (`assetUrl()` in `shared/assets.ts`, from `shared/asset-manifest.json`).
+  After adding or replacing a file, run `npm run images` (or `npm run assets:manifest`) and commit
+  the manifest; `npm run build` refuses to build if it's out of date.
 - **Gallery photos:** listed in `src/content/gallery.ts` (plated photos from `public/images`).
 - **Menu photos, "What you'll receive" box photos and extras icons:** Admin → Menu → edit a dish.
 - **Map location:** Admin → Settings → Map location (public)

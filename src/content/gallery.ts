@@ -1,4 +1,5 @@
 import { srcSetFor } from '../lib/images';
+import { assetUrl } from '../../shared/assets';
 
 /**
  * Gallery photos (the plated dish photos in public/images, built by `npm run images` from
@@ -46,4 +47,8 @@ const PHOTOS: Array<Omit<GalleryPhoto, 'srcSet'>> = [
   },
 ];
 
-export const GALLERY: GalleryPhoto[] = PHOTOS.map((p) => ({ ...p, srcSet: srcSetFor(p.src) }));
+export const GALLERY: GalleryPhoto[] = PHOTOS.map((p) => ({
+  ...p,
+  src: assetUrl(p.src),
+  srcSet: srcSetFor(p.src),
+}));

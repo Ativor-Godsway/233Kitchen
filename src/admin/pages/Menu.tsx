@@ -7,6 +7,7 @@ import { formatMoney } from '../../../shared/pricing';
 import { CATEGORY_LABELS } from '../../../shared/menu.seed';
 import { EXTRA_ICONS, iconLabel } from '../../../shared/icons';
 import { ExtraIcon } from '../../components/menu/ExtraIcon';
+import { assetUrl } from '../../../shared/assets';
 import type { MenuItem, OptionGroup } from '../../../shared/types';
 import {
   Button,
@@ -374,7 +375,7 @@ function Editor({ initial, onClose }: { initial: Draft; onClose: () => void }) {
             <div className="flex gap-3">
               <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-lg bg-neutral-100">
                 {d.image ? (
-                  <img src={d.image} alt="" className="h-full w-full object-cover" />
+                  <img src={assetUrl(d.image)} alt="" className="h-full w-full object-cover" />
                 ) : (
                   <ImageOff size={18} className="text-neutral-400" aria-hidden />
                 )}
@@ -401,7 +402,7 @@ function Editor({ initial, onClose }: { initial: Draft; onClose: () => void }) {
                     .map((u) => (
                       <img
                         key={u}
-                        src={u}
+                        src={assetUrl(u)}
                         alt=""
                         className="h-16 w-16 rounded-lg bg-neutral-100 object-cover"
                       />
@@ -562,7 +563,7 @@ export default function MenuPage() {
               <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-lg bg-ghana-gold-100">
                 {item.image ? (
                   <img
-                    src={item.image}
+                    src={assetUrl(item.image)}
                     alt=""
                     className={cn('h-full w-full object-cover', !item.isAvailable && 'grayscale')}
                   />

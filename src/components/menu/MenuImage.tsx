@@ -1,5 +1,6 @@
 import { BrandIcon } from '../BrandIcon';
 import { srcSetFor } from '../../lib/images';
+import { assetUrl } from '../../../shared/assets';
 import { cn } from '../../lib/cn';
 import type { MenuItem } from '../../../shared/types';
 
@@ -44,7 +45,7 @@ export function MenuImage({
   }
   return (
     <img
-      src={item.image}
+      src={assetUrl(item.image)}
       srcSet={srcSetFor(item.image)}
       sizes={sizes}
       alt={item.name}

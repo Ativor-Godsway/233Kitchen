@@ -1,6 +1,7 @@
 import { motion, useTransform, type MotionValue } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { srcSetFor } from '../../lib/images';
+import { assetUrl } from '../../../shared/assets';
 
 /**
  * Isolated hero visual. It only receives scroll progress (0 → 1), so it can be
@@ -49,7 +50,7 @@ function Card({
       className={`h-full w-full overflow-hidden rounded-[28px] bg-ink-700 shadow-lift ring-1 ring-white/10 ${className ?? ''}`}
     >
       <img
-        src={src}
+        src={assetUrl(src)}
         srcSet={srcSetFor(src)}
         sizes={SIZES}
         alt={alt}

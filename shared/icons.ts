@@ -1,3 +1,5 @@
+import { assetUrl } from './assets.js';
+
 /**
  * Transparent extras icons in public/icons: <name>-128.webp, <name>-256.webp and <name>-256.png.
  * Built by `npm run images` from reference/ai/icons-cutout/icon-<name>.png.
@@ -34,5 +36,6 @@ export const isExtraIcon = (v: unknown): v is ExtraIcon =>
 export const iconLabel = (name: string) =>
   (name.charAt(0).toUpperCase() + name.slice(1)).replace(/-/g, ' ');
 
+/** Cache-busted icon URL (see shared/assets.ts). */
 export const iconSrc = (name: string, size: 128 | 256 = 128, ext: 'webp' | 'png' = 'webp') =>
-  `/icons/${name}-${ext === 'png' ? 256 : size}.${ext}`;
+  assetUrl(`/icons/${name}-${ext === 'png' ? 256 : size}.${ext}`);

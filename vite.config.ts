@@ -1,15 +1,23 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import { assetUrl } from './shared/assets.js';
 
 /**
  * Injects the absolute site URL into index.html (Open Graph / canonical need
- * absolute URLs) and emits sitemap.xml at build time.
+ * absolute URLs), cache-busts /images and /icons paths in it (og:image, JSON-LD)
+ * and emits sitemap.xml at build time.
  */
 function siteUrlPlugin(siteUrl: string): Plugin {
   const base = siteUrl.replace(/\/$/, '');
   return {
     name: 'k233-site-url',
-    transformIndexHtml: { order: 'pre', handler: (html) => html.replaceAll('%SITE_URL%', base) },
+    transformIndexHtml: {
+      order: 'pre',
+      handler: (html) =>
+        html
+          .replaceAll('%SITE_URL%', base)
+          .replace(/\/(?:images|icons)\/[\w./-]+\.(?:webp|png|jpe?g|svg)/g, (p) => assetUrl(p)),
+    },
     generateBundle() {
       const today = new Date().toISOString().slice(0, 10);
       this.emitFile({

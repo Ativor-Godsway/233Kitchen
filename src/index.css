@@ -1,8 +1,9 @@
-/* Self-hosted fonts in public/fonts (Clash Display: Fontshare/ITF free licence; Inter: OFL). */
+/* Self-hosted fonts in src/assets/fonts; Vite content-hashes them into /assets (immutable).
+   Clash Display: Fontshare/ITF free licence; Inter: OFL. */
 
 @font-face {
   font-family: 'Clash Display';
-  src: url('/fonts/ClashDisplay-Medium.woff2') format('woff2');
+  src: url('./assets/fonts/ClashDisplay-Medium.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -10,7 +11,7 @@
 
 @font-face {
   font-family: 'Clash Display';
-  src: url('/fonts/ClashDisplay-Semibold.woff2') format('woff2');
+  src: url('./assets/fonts/ClashDisplay-Semibold.woff2') format('woff2');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -18,7 +19,7 @@
 
 @font-face {
   font-family: 'Clash Display';
-  src: url('/fonts/ClashDisplay-Bold.woff2') format('woff2');
+  src: url('./assets/fonts/ClashDisplay-Bold.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -27,7 +28,7 @@
 /* Inter variable (400–700), latin */
 @font-face {
   font-family: 'Inter';
-  src: url('/fonts/Inter-latin.woff2') format('woff2');
+  src: url('./assets/fonts/Inter-latin.woff2') format('woff2');
   font-weight: 400 700;
   font-style: normal;
   font-display: swap;
@@ -39,7 +40,7 @@
 /* Inter variable (400–700), latin-ext */
 @font-face {
   font-family: 'Inter';
-  src: url('/fonts/Inter-latin-ext.woff2') format('woff2');
+  src: url('./assets/fonts/Inter-latin-ext.woff2') format('woff2');
   font-weight: 400 700;
   font-style: normal;
   font-display: swap;

@@ -3,6 +3,7 @@
  * renders well in Gmail, Apple Mail and Outlook.
  */
 import { env } from '../env.js';
+import { assetUrl } from '../../shared/assets.js';
 
 export const C = {
   ink: '#0B0B0B',
@@ -64,7 +65,7 @@ interface LayoutOpts {
 }
 
 export function layout({ preheader, body, footer = '' }: LayoutOpts): string {
-  const logo = `${env.siteUrl}/images/logo-email.png`;
+  const logo = `${env.siteUrl}${assetUrl('/images/logo-email.png')}`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><title>+233 Kitchen</title></head>
 <body style="margin:0;padding:0;background:#F4EFE8;font-family:Arial,Helvetica,sans-serif;">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(preheader)}</div>

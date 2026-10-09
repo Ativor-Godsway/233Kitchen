@@ -10,10 +10,13 @@
  *
  * Real photos only ever go to box/, so they can never replace the plated photos.
  * Photos are checked per size, so adding a new width only writes that width.
+ * Finally rewrites shared/asset-manifest.json (content hashes of every file, built or skipped),
+ * which assetUrl() uses for ?v= cache busting.
  */
 import sharp, { type OverlayOptions } from 'sharp';
 import { existsSync, mkdirSync, readdirSync } from 'node:fs';
 import path from 'node:path';
+import { MANIFEST_PATH, writeManifest } from './asset-manifest.js';
 
 const SRC = 'reference';
 const DISHES = 'reference/ai/dishes';
@@ -225,3 +228,5 @@ await ogImage(await logo());
 console.log(
   `Done: ${built} file(s) built, ${skipped} already present${FORCE ? '' : ' (use --force to rebuild)'}.`,
 );
+const manifest = writeManifest();
+console.log(`✓ ${MANIFEST_PATH}: ${Object.keys(manifest).length} files hashed`);
