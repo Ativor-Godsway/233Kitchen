@@ -27,8 +27,11 @@ With an empty `.env`, `npm run dev` runs three processes:
 Emails aren't sent in dev. They're printed to the terminal, saved as HTML in `./.email-previews/`,
 and recorded in the admin **Email log** as "Sent (dev)".
 
-To use real services locally, copy `.env.example` to `.env` and fill in `MONGODB_URI`,
-`RESEND_API_KEY` and the other variables.
+To use real services locally, copy `.env.example` to `.env` and fill in the variables.
+
+> **Careful:** with `MONGODB_URI` in `.env`, `npm run dev` and every script (`seed`, `admin:set`,
+> `prod:reset-test-data`, migrations) use **that** database, which is production if it's the Atlas
+> URI. Leave it empty for local work; tests never read `.env`.
 
 ## Scripts
 
@@ -38,8 +41,11 @@ To use real services locally, copy `.env.example` to `.env` and fill in `MONGODB
 | `npm run build`                   | Type-check the client and build `dist/`                                     |
 | `npm run typecheck`               | Type-check client and server                                                |
 | `npm run lint` / `npm run format` | ESLint / Prettier                                                           |
-| `npm test`                        | Vitest: pricing, cutoff/DST, capacity, cart, order + admin APIs             |
+| `npm test`                        | Vitest: pricing, schedule, orders, admin, email, security, reset tool, UI   |
 | `npm run seed`                    | Seed menu + settings if missing (`-- --force` replaces them); see DEPLOY.md |
+| `npm run admin:set -- --email x`  | Create an admin or change a password (typed, hidden); `admin:list`/`remove` |
+| `npm run prod:reset-test-data`    | Back up, then delete test orders/customers/emails (`-- --dry-run` first)    |
+| `npm run email:test -- you@x.com` | Send one real email through the configured provider                         |
 | `npm run images`                  | Rebuild WebP images, favicons and the OG image from `./reference`           |
 
 ## Structure
@@ -47,7 +53,7 @@ To use real services locally, copy `.env.example` to `.env` and fill in `MONGODB
 ```
 api/index.ts        Vercel serverless entry: exports the Express app
 server/             Express app, Mongoose models, routes, services, email templates
-  services/         pricing/order flow, email (Resend | SMTP | dev), analytics, campaigns, prep sheet
+  services/         pricing/order flow, email (Gmail/SMTP | Resend | dev), analytics, campaigns, prep sheet
 shared/             Types, Zod schemas, menu seed, pricing + schedule logic (used by client AND server)
 src/                React app (public site); src/admin/ is a separate lazy-loaded bundle
   content/site.ts   Marketing copy, including the hero headline (edit words here)
@@ -91,4 +97,5 @@ reference/          Original brand photos and logo
 - **Menu photos, "What you'll receive" box photos and extras icons:** Admin → Menu → edit a dish.
 - **Map location:** Admin → Settings → Map location (public)
 
-Deployment: see [DEPLOY.md](DEPLOY.md). Open business questions: [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+Deployment: see [DEPLOY.md](DEPLOY.md). Owner guide: [HANDOVER.md](HANDOVER.md). Open questions:
+[OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
