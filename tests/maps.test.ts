@@ -7,6 +7,7 @@ import { MenuItemModel } from '../server/models/MenuItem.js';
 import { SettingsModel } from '../server/models/Settings.js';
 import { migrateClientUpdates } from '../server/services/migrations.js';
 import { patchSettings, resetDb } from './helpers.js';
+import { SITE_CSP } from '../server/securityHeaders.js';
 
 describe('mapLinks', () => {
   it('builds Google embed, Google directions and Apple Maps URLs', () => {
@@ -100,10 +101,9 @@ describe('mapQuery setting', () => {
     expect(again).toMatchObject({ waakyeUpdated: false, settingsUpdated: false });
   });
 
-  it('allows the Google Maps iframe in the Content-Security-Policy', async () => {
-    const res = await request(app).get('/api/health').expect(200);
-    const csp = String(res.headers['content-security-policy']);
-    expect(csp).toMatch(/frame-src 'self' https:\/\/www\.google\.com https:\/\/maps\.google\.com/);
-    expect(csp).toMatch(/child-src 'self' https:\/\/www\.google\.com/);
+  it('allows the Google Maps iframe in the website Content-Security-Policy', () => {
+    // The page CSP is served by Vercel (vercel.json); tests/security.test.ts keeps them in sync.
+    expect(SITE_CSP).toMatch(/frame-src https:\/\/www\.google\.com https:\/\/maps\.google\.com/);
+    expect(new URL(mapLinks('x').embed).origin).toBe('https://www.google.com');
   });
 });

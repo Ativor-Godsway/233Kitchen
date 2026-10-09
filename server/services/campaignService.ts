@@ -4,6 +4,7 @@ import { CampaignModel, toCampaignDTO, type CampaignRow } from '../models/Campai
 import { EmailLogModel } from '../models/EmailLog.js';
 import { messageEmail, unsubscribeUrl } from '../emails/templates.js';
 import { providerStatus, sendEmail } from './emailService.js';
+import { unsubscribeLinkToken } from './unsubscribe.js';
 import { env } from '../env.js';
 import type { CampaignInput } from '../../shared/schemas.js';
 import type { EmailQuota, Settings } from '../../shared/types.js';
@@ -57,12 +58,12 @@ export async function resolveAudience(
 export function renderFor(
   input: CampaignInput,
   s: Settings,
-  c: Pick<CustomerRow, 'name' | 'unsubscribeToken'> | null,
+  c: Pick<CustomerRow, '_id' | 'name' | 'unsubscribeToken'> | null,
   transactional: boolean,
 ) {
   return messageEmail(input, s, {
     firstName: c?.name.split(' ')[0],
-    unsubscribeToken: c?.unsubscribeToken,
+    unsubscribeToken: c ? unsubscribeLinkToken(c) : undefined,
     marketing: !transactional,
   });
 }
@@ -233,7 +234,7 @@ function sendToCustomer(
   const headers = transactional
     ? undefined
     : {
-        'List-Unsubscribe': `<${env.siteUrl}/api/unsubscribe/one-click?token=${encodeURIComponent(c.unsubscribeToken)}>, <${unsubscribeUrl(c.unsubscribeToken)}>`,
+        'List-Unsubscribe': `<${env.siteUrl}/api/unsubscribe/one-click?token=${encodeURIComponent(unsubscribeLinkToken(c))}>, <${unsubscribeUrl(unsubscribeLinkToken(c))}>`,
         'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
       };
   return sendEmail({

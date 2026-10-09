@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { ah, HttpError, parse } from '../../middleware/errors.js';
-import { loginLimiter } from '../../middleware/rateLimit.js';
+import { loginAccountLimiter, loginLimiter } from '../../middleware/rateLimit.js';
 import {
   clearSession,
   issueSession,
@@ -19,6 +19,7 @@ const DUMMY_HASH = bcrypt.hashSync('not-the-password', 10);
 authRouter.post(
   '/login',
   loginLimiter,
+  loginAccountLimiter,
   ah(async (req, res) => {
     const { email, password } = parse(loginSchema, req.body);
     const admin = await AdminUserModel.findOne({ email }).setOptions({ sanitizeFilter: true });

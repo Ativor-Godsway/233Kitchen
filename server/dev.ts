@@ -1,6 +1,7 @@
 import { app } from './app.js';
 import { connectDb } from './db.js';
 import { logEmailConfig } from './services/emailService.js';
+import { describeError } from './logging.js';
 
 const port = Number(process.env.API_PORT || 3001);
 
@@ -13,5 +14,5 @@ app.listen(port, () => {
 
 connectDb().catch((err) => {
   // Not fatal: the next request retries the connection and gets a 503 if it still fails.
-  console.error('Database connection failed (will retry on next request):', err);
+  console.error(`Database connection failed (will retry on next request): ${describeError(err)}`);
 });

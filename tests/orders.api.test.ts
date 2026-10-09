@@ -286,7 +286,10 @@ describe('unsubscribe', () => {
   it('turns off marketing consent with the customer token', async () => {
     await request(app).post('/api/orders').send(orderBody()).expect(201);
     const c = await CustomerModel.findOne({ email: 'ama@example.com' }).lean();
-    await request(app).post('/api/unsubscribe').send({ token: c!.unsubscribeToken }).expect(200);
+    await request(app)
+      .post('/api/unsubscribe')
+      .send({ token: `${c!._id}.${c!.unsubscribeToken}` })
+      .expect(200);
     const after = await CustomerModel.findById(c!._id).lean();
     expect(after?.marketingConsent).toBe(false);
     expect(after?.unsubscribedAt).toBeTruthy();

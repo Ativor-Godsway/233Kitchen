@@ -110,7 +110,7 @@ describe('campaigns', () => {
     body: 'Hello!\n\nTry it **now**.',
     imageUrl: '',
     ctaLabel: 'Order',
-    ctaUrl: 'http://localhost:5173/#menu',
+    ctaUrl: 'https://233kitchen.example/#menu',
   };
 
   it('sends marketing only to opted-in customers, with unsubscribe link + headers', async () => {
@@ -165,7 +165,7 @@ describe('campaigns', () => {
     await seedOrders();
     const ama = await CustomerModel.findOne({ email: 'ama@example.com' }).lean();
     await request(app)
-      .post(`/api/unsubscribe/one-click?token=${ama!.unsubscribeToken}`)
+      .post(`/api/unsubscribe/one-click?token=${ama!._id}.${ama!.unsubscribeToken}`)
       .expect(200);
     const a = await login();
     const res = await a

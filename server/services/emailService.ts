@@ -17,6 +17,7 @@ import { Resend } from 'resend';
 import nodemailer, { type Transporter } from 'nodemailer';
 import { env } from '../env.js';
 import { EmailLogModel, type EmailLogRow } from '../models/EmailLog.js';
+import { describeError, redact } from '../logging.js';
 import type { EmailType } from '../../shared/types.js';
 
 export interface SendInput {
@@ -57,6 +58,15 @@ export interface ProviderStatus {
  * never swapped for another provider; partial SMTP credentials count as "SMTP requested".
  */
 export function providerStatus(): ProviderStatus {
+  if (env.isPreview) {
+    return {
+      provider: 'none',
+      misconfigured: null,
+      label: 'disabled on preview deployments',
+      from: env.emailFrom,
+      ownerEmail: env.ownerEmail,
+    };
+  }
   const raw = process.env.EMAIL_PROVIDER?.trim().toLowerCase();
   // "gmail" is SMTP with Gmail's settings (SMTP_HOST defaults to smtp.gmail.com).
   const explicit = raw === 'gmail' ? 'smtp' : raw;
@@ -224,6 +234,9 @@ async function deliver(
     return { status: 'sent_dev', providerId: null };
   }
 
+  if (env.isPreview) {
+    throw new Error('Email is disabled on Vercel preview deployments. Email not sent.');
+  }
   console.error(
     `\n⛔ [email] No email provider is configured: ${input.type} email to ${maskEmail(input.to)} was NOT sent.` +
       `\n    Set EMAIL_PROVIDER=gmail + SMTP_USER + SMTP_PASS (or resend + RESEND_API_KEY) and redeploy.\n`,
@@ -256,7 +269,7 @@ export async function sendEmail(input: SendInput): Promise<SendResult> {
     ({ status, providerId } = await deliver(input));
   } catch (e) {
     error = e instanceof Error ? e.message : String(e);
-    console.error(`[email] ${input.type} to ${maskEmail(input.to)} failed: ${error}`);
+    console.error(`[email] ${input.type} to ${maskEmail(input.to)} failed: ${redact(error)}`);
   }
   try {
     const log = await EmailLogModel.create({
@@ -279,7 +292,7 @@ export async function sendEmail(input: SendInput): Promise<SendResult> {
       ...(error ? { error } : {}),
     };
   } catch (e) {
-    console.error('[email] could not write EmailLog', e);
+    console.error(`[email] could not write EmailLog: ${describeError(e)}`);
     return { ok: status !== 'failed', status, logId: '', ...(error ? { error } : {}) };
   }
 }

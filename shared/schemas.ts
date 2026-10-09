@@ -12,6 +12,40 @@ export function normalizeUsPhone(raw: string): string | null {
 }
 
 const dateStr = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date');
+
+/** Single-line text: control characters and line breaks become spaces, runs of spaces collapse. */
+const singleLine = (max: number) =>
+  z
+    .string()
+    .max(max * 2)
+    .transform((v) =>
+      v
+        // eslint-disable-next-line no-control-regex
+        .replace(/[\u0000-\u001f\u007f]+/g, ' ')
+        .replace(/\s{2,}/g, ' ')
+        .trim(),
+    )
+    .pipe(z.string().max(max));
+
+/** Absolute https:// URL (no other scheme, no credentials). */
+export function isHttpsUrl(v: string): boolean {
+  try {
+    const u = new URL(v);
+    return u.protocol === 'https:' && !u.username && !u.password && !!u.hostname;
+  } catch {
+    return false;
+  }
+}
+
+/** Links an admin may put in an email button: https:, mailto: or tel: only. */
+export function isSafeLinkUrl(v: string): boolean {
+  if (isHttpsUrl(v)) return true;
+  if (/^mailto:[^\s@<>"]+@[^\s@<>"]+$/i.test(v)) return true;
+  return /^tel:\+?[\d\s().-]{5,30}$/i.test(v);
+}
+
+/** A same-site path ("/images/x.webp") but not protocol-relative ("//evil.example"). */
+const isSitePath = (v: string) => /^\/(?![/\\])[\w\-./%~]*$/.test(v);
 const hm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:mm');
 const key = z.string().trim().min(1).max(60);
 
@@ -31,15 +65,16 @@ export const lineInputSchema = z.object({
 export const phoneSchema = z
   .string()
   .trim()
+  .max(30, 'Enter a valid US phone number')
   .refine((v) => normalizeUsPhone(v) !== null, 'Enter a valid US phone number');
 
 /** Customer-facing checkout form (shared by RHF on the client and the API). */
 export const checkoutSchema = z.object({
-  name: z.string().trim().min(2, 'Please enter your full name').max(80),
+  name: singleLine(80).pipe(z.string().min(2, 'Please enter your full name')),
   phone: phoneSchema,
-  email: z.string().trim().toLowerCase().email('Enter a valid email').max(120),
+  email: z.string().trim().toLowerCase().max(120).email('Enter a valid email'),
   pickupDate: dateStr,
-  pickupWindowId: z.string().min(1, 'Choose a pickup time'),
+  pickupWindowId: z.string().min(1, 'Choose a pickup time').max(20),
   fulfilment: z.enum(['pickup', 'uber']),
   notes: z.string().trim().max(500).optional().default(''),
   marketingConsent: z.boolean().default(false),
@@ -56,12 +91,12 @@ export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 // ---------------------------------------------------------------- admin
 
 export const loginSchema = z.object({
-  email: z.string().trim().toLowerCase().email(),
+  email: z.string().trim().toLowerCase().max(120).email(),
   password: z.string().min(1).max(200),
 });
 
 export const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1),
+  currentPassword: z.string().min(1).max(200),
   newPassword: z.string().min(10, 'Use at least 10 characters').max(200),
 });
 
@@ -114,7 +149,7 @@ export const menuItemSchema = z.object({
     .trim()
     .max(500)
     .refine(
-      (v) => v === '' || v.startsWith('/') || /^https:\/\//.test(v),
+      (v) => v === '' || isSitePath(v) || isHttpsUrl(v),
       'Use an https:// URL or /images/… path',
     )
     .nullable(),
@@ -124,10 +159,7 @@ export const menuItemSchema = z.object({
         .string()
         .trim()
         .max(500)
-        .refine(
-          (v) => v.startsWith('/') || /^https:\/\//.test(v),
-          'Use an https:// URL or /images/… path',
-        ),
+        .refine((v) => isSitePath(v) || isHttpsUrl(v), 'Use an https:// URL or /images/… path'),
     )
     .max(6)
     .optional()
@@ -141,11 +173,13 @@ export const menuItemSchema = z.object({
 });
 export type MenuItemInput = z.infer<typeof menuItemSchema>;
 
-export const menuAvailabilitySchema = z.object({
-  isAvailable: z.boolean(),
-  groupKey: z.string().optional(),
-  optionKey: z.string().optional(),
-});
+export const menuAvailabilitySchema = z
+  .object({
+    isAvailable: z.boolean(),
+    groupKey: key.optional(),
+    optionKey: key.optional(),
+  })
+  .strict();
 
 const windowSchema = z
   .object({
@@ -161,7 +195,7 @@ const optionalUrl = z
   .string()
   .trim()
   .max(300)
-  .refine((v) => v === '' || /^https:\/\//.test(v), 'Use an https:// link');
+  .refine((v) => v === '' || isHttpsUrl(v), 'Use an https:// link');
 
 export const settingsSchema = z.object({
   timezone: z.string().min(1).max(60),
@@ -177,7 +211,7 @@ export const settingsSchema = z.object({
   closedDates: z.array(dateStr).max(100),
   orderingPaused: z.boolean(),
   pausedMessage: z.string().trim().max(300),
-  notificationEmails: z.array(z.string().trim().toLowerCase().email()).max(10),
+  notificationEmails: z.array(z.string().trim().toLowerCase().max(120).email()).max(10),
   paymentInstructions: z.string().trim().min(1).max(600),
   pickupAddressPublic: z.string().trim().min(1).max(200),
   mapQuery: z.string().trim().min(3, 'Enter a street, place or address').max(200),
@@ -195,7 +229,7 @@ export const settingsSchema = z.object({
 
 export const customerUpdateSchema = z
   .object({
-    name: z.string().trim().min(1).max(80).optional(),
+    name: singleLine(80).pipe(z.string().min(1)).optional(),
     phone: z.string().trim().max(30).optional(),
     tags: z.array(z.string().trim().toLowerCase().min(1).max(30)).max(20).optional(),
     notes: z.string().max(5000).optional(),
@@ -211,14 +245,14 @@ export const campaignSchema = z.object({
     .string()
     .trim()
     .max(500)
-    .refine((v) => v === '' || /^https:\/\//.test(v), 'Use an https:// image URL')
+    .refine((v) => v === '' || isHttpsUrl(v), 'Use an https:// image URL')
     .default(''),
   ctaLabel: z.string().trim().max(40).default(''),
   ctaUrl: z
     .string()
     .trim()
     .max(500)
-    .refine((v) => v === '' || /^https?:\/\//.test(v), 'Use a full URL')
+    .refine((v) => v === '' || isSafeLinkUrl(v), 'Use an https://, mailto: or tel: link')
     .default(''),
   segment: z.enum(['all_opted_in', 'ordered_last_30', 'lapsed_60', 'tag', 'selected', 'single']),
   tag: z.string().trim().max(30).default(''),

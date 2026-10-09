@@ -24,7 +24,10 @@ export function esc(s: string | number | null | undefined): string {
     .replace(/'/g, '&#39;');
 }
 
-/** Escaped plain text → paragraphs with line breaks and auto-linked URLs. */
+/**
+ * Plain text (e.g. the admin's marketing message) → safe HTML: everything is escaped first, then
+ * **bold** and https:// links (only https) are turned into markup.
+ */
 export function textToHtml(text: string): string {
   return text
     .trim()
@@ -32,7 +35,7 @@ export function textToHtml(text: string): string {
     .map((para) => {
       const html = esc(para)
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/(https?:\/\/[^\s<]+)/g, `<a href="$1" style="color:${C.red};">$1</a>`)
+        .replace(/(https:\/\/[^\s<"']+)/g, `<a href="$1" style="color:${C.red};">$1</a>`)
         .replace(/\n/g, '<br>');
       return `<p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:${C.ink};">${html}</p>`;
     })

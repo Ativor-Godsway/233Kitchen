@@ -1,6 +1,7 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import { ZodError, type ZodTypeAny, type z } from 'zod';
 import { PricingError } from '../../shared/pricing.js';
+import { describeError } from '../logging.js';
 
 export class HttpError extends Error {
   constructor(
@@ -42,15 +43,18 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
       .status(err.status)
       .json({ error: err.message, code: err.code, details: err.details });
   }
-  if (
-    err &&
-    typeof err === 'object' &&
-    'type' in err &&
-    (err as { type: string }).type === 'entity.parse.failed'
-  ) {
+  const type = err && typeof err === 'object' && 'type' in err ? String(err.type) : '';
+  if (type === 'entity.parse.failed') {
     return res.status(400).json({ error: 'Invalid JSON body', code: 'BAD_JSON' });
   }
-  console.error('[api] unhandled error', err);
+  if (type === 'entity.too.large') {
+    return res.status(413).json({ error: 'Request is too large', code: 'TOO_LARGE' });
+  }
+  if (type.startsWith('entity.') || type.startsWith('charset.') || type.startsWith('encoding.')) {
+    return res.status(400).json({ error: 'Invalid request body', code: 'BAD_BODY' });
+  }
+  // Never send internals to the client; log a redacted one-liner (no PII or secrets).
+  console.error(`[api] unhandled error: ${describeError(err)}`);
   return res
     .status(500)
     .json({ error: 'Something went wrong. Please try again.', code: 'INTERNAL' });

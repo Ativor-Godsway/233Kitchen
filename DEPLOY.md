@@ -156,6 +156,36 @@ git push -u origin main
 
 ---
 
+### Preview deployments
+
+Vercel builds a **preview** for every branch and pull request. Previews must never touch the real
+database or email customers:
+
+- **Scope every secret to Production only** (step 3b). A preview then has no `MONGODB_URI` and its
+  API refuses to start: harmless.
+- If you want working previews, give the **Preview** environment its own database whose name
+  contains `preview` (e.g. `…mongodb.net/k233-preview`). The API refuses any other database name
+  on a preview, so the production URI can't be used by mistake.
+- Previews **never send email**, whatever is configured: every email is logged as failed with
+  "Email is disabled on Vercel preview deployments".
+- Keep **Deployment Protection → Vercel Authentication** on for previews (the default), so only
+  your Vercel team can open preview URLs.
+
+### Security notes
+
+- **Headers:** the site's Content-Security-Policy, HSTS, `X-Frame-Options: DENY`,
+  `frame-ancestors 'none'` and Permissions-Policy are set in `vercel.json` (generated from
+  `server/securityHeaders.ts`; a test keeps them in sync). If you add a script, font, image or
+  iframe from another site, add its origin there.
+- **Sessions:** admin login is an httpOnly, Secure, SameSite=Strict cookie that expires after
+  12 hours without use and 7 days after login at the latest. Changing a password signs out that
+  admin's other sessions.
+- **Rotating `JWT_SECRET`** signs every admin out and invalidates the "View your order" links in
+  emails already sent (customers can still call). Rotate it if it ever leaks.
+- **Logs** never contain customer emails, phone numbers, passwords or tokens.
+
+---
+
 ## 4. Database setup and admin accounts
 
 Run these from your computer, in the project folder. They use `MONGODB_URI` from `.env` (or from

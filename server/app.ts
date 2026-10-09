@@ -3,11 +3,10 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { env } from './env.js';
-
-/** Origins allowed to be framed (Google Maps embed on the Pickup section). */
-export const MAP_FRAME_SOURCES = ['https://www.google.com', 'https://maps.google.com'];
+import { API_CSP_DIRECTIVES } from './securityHeaders.js';
 import { connectDb } from './db.js';
 import { errorHandler, HttpError } from './middleware/errors.js';
+import { describeError } from './logging.js';
 import { sanitizeInput } from './middleware/sanitize.js';
 import { publicRouter } from './routes/public.js';
 import { adminRouter } from './routes/admin/index.js';
@@ -21,17 +20,16 @@ export function createApp() {
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: 'same-site' },
-      contentSecurityPolicy: {
-        // Helmet defaults + allow the embedded Google Map used in the Pickup section.
-        directives: {
-          'frame-src': ["'self'", ...MAP_FRAME_SOURCES],
-          'child-src': ["'self'", ...MAP_FRAME_SOURCES],
-        },
-      },
+      // API responses are data, never pages. The website's own CSP is in vercel.json.
+      contentSecurityPolicy: { useDefaults: false, directives: API_CSP_DIRECTIVES },
+      strictTransportSecurity: { maxAge: 63_072_000, includeSubDomains: true },
+      frameguard: { action: 'deny' },
+      referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     }),
   );
+  // Only the site itself may call the API from a browser.
   app.use(cors({ origin: env.siteUrl, credentials: true }));
-  app.use(express.json({ limit: '200kb' }));
+  app.use(express.json({ limit: '100kb', strict: true }));
   app.use(cookieParser());
   app.use(sanitizeInput);
   app.use((_req, res, next) => {
@@ -48,7 +46,7 @@ export function createApp() {
     connectDb().then(
       () => next(),
       (err) => {
-        console.error('[api] database unavailable', err);
+        console.error(`[api] database unavailable: ${describeError(err)}`);
         next(
           new HttpError(503, 'Service is starting up. Please retry in a moment.', 'DB_UNAVAILABLE'),
         );

@@ -90,8 +90,8 @@ export async function buildPrepSheet(date: string, s: Settings): Promise<PrepShe
 
 const csvCell = (v: string | number) => {
   const s = String(v);
-  // Neutralise spreadsheet formula injection and quote everything.
-  const safe = /^[=+\-@\t\r]/.test(s) ? `'${s}` : s;
+  // Neutralise spreadsheet formula injection (also after leading spaces) and quote everything.
+  const safe = /^[\s]*[=+\-@]|^[\t\r]/.test(s) ? `'${s}` : s;
   return `"${safe.replace(/"/g, '""')}"`;
 };
 

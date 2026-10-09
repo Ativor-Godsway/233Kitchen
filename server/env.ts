@@ -36,6 +36,10 @@ function required(name: string, devDefault: string): string {
 export const env = {
   isProd,
   isTest,
+  /** A Vercel preview deployment (branch/PR URL): never the production DB, never real email. */
+  get isPreview() {
+    return process.env.VERCEL_ENV === 'preview';
+  },
   get mongoUri() {
     return process.env.MONGODB_URI?.trim() ?? '';
   },

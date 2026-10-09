@@ -10,7 +10,7 @@ import { orderLimiter, publicPostLimiter } from '../middleware/rateLimit.js';
 import { createOrder, toPublicOrder } from '../services/orderService.js';
 import { verifyOrderToken } from '../services/orderToken.js';
 import { OrderModel, toOrderDTO } from '../models/Order.js';
-import { CustomerModel } from '../models/Customer.js';
+import { unsubscribeByToken } from '../services/unsubscribe.js';
 import { orderIcs } from '../services/ics.js';
 
 export const publicRouter = Router();
@@ -82,12 +82,7 @@ publicRouter.post(
   publicPostLimiter,
   ah(async (req, res) => {
     const { token } = parse(z.object({ token: z.string().min(10).max(100) }), req.body);
-    const customer = await CustomerModel.findOneAndUpdate(
-      { unsubscribeToken: token },
-      { $set: { marketingConsent: false, unsubscribedAt: new Date() } },
-      { new: true },
-    ).setOptions({ sanitizeFilter: true });
-    if (!customer)
+    if (!(await unsubscribeByToken(token)))
       throw new HttpError(404, 'This unsubscribe link is invalid or has expired.', 'NOT_FOUND');
     res.json({ ok: true });
   }),
@@ -99,10 +94,7 @@ publicRouter.post(
   publicPostLimiter,
   ah(async (req, res) => {
     const { token } = parse(z.object({ token: z.string().min(10).max(100) }), req.query);
-    await CustomerModel.updateOne(
-      { unsubscribeToken: token },
-      { $set: { marketingConsent: false, unsubscribedAt: new Date() } },
-    ).setOptions({ sanitizeFilter: true });
+    await unsubscribeByToken(token);
     res.json({ ok: true });
   }),
 );

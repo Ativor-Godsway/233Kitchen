@@ -44,6 +44,7 @@ function make(
   limit: number,
   message: string,
   skipSuccessfulRequests = false,
+  keyGenerator?: Options['keyGenerator'],
 ) {
   return rateLimit({
     windowMs,
@@ -51,6 +52,8 @@ function make(
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     store: new MongoStore(prefix),
+    ...(keyGenerator ? { keyGenerator } : {}),
+    // Only ever skipped under the test runner (env.isTest is always false in production).
     skip: () => env.isTest && process.env.K233_TEST_RATE_LIMIT !== '1',
     message: { error: message, code: 'RATE_LIMITED' },
     // Mongo outage should not lock everyone out of ordering.
@@ -72,6 +75,21 @@ export const loginLimiter = make(
   10,
   'Too many login attempts. Try again in 15 minutes.',
   true,
+);
+/**
+ * Per-account lockout on top of the per-network limit, so guesses spread over many IPs still
+ * stop after 10 failures per 15 minutes for one email address.
+ */
+export const loginAccountLimiter = make(
+  'login-account',
+  15 * 60_000,
+  10,
+  'Too many login attempts for this account. Try again in 15 minutes.',
+  true,
+  (req) => {
+    const email = (req.body as { email?: unknown } | undefined)?.email;
+    return typeof email === 'string' ? email.trim().toLowerCase().slice(0, 200) : 'none';
+  },
 );
 export const publicPostLimiter = make(
   'public',
