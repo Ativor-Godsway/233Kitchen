@@ -67,7 +67,7 @@ export default function Unsubscribe() {
             </button>
           </>
         )}
-        <Link to="/" className="mt-6 block text-sm text-cream/50 hover:text-cream">
+        <Link to="/" className="mt-4 block py-3 text-sm text-cream/60 hover:text-cream">
           Back to home
         </Link>
       </div>

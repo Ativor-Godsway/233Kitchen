@@ -114,7 +114,7 @@ export default function Orders() {
               aria-selected={status === t.id}
               onClick={() => update({ status: t.id })}
               className={cn(
-                'flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition',
+                'flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition lg:min-h-0',
                 status === t.id
                   ? 'bg-neutral-900 text-white'
                   : 'text-neutral-600 hover:bg-neutral-100',
@@ -224,7 +224,8 @@ export default function Orders() {
                     }
                     className={cn(
                       'cursor-pointer hover:bg-neutral-50 focus:bg-neutral-50 focus:outline-none',
-                      o.status === 'new' && 'bg-ghana-red-50/40',
+                      o.status === 'new' &&
+                        'bg-ghana-red-50/40 [&_.text-neutral-500]:text-neutral-600',
                     )}
                   >
                     <td className="px-4 py-3">
@@ -265,7 +266,8 @@ export default function Orders() {
                     onClick={() => update({ order: o.id, page: String(page) })}
                     className={cn(
                       'w-full px-4 py-3.5 text-left',
-                      o.status === 'new' && 'bg-ghana-red-50/40',
+                      o.status === 'new' &&
+                        'bg-ghana-red-50/40 [&_.text-neutral-500]:text-neutral-600',
                     )}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -302,7 +304,7 @@ export default function Orders() {
               type="button"
               disabled={page <= 1}
               onClick={() => update({ page: String(page - 1) })}
-              className="grid h-9 w-9 place-items-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40"
+              className="grid h-11 w-11 lg:h-9 lg:w-9 place-items-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40"
               aria-label="Previous page"
             >
               <ChevronLeft size={16} aria-hidden />
@@ -311,7 +313,7 @@ export default function Orders() {
               type="button"
               disabled={page >= pages}
               onClick={() => update({ page: String(page + 1) })}
-              className="grid h-9 w-9 place-items-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40"
+              className="grid h-11 w-11 lg:h-9 lg:w-9 place-items-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40"
               aria-label="Next page"
             >
               <ChevronRight size={16} aria-hidden />

@@ -18,7 +18,7 @@ export function Faq() {
               key={f.q}
               className="group px-6 py-5 [&_summary::-webkit-details-marker]:hidden"
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 font-semibold">
                 {f.q}
                 <ChevronDown
                   size={18}

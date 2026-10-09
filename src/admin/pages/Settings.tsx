@@ -244,7 +244,7 @@ export default function Settings() {
                       )
                     }
                     className={cn(
-                      'h-9 w-12 rounded-lg border text-sm font-medium',
+                      'h-11 w-12 rounded-lg border text-sm font-medium lg:h-9',
                       on
                         ? 'border-ghana-green bg-ghana-green text-white'
                         : 'border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50',
@@ -468,7 +468,7 @@ export default function Settings() {
           >
             <div className="flex flex-wrap gap-3">
               {ORDER_STATUSES.filter((x) => x !== 'new').map((st) => (
-                <label key={st} className="flex items-center gap-2 text-sm">
+                <label key={st} className="flex min-h-11 items-center gap-2 text-sm lg:min-h-0">
                   <input
                     type="checkbox"
                     className="h-4 w-4 accent-ghana-green"

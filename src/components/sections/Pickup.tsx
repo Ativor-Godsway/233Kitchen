@@ -51,7 +51,7 @@ function LocationMap({ query }: { query: string }) {
             href={links.apple}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-center text-xs font-medium text-ink/70 underline-offset-2 hover:text-ink hover:underline"
+            className="inline-flex min-h-11 items-center justify-center text-xs font-medium text-ink/70 underline-offset-2 hover:text-ink hover:underline"
           >
             Open in Apple Maps<span className="sr-only"> (new tab)</span>
           </a>
@@ -89,7 +89,7 @@ export function Pickup() {
                   href={mapLinks(s.mapQuery || s.pickupAddressPublic).search}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-ghana-red hover:underline"
+                  className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ghana-red hover:underline"
                 >
                   <Navigation size={14} aria-hidden /> Get directions
                   <span className="sr-only">(opens Google Maps in a new tab)</span>
@@ -127,7 +127,7 @@ export function Pickup() {
                 <p className="font-semibold">Questions?</p>
                 <a
                   href={`tel:+1${tel}`}
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-ghana-red hover:underline"
+                  className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-ghana-red hover:underline"
                 >
                   <Phone size={14} aria-hidden /> Call or text {s.businessPhone}
                 </a>

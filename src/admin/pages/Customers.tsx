@@ -101,7 +101,7 @@ function Profile({ id, onClose }: { id: string; onClose: () => void }) {
         <button
           type="button"
           onClick={onClose}
-          className="grid h-9 w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100"
+          className="grid h-11 w-11 lg:h-9 lg:w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100"
           aria-label="Close"
         >
           <X size={18} aria-hidden />
@@ -422,19 +422,21 @@ export default function Customers() {
               <thead className="border-b border-neutral-200 bg-neutral-50 text-left text-xs font-medium uppercase tracking-wide text-neutral-500">
                 <tr>
                   <th className="w-10 px-4 py-3">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 accent-ghana-green"
-                      checked={allOnPage}
-                      onChange={() =>
-                        setSelected((s) => {
-                          const n = new Set(s);
-                          data.items.forEach((c) => (allOnPage ? n.delete(c.id) : n.add(c.id)));
-                          return n;
-                        })
-                      }
-                      aria-label="Select all on this page"
-                    />
+                    <label className="-m-3 grid h-11 w-11 shrink-0 cursor-pointer place-items-center">
+                      <input
+                        type="checkbox"
+                        className="h-5 w-5 accent-ghana-green"
+                        checked={allOnPage}
+                        onChange={() =>
+                          setSelected((s) => {
+                            const n = new Set(s);
+                            data.items.forEach((c) => (allOnPage ? n.delete(c.id) : n.add(c.id)));
+                            return n;
+                          })
+                        }
+                        aria-label="Select all on this page"
+                      />
+                    </label>
                   </th>
                   <th className="px-4 py-3">Customer</th>
                   <th className="px-4 py-3">Phone</th>
@@ -448,19 +450,24 @@ export default function Customers() {
                 {data.items.map((c) => (
                   <tr key={c.id} className="hover:bg-neutral-50">
                     <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 accent-ghana-green"
-                        checked={selected.has(c.id)}
-                        onChange={() => toggle(c.id)}
-                        aria-label={`Select ${c.name}`}
-                      />
+                      <label className="-m-3 grid h-11 w-11 shrink-0 cursor-pointer place-items-center">
+                        <input
+                          type="checkbox"
+                          className="h-5 w-5 accent-ghana-green"
+                          checked={selected.has(c.id)}
+                          onChange={() => toggle(c.id)}
+                          aria-label={`Select ${c.name}`}
+                        />
+                      </label>
                     </td>
                     <td
                       className="cursor-pointer px-4 py-3"
                       onClick={() => update({ customer: c.id })}
                     >
-                      <button type="button" className="text-left font-medium hover:underline">
+                      <button
+                        type="button"
+                        className="min-h-11 text-left font-medium hover:underline lg:min-h-0"
+                      >
                         {c.name}
                       </button>
                       <p className="text-xs text-neutral-500">{c.email}</p>
@@ -495,13 +502,15 @@ export default function Customers() {
             <ul className="divide-y divide-neutral-100 md:hidden">
               {data.items.map((c) => (
                 <li key={c.id} className="flex items-start gap-3 px-4 py-3">
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 accent-ghana-green"
-                    checked={selected.has(c.id)}
-                    onChange={() => toggle(c.id)}
-                    aria-label={`Select ${c.name}`}
-                  />
+                  <label className="-m-3 grid h-11 w-11 shrink-0 cursor-pointer place-items-center">
+                    <input
+                      type="checkbox"
+                      className="h-5 w-5 accent-ghana-green"
+                      checked={selected.has(c.id)}
+                      onChange={() => toggle(c.id)}
+                      aria-label={`Select ${c.name}`}
+                    />
+                  </label>
                   <button
                     type="button"
                     className="min-w-0 flex-1 text-left"
@@ -537,7 +546,7 @@ export default function Customers() {
               type="button"
               disabled={page <= 1}
               onClick={() => update({ page: String(page - 1) })}
-              className="grid h-9 w-9 place-items-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40"
+              className="grid h-11 w-11 lg:h-9 lg:w-9 place-items-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40"
               aria-label="Previous page"
             >
               <ChevronLeft size={16} aria-hidden />
@@ -546,7 +555,7 @@ export default function Customers() {
               type="button"
               disabled={page >= pages}
               onClick={() => update({ page: String(page + 1) })}
-              className="grid h-9 w-9 place-items-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40"
+              className="grid h-11 w-11 lg:h-9 lg:w-9 place-items-center rounded-lg border border-neutral-200 bg-white disabled:opacity-40"
               aria-label="Next page"
             >
               <ChevronRight size={16} aria-hidden />

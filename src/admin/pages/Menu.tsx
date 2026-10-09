@@ -128,7 +128,7 @@ function GroupEditor({
         </Field>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
-        <label className="flex items-center gap-2">
+        <label className="flex min-h-11 items-center gap-2 lg:min-h-0">
           <input
             type="checkbox"
             className="h-4 w-4 accent-ghana-green"
@@ -151,7 +151,7 @@ function GroupEditor({
               type="number"
               min={1}
               max={20}
-              className="h-8 w-16"
+              className="h-11 w-16 lg:h-8"
               value={group.max}
               onChange={(e) =>
                 onChange({ ...group, max: Math.max(1, Number(e.target.value) || 1) })
@@ -162,7 +162,7 @@ function GroupEditor({
         <button
           type="button"
           onClick={onRemove}
-          className="ml-auto text-xs font-medium text-ghana-red hover:underline"
+          className="ml-auto min-h-11 text-xs font-medium text-ghana-red hover:underline lg:min-h-0"
         >
           Remove group
         </button>
@@ -203,7 +203,7 @@ function GroupEditor({
             />
             <button
               type="button"
-              className="grid h-8 w-8 place-items-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-ghana-red"
+              className="grid h-11 w-11 lg:h-8 lg:w-8 place-items-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-ghana-red"
               aria-label={`Remove ${o.name}`}
               onClick={() =>
                 onChange({ ...group, options: group.options.filter((_, j) => j !== i) })
@@ -213,7 +213,7 @@ function GroupEditor({
             </button>
             <Select
               aria-label={`${o.name || 'Option'} icon`}
-              className="col-span-2 h-9 py-1 text-sm"
+              className="col-span-2 h-11 py-1 text-sm lg:h-9"
               value={o.icon ?? ''}
               onChange={(e) => setOpt(i, { icon: e.target.value || undefined })}
             >
@@ -296,7 +296,7 @@ function Editor({ initial, onClose }: { initial: Draft; onClose: () => void }) {
         <button
           type="button"
           onClick={onClose}
-          className="grid h-9 w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100"
+          className="grid h-11 w-11 lg:h-9 lg:w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100"
           aria-label="Close"
         >
           <X size={18} aria-hidden />
@@ -594,7 +594,7 @@ export default function MenuPage() {
                 />
                 <button
                   type="button"
-                  className="grid h-9 w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100"
+                  className="grid h-11 w-11 lg:h-9 lg:w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100"
                   aria-label={`Edit ${item.name}`}
                   onClick={() => setEditing({ ...item })}
                 >
@@ -602,7 +602,7 @@ export default function MenuPage() {
                 </button>
                 <button
                   type="button"
-                  className="grid h-9 w-9 place-items-center rounded-lg text-neutral-400 hover:bg-red-50 hover:text-ghana-red"
+                  className="grid h-11 w-11 lg:h-9 lg:w-9 place-items-center rounded-lg text-neutral-400 hover:bg-red-50 hover:text-ghana-red"
                   aria-label={`Delete ${item.name}`}
                   onClick={() =>
                     window.confirm(
@@ -614,7 +614,7 @@ export default function MenuPage() {
                 </button>
                 <button
                   type="button"
-                  className="grid h-9 w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100"
+                  className="grid h-11 w-11 lg:h-9 lg:w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100"
                   aria-expanded={!!open[item.id]}
                   aria-label={`${open[item.id] ? 'Hide' : 'Show'} options for ${item.name}`}
                   onClick={() => setOpen((o) => ({ ...o, [item.id]: !o[item.id] }))}

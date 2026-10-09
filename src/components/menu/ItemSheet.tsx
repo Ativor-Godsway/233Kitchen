@@ -121,7 +121,7 @@ function BoxPhotos({ item }: { item: MenuItem }) {
             <button
               type="button"
               onClick={() => setOpen(null)}
-              className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-ink/70 text-cream backdrop-blur transition hover:bg-ink"
+              className="absolute right-3 top-3 grid h-11 w-11 place-items-center rounded-full bg-ink/70 text-cream backdrop-blur transition hover:bg-ink"
               aria-label="Close photo"
             >
               <X size={20} aria-hidden />
@@ -234,7 +234,7 @@ function SheetBody({
         <button
           type="button"
           onClick={onDone}
-          className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-ink/70 text-cream backdrop-blur transition hover:bg-ink"
+          className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-full bg-ink/70 text-cream backdrop-blur transition hover:bg-ink"
           aria-label="Close"
         >
           <X size={20} aria-hidden />

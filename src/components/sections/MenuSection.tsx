@@ -62,7 +62,7 @@ export function MenuSection() {
                 aria-selected={filter === c.id}
                 onClick={() => setFilter(c.id)}
                 className={cn(
-                  'shrink-0 rounded-full px-5 py-2 text-sm font-semibold transition',
+                  'shrink-0 rounded-full px-5 py-3 text-sm font-semibold transition',
                   filter === c.id
                     ? 'bg-ink text-cream'
                     : 'bg-white text-ink ring-1 ring-ink/10 hover:ring-ink/30',

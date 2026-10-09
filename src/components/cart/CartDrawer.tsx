@@ -34,7 +34,7 @@ export function CartDrawer() {
         <button
           type="button"
           onClick={close}
-          className="grid h-10 w-10 place-items-center rounded-full hover:bg-white/10"
+          className="grid h-11 w-11 place-items-center rounded-full hover:bg-white/10"
           aria-label="Close bag"
         >
           <X size={20} aria-hidden />
@@ -107,7 +107,7 @@ export function CartDrawer() {
                             close();
                             openItem(line.slug, line);
                           }}
-                          className="grid h-8 w-8 place-items-center rounded-full text-cream/70 hover:bg-white/10 hover:text-cream"
+                          className="grid h-11 w-11 place-items-center rounded-full text-cream/70 hover:bg-white/10 hover:text-cream"
                           aria-label={`Edit ${item.name}`}
                         >
                           <Pencil size={15} aria-hidden />
@@ -116,7 +116,7 @@ export function CartDrawer() {
                       <button
                         type="button"
                         onClick={() => remove(line.key)}
-                        className="grid h-8 w-8 place-items-center rounded-full text-cream/70 hover:bg-white/10 hover:text-ghana-red-300"
+                        className="grid h-11 w-11 place-items-center rounded-full text-cream/70 hover:bg-white/10 hover:text-ghana-red-300"
                         aria-label={`Remove ${item?.name ?? 'item'}`}
                       >
                         <Trash2 size={15} aria-hidden />
@@ -163,7 +163,7 @@ export function CartDrawer() {
             <Link
               to="/#menu"
               onClick={close}
-              className="mt-3 block text-center text-sm font-medium text-cream/60 hover:text-cream"
+              className="mt-1 block py-3 text-center text-sm font-medium text-cream/60 hover:text-cream"
             >
               Keep browsing
             </Link>

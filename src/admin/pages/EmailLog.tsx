@@ -98,7 +98,7 @@ export default function EmailLog() {
             }}
             aria-pressed={status === s}
             className={cn(
-              'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium',
+              'flex min-h-11 items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium lg:min-h-0',
               status === s ? 'bg-neutral-900 text-white' : 'text-neutral-600 hover:bg-neutral-100',
             )}
           >
@@ -161,6 +161,7 @@ export default function EmailLog() {
                   <Button
                     size="sm"
                     variant="ghost"
+                    className="w-11 px-0 lg:w-auto lg:px-3"
                     onClick={() => setPreviewId(e.id)}
                     aria-label={`Preview ${e.subject}`}
                   >

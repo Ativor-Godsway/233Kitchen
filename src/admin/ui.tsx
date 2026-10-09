@@ -46,7 +46,7 @@ export const Button = forwardRef<
       disabled={disabled || loading}
       className={cn(
         'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition disabled:cursor-not-allowed disabled:opacity-50',
-        size === 'sm' ? 'h-8 px-3 text-xs' : 'h-10 px-4 text-sm',
+        size === 'sm' ? 'h-11 px-3 text-xs lg:h-8' : 'h-11 px-4 text-sm lg:h-10',
         variant === 'primary' && 'bg-neutral-900 text-white hover:bg-neutral-700',
         variant === 'brand' && 'bg-ghana-green text-white hover:bg-ghana-green-600',
         variant === 'secondary' &&
@@ -116,7 +116,7 @@ const fieldCls =
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
   function Input({ className, ...rest }, ref) {
-    return <input ref={ref} className={cn(fieldCls, 'h-10', className)} {...rest} />;
+    return <input ref={ref} className={cn(fieldCls, 'h-11 lg:h-10', className)} {...rest} />;
   },
 );
 
@@ -184,7 +184,7 @@ export const PasswordInput = forwardRef<
         autoCapitalize="none"
         autoCorrect="off"
         spellCheck={false}
-        className={cn(fieldCls, 'h-10 pr-11', className)}
+        className={cn(fieldCls, 'h-11 pr-11 lg:h-10', className)}
         {...rest}
       />
       <button
@@ -215,7 +215,7 @@ export const Textarea = forwardRef<
 export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(
   function Select({ className, children, ...rest }, ref) {
     return (
-      <select ref={ref} className={cn(fieldCls, 'h-10 pr-8', className)} {...rest}>
+      <select ref={ref} className={cn(fieldCls, 'h-11 pr-8 lg:h-10', className)} {...rest}>
         {children}
       </select>
     );
@@ -269,7 +269,8 @@ export function Toggle({
       disabled={disabled}
       onClick={() => onChange(!checked)}
       className={cn(
-        'relative h-6 w-11 shrink-0 rounded-full transition disabled:opacity-50',
+        // The after: layer grows the tap area to 44px without changing the look.
+        "relative h-6 w-11 shrink-0 rounded-full transition after:absolute after:-inset-y-2.5 after:inset-x-0 after:content-[''] disabled:opacity-50",
         checked ? 'bg-ghana-green' : 'bg-neutral-300',
       )}
     >

@@ -7,6 +7,7 @@ import NotFound from './pages/NotFound';
 const Checkout = lazy(() => import('./pages/Checkout'));
 const Confirmation = lazy(() => import('./pages/Confirmation'));
 const Unsubscribe = lazy(() => import('./pages/Unsubscribe'));
+const Privacy = lazy(() => import('./pages/Privacy'));
 /** Admin is a separate chunk so customers never download it. */
 const AdminApp = lazy(() => import('./admin/AdminApp'));
 
@@ -66,6 +67,14 @@ export default function App() {
           element={
             <Suspense fallback={<PageFallback />}>
               <Unsubscribe />
+            </Suspense>
+          }
+        />
+        <Route
+          path="privacy"
+          element={
+            <Suspense fallback={<PageFallback />}>
+              <Privacy />
             </Suspense>
           }
         />

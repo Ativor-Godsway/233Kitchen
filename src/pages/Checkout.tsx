@@ -175,13 +175,33 @@ export default function Checkout() {
     <section className="mx-auto max-w-6xl px-4 pb-24 pt-24 sm:px-6 sm:pt-28">
       <Link
         to="/#menu"
-        className="inline-flex items-center gap-2 text-sm text-cream/60 hover:text-cream"
+        className="inline-flex min-h-11 items-center gap-2 text-sm text-cream/60 hover:text-cream"
       >
         <ArrowLeft size={16} aria-hidden /> Back to menu
       </Link>
       <h1 className="mt-4 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
         Checkout
       </h1>
+      {(paused || noDates || menuUnavailable) && (
+        // Shown before the form so nobody fills in their details for an order they can't place.
+        <div
+          className="mt-6 flex gap-3 rounded-2xl bg-ghana-gold/10 p-4 text-sm text-ghana-gold ring-1 ring-ghana-gold/30 sm:p-5"
+          role="status"
+        >
+          <Info size={18} className="mt-0.5 shrink-0" aria-hidden />
+          <div>
+            <p className="font-semibold">We’re not taking orders right now.</p>
+            <p className="mt-1 text-cream/80">
+              {paused
+                ? settings?.pausedMessage
+                : menuUnavailable
+                  ? 'Our menu is temporarily unavailable. Please try again in a few minutes.'
+                  : 'No pickup dates are open right now. Please check back soon.'}{' '}
+              Your bag is saved for when we reopen.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px] lg:items-start">
         <div className="lg:hidden">
@@ -271,16 +291,6 @@ export default function Checkout() {
                   Retry
                 </button>
               </p>
-            )}
-            {(paused || noDates) && (
-              <div
-                className="rounded-2xl bg-ghana-gold/10 p-4 text-sm text-ghana-gold ring-1 ring-ghana-gold/30"
-                role="status"
-              >
-                {paused
-                  ? settings?.pausedMessage
-                  : 'No pickup dates are open right now. Please check back soon.'}
-              </div>
             )}
             {config && !paused && !noDates && (
               <>
@@ -427,7 +437,7 @@ export default function Checkout() {
             {errors.notes && <p className="field-error">{errors.notes.message}</p>}
           </div>
 
-          <label className="flex cursor-pointer items-start gap-3 text-sm">
+          <label className="flex cursor-pointer items-start gap-3 py-3 text-sm">
             <input
               type="checkbox"
               className="mt-0.5 h-5 w-5 shrink-0 accent-ghana-gold"
@@ -437,6 +447,18 @@ export default function Checkout() {
               Email me about new menu items and offers. You can unsubscribe at any time.
             </span>
           </label>
+          <p className="-mt-6 pl-8 text-xs text-cream/60">
+            How we use your details:{' '}
+            <Link
+              to="/privacy"
+              target="_blank"
+              rel="noopener"
+              className="underline underline-offset-2 hover:text-cream"
+            >
+              Privacy
+            </Link>{' '}
+            (opens in a new tab, so your order stays here).
+          </p>
 
           <div
             className="flex gap-3 rounded-2xl bg-ghana-green/20 p-4 text-sm ring-1 ring-ghana-green-400/40"
@@ -465,17 +487,10 @@ export default function Checkout() {
             {submitting && <Loader2 size={20} className="animate-spin" aria-hidden />}
             {submitting ? 'Placing order…' : 'Place pre-order'}
           </button>
-          {menuUnavailable ? (
-            <p className="text-center text-sm text-ghana-gold" role="status">
-              Our menu is temporarily unavailable, so ordering is paused. Please try again in a few
-              minutes.
+          {hasProblems && !menuUnavailable && (
+            <p className="text-center text-sm text-ghana-gold">
+              Some items in your bag are unavailable. Please update your bag.
             </p>
-          ) : (
-            hasProblems && (
-              <p className="text-center text-sm text-ghana-gold">
-                Some items in your bag are unavailable. Please update your bag.
-              </p>
-            )
           )}
         </form>
 

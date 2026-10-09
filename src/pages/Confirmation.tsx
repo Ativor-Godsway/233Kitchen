@@ -119,7 +119,7 @@ export default function Confirmation() {
             href={mapLinks(order.pickupAddressPublic).search}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-ghana-gold hover:underline"
+            className="mt-1 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ghana-gold hover:underline"
           >
             <Navigation size={14} aria-hidden /> Get directions
             <span className="sr-only">(opens Google Maps in a new tab)</span>
@@ -170,7 +170,7 @@ export default function Confirmation() {
           <Phone size={18} aria-hidden /> {order.businessPhone}
         </a>
       </div>
-      <Link to="/" className="mt-6 block text-center text-sm text-cream/50 hover:text-cream">
+      <Link to="/" className="mt-4 block py-3 text-center text-sm text-cream/60 hover:text-cream">
         Back to home
       </Link>
     </section>

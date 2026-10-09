@@ -119,7 +119,7 @@ function ChartCard({
             <button
               type="button"
               onClick={() => setAsTable(!asTable)}
-              className="grid h-8 w-8 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100"
+              className="grid h-11 w-11 lg:h-8 lg:w-8 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100"
               aria-label={asTable ? `Show ${title} as chart` : `Show ${title} as table`}
               title={asTable ? 'Chart view' : 'Table view'}
             >
@@ -282,7 +282,7 @@ export default function Dashboard() {
               aria-selected={range === r.id}
               onClick={() => setRange(r.id)}
               className={cn(
-                'rounded-md px-3 py-1.5 text-sm font-medium',
+                'min-h-11 rounded-md px-3 py-1.5 text-sm font-medium lg:min-h-0',
                 range === r.id
                   ? 'bg-neutral-900 text-white'
                   : 'text-neutral-600 hover:bg-neutral-100',

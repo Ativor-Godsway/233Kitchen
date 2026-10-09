@@ -42,7 +42,7 @@ export function Footer() {
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cream/50">Contact</p>
           <a
             href={`tel:+1${tel}`}
-            className="mt-3 inline-flex items-center gap-2 text-sm hover:text-ghana-gold"
+            className="mt-1 inline-flex min-h-11 items-center gap-2 text-sm hover:text-ghana-gold"
           >
             <Phone size={16} aria-hidden /> {s.businessPhone}
           </a>
@@ -74,9 +74,14 @@ export function Footer() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-6 text-xs text-cream/60 sm:flex-row sm:justify-between sm:px-6">
           <p>© {new Date().getFullYear()} +233 Kitchen. Made with love in Worcester.</p>
-          <Link to="/admin" className="hover:text-cream/70">
-            Owner login
-          </Link>
+          <div className="-my-3 flex gap-6">
+            <Link to="/privacy" className="inline-flex min-h-11 items-center hover:text-cream">
+              Privacy
+            </Link>
+            <Link to="/admin" className="inline-flex min-h-11 items-center hover:text-cream">
+              Owner login
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

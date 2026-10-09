@@ -40,7 +40,7 @@ export function Navbar() {
       >
         <Link
           to="/"
-          className="flex items-center gap-3 rounded-full focus-visible:outline-offset-4"
+          className="flex min-h-11 min-w-11 items-center gap-3 rounded-full focus-visible:outline-offset-4"
           aria-label="+233 Kitchen home"
         >
           <Logo size={40} />
@@ -54,7 +54,7 @@ export function Navbar() {
               <li key={l.href}>
                 <a
                   href={l.href}
-                  className="rounded-full px-4 py-2 text-sm font-medium text-cream/80 transition hover:bg-white/10 hover:text-cream"
+                  className="inline-flex min-h-11 items-center rounded-full px-4 text-sm font-medium text-cream/80 transition hover:bg-white/10 hover:text-cream"
                 >
                   {l.label}
                 </a>
@@ -63,14 +63,14 @@ export function Navbar() {
           </ul>
           <a
             href="/#menu"
-            className="rounded-full px-3 py-2 text-sm font-medium text-cream/80 hover:text-cream md:hidden"
+            className="inline-flex min-h-11 items-center rounded-full px-3 text-sm font-medium text-cream/80 hover:text-cream md:hidden"
           >
             Menu
           </a>
           <button
             type="button"
             onClick={openBag}
-            className="relative flex items-center gap-2 rounded-full bg-cream px-4 py-2 text-sm font-semibold text-ink transition hover:bg-white"
+            className="relative flex min-h-11 items-center gap-2 rounded-full bg-cream px-4 text-sm font-semibold text-ink transition hover:bg-white"
             aria-label={`Open bag, ${count} item${count === 1 ? '' : 's'}`}
           >
             <ShoppingBag size={18} aria-hidden />

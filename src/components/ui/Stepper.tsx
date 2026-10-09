@@ -25,7 +25,7 @@ export function Stepper({
 }: StepperProps) {
   const btn = cn(
     'grid place-items-center rounded-full transition disabled:opacity-30 disabled:cursor-not-allowed',
-    size === 'sm' ? 'h-8 w-8' : 'h-10 w-10',
+    size === 'sm' ? 'h-11 w-11 lg:h-9 lg:w-9' : 'h-11 w-11',
     tone === 'dark'
       ? 'bg-white/10 hover:bg-white/20 text-cream'
       : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-900',

@@ -331,7 +331,7 @@ export default function Marketing() {
               label="Message"
               htmlFor="body"
               error={errors.body}
-              hint="Blank line = new paragraph. **bold** and links work."
+              hint="Blank line = new paragraph. **bold** and https:// links work."
             >
               <Textarea
                 id="body"
@@ -453,7 +453,7 @@ export default function Marketing() {
         ) : !history.data?.items.length ? (
           <EmptyState icon={<Megaphone size={20} />} title="No emails sent yet" />
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Campaign history">
             <table className="w-full text-sm">
               <thead className="border-b border-neutral-200 bg-neutral-50 text-left text-xs font-medium uppercase tracking-wide text-neutral-500">
                 <tr>

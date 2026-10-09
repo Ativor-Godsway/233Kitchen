@@ -169,7 +169,7 @@ function DrawerBody({ id, onClose }: { id: string; onClose: () => void }) {
         <button
           type="button"
           onClick={onClose}
-          className="grid h-9 w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100"
+          className="grid h-11 w-11 lg:h-9 lg:w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100"
           aria-label="Close"
         >
           <X size={18} aria-hidden />
@@ -264,7 +264,7 @@ function DrawerBody({ id, onClose }: { id: string; onClose: () => void }) {
                   )
                 }
                 className={cn(
-                  'rounded-lg border px-3 py-1.5 text-sm font-medium transition',
+                  'min-h-11 rounded-lg border px-3 py-1.5 text-sm font-medium transition lg:min-h-0',
                   order.paymentStatus === p
                     ? 'border-ghana-green bg-ghana-green-50 text-ghana-green-700'
                     : 'border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50',
@@ -288,19 +288,19 @@ function DrawerBody({ id, onClose }: { id: string; onClose: () => void }) {
             <div className="mt-3 grid grid-cols-3 gap-2">
               <a
                 href={telHref(order.customer.phone)}
-                className="flex items-center justify-center gap-1.5 rounded-lg border border-neutral-200 py-2 text-sm font-medium hover:bg-neutral-50"
+                className="flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-neutral-200 py-2 text-sm font-medium hover:bg-neutral-50 lg:min-h-0"
               >
                 <Phone size={15} aria-hidden /> Call
               </a>
               <a
                 href={smsHref(order.customer.phone)}
-                className="flex items-center justify-center gap-1.5 rounded-lg border border-neutral-200 py-2 text-sm font-medium hover:bg-neutral-50"
+                className="flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-neutral-200 py-2 text-sm font-medium hover:bg-neutral-50 lg:min-h-0"
               >
                 <MessageSquare size={15} aria-hidden /> Text
               </a>
               <a
                 href={`mailto:${order.customer.email}?subject=${encodeURIComponent(`Your +233 Kitchen order ${order.number}`)}`}
-                className="flex items-center justify-center gap-1.5 rounded-lg border border-neutral-200 py-2 text-sm font-medium hover:bg-neutral-50"
+                className="flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-neutral-200 py-2 text-sm font-medium hover:bg-neutral-50 lg:min-h-0"
               >
                 <Mail size={15} aria-hidden /> Email
               </a>
@@ -309,13 +309,13 @@ function DrawerBody({ id, onClose }: { id: string; onClose: () => void }) {
               <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
                 <Link
                   to={`/admin/marketing?customer=${order.customerId}`}
-                  className="inline-flex items-center gap-1 font-medium text-ghana-green hover:underline"
+                  className="inline-flex min-h-11 items-center gap-1 font-medium text-ghana-green hover:underline lg:min-h-0"
                 >
                   <Send size={14} aria-hidden /> Email customer from the site
                 </Link>
                 <Link
                   to={`/admin/customers?customer=${order.customerId}`}
-                  className="font-medium text-neutral-600 hover:underline"
+                  className="inline-flex min-h-11 items-center font-medium text-neutral-600 hover:underline lg:min-h-0"
                 >
                   View profile
                 </Link>

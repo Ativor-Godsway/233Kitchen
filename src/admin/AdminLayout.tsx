@@ -68,7 +68,7 @@ export function AdminLayout({ email }: { email: string }) {
     <button
       type="button"
       onClick={() => setSound(!sound)}
-      className="grid h-9 w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+      className="grid h-11 w-11 lg:h-9 lg:w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
       aria-label={sound ? 'Mute new-order sound' : 'Turn on new-order sound'}
       title={sound ? 'Sound on for new orders' : 'Sound off'}
     >
@@ -125,7 +125,7 @@ export function AdminLayout({ email }: { email: string }) {
             <button
               type="button"
               onClick={logout}
-              className="grid h-9 w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+              className="grid h-11 w-11 lg:h-9 lg:w-9 place-items-center rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
               aria-label="Log out"
             >
               <LogOut size={18} aria-hidden />
