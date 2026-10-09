@@ -25,7 +25,10 @@
     "images": "tsx scripts/optimize-images.ts",
     "assets:manifest": "tsx scripts/asset-manifest.ts",
     "dev:db": "tsx scripts/dev-db.ts",
-    "prod:reset-test-data": "tsx server/scripts/reset-test-data.ts"
+    "prod:reset-test-data": "tsx server/scripts/reset-test-data.ts",
+    "admin:set": "tsx server/scripts/admin.ts set",
+    "admin:list": "tsx server/scripts/admin.ts list",
+    "admin:remove": "tsx server/scripts/admin.ts remove"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

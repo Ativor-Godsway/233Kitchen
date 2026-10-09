@@ -203,7 +203,10 @@ describe('admin test email', () => {
     setEmailEnv({ EMAIL_PROVIDER: 'smtp', SMTP_USER: 'kitchen@gmail.com' });
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const a = await login();
-    const res = await a.post('/api/admin/settings/test-email').expect(200);
+    const res = await a
+      .post('/api/admin/settings/test-email')
+      .send({ target: 'notifications' })
+      .expect(200);
     expect(res.body.emailStatus.misconfigured).toBe('SMTP not configured (SMTP_PASS missing)');
     expect(res.body.results).toEqual([
       {

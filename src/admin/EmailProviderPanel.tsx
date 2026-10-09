@@ -4,7 +4,7 @@ import { AlertTriangle, CheckCircle2, Send, XCircle } from 'lucide-react';
 import { api, ApiError } from '../lib/api';
 import { cn } from '../lib/cn';
 import { Button } from './ui';
-import { useAdminSettings, type EmailStatus } from './api';
+import { useAdminSettings, useMe, type EmailStatus } from './api';
 
 interface TestResult {
   to: string;
@@ -14,19 +14,21 @@ interface TestResult {
 }
 
 /**
- * Shows which email provider is really active (and any misconfiguration), with a
- * "Send test email" button that goes through the real provider to the notification emails.
+ * Shows which email provider is really active (and any misconfiguration), with "Send test email"
+ * buttons that go through the real provider: to the logged-in admin, or to every new-order inbox.
  */
 export function EmailProviderPanel({ compact }: { compact?: boolean }) {
   const qc = useQueryClient();
   const { data } = useAdminSettings();
+  const { data: me } = useMe();
   const [results, setResults] = useState<TestResult[] | null>(null);
   const [requestError, setRequestError] = useState('');
 
   const test = useMutation({
-    mutationFn: () =>
+    mutationFn: (target: 'me' | 'notifications') =>
       api<{ emailStatus: EmailStatus; results: TestResult[] }>('/admin/settings/test-email', {
         method: 'POST',
+        json: { target },
       }),
     onMutate: () => {
       setResults(null);
@@ -95,9 +97,27 @@ export function EmailProviderPanel({ compact }: { compact?: boolean }) {
             </p>
           )}
         </div>
-        <Button onClick={() => test.mutate()} loading={test.isPending} className="shrink-0">
-          <Send size={15} aria-hidden /> Send test email
-        </Button>
+        <div className="flex shrink-0 flex-col gap-2 sm:items-end">
+          <Button
+            onClick={() => test.mutate('me')}
+            loading={test.isPending && test.variables === 'me'}
+            disabled={test.isPending}
+            title={me ? `Sends a test email to ${me.email}` : undefined}
+          >
+            <Send size={15} aria-hidden /> Send test email to me
+          </Button>
+          {!compact && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => test.mutate('notifications')}
+              loading={test.isPending && test.variables === 'notifications'}
+              disabled={test.isPending}
+            >
+              Test the new-order inboxes
+            </Button>
+          )}
+        </div>
       </div>
 
       {requestError && (
